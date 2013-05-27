@@ -133,7 +133,7 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
     public void testRemoteApiBasicAuth() throws Exception {
       
         // start process
-        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.BASIC, "guest", "1234");
+        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.BASIC, "admin", "admin");
         RuntimeManager runtimeManager = remoteSessionFactory.newRuntimeManager();
         RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
         KieSession ksession = engine.getKieSession();
@@ -145,7 +145,7 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
     public void testRemoteApiFormAuth() throws Exception {
       
         // start process
-        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.FORM_BASED, "guest", "1234");
+        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.FORM_BASED, "admin", "admin");
         RuntimeManager runtimeManager = remoteSessionFactory.newRuntimeManager();
         RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
         KieSession ksession = engine.getKieSession();

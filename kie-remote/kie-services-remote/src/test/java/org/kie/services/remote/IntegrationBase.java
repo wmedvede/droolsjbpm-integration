@@ -15,6 +15,7 @@ import org.kie.commons.java.nio.file.spi.FileSystemProvider;
 import org.kie.commons.java.nio.fs.file.SimpleFileSystemProvider;
 import org.uberfire.security.auth.AuthenticationSource;
 import org.uberfire.security.server.auth.source.JACCAuthenticationSource;
+import org.uberfire.security.server.auth.source.PropertyUserSource;
 
 public class IntegrationBase {
 
@@ -72,7 +73,8 @@ public class IntegrationBase {
                 .addClass(UnfinishedError.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsServiceProvider(FileSystemProvider.class, SimpleFileSystemProvider.class)
-                .addAsServiceProvider(AuthenticationSource.class, JACCAuthenticationSource.class)
+                .addAsServiceProvider(AuthenticationSource.class, PropertyUserSource.class)
+                .addAsResource("users.properties")
                 .addAsWebInfResource("WEB-INF/test-beans.xml", "beans.xml")
                 .addAsWebInfResource("META-INF/ejb-jar.xml", "ejb-jar.xml")
                 .setWebXML("WEB-INF/web.xml")

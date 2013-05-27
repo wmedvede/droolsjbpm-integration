@@ -47,12 +47,10 @@ import org.jboss.as.arquillian.api.ServerSetup;
 import org.jboss.resteasy.client.ClientRequest;
 import org.jboss.resteasy.client.ClientResponse;
 import org.jboss.shrinkwrap.api.Archive;
-import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jbpm.services.task.commands.CompleteTaskCommand;
 import org.jbpm.services.task.commands.GetTasksByProcessInstanceIdCommand;
 import org.jbpm.services.task.commands.GetTasksOwnedCommand;
 import org.jbpm.services.task.commands.StartTaskCommand;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -66,7 +64,9 @@ import org.kie.api.task.TaskService;
 import org.kie.api.task.model.Status;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.internal.runtime.manager.context.EmptyContext;
-import org.kie.services.client.api.RemoteJmsSessionFactory;
+import org.kie.services.client.api.RemoteRestSessionFactory;
+import org.kie.services.client.api.RemoteRestSessionFactory.AuthenticationType;
+import org.kie.services.client.api.RemoteSessionFactory;
 import org.kie.services.client.serialization.jaxb.JaxbCommandsRequest;
 import org.kie.services.client.serialization.jaxb.JaxbCommandsResponse;
 import org.kie.services.client.serialization.jaxb.JaxbSerializationProvider;
@@ -130,6 +130,31 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
    
     @Test
     @InSequence(0)
+    public void testRemoteApiBasicAuth() throws Exception {
+      
+        // start process
+        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.BASIC, "guest", "1234");
+        RuntimeManager runtimeManager = remoteSessionFactory.newRuntimeManager();
+        RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
+        KieSession ksession = engine.getKieSession();
+        ProcessInstance processInstance = ksession.startProcess("org.jbpm.simplehumantask");
+    }
+    
+    @Test
+    @InSequence(0)
+    public void testRemoteApiFormAuth() throws Exception {
+      
+        // start process
+        RemoteSessionFactory remoteSessionFactory = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test", AuthenticationType.FORM_BASED, "guest", "1234");
+        RuntimeManager runtimeManager = remoteSessionFactory.newRuntimeManager();
+        RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
+        KieSession ksession = engine.getKieSession();
+        ProcessInstance processInstance = ksession.startProcess("org.jbpm.simplehumantask");
+    }
+    
+    @Test
+    @InSequence(0)
+    @Ignore
     public void testJmsStartProcess() throws Exception {
         // send cmd
         Command<?> cmd = new StartProcessCommand("org.jbpm.humantask"); 
@@ -239,9 +264,10 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
         return cmdResponse;
     }
     
+    
     @Test
-    @InSequence(1)
     @Ignore
+    @InSequence(1)
     public void testRestUrlStartHumanTaskProcess() throws Exception { 
         // create REST request
         String urlString = new URL(deploymentUrl, "/arquillian-test/rest/runtime/test/process/org.jbpm.humantask/start").toExternalForm();
@@ -252,15 +278,22 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
         // Get and check response
         ClientResponse responseObj = restRequest.post();
         assertEquals(200, responseObj.getStatus());
+        JaxbProcessInstanceResponse procInstResp = (JaxbProcessInstanceResponse) responseObj.getEntity(JaxbProcessInstanceResponse.class);
+        long procInstId = procInstResp.getId();
 
         urlString = deploymentUrl.toExternalForm() + "/rest/task/query?taskOwner=salaboy";
         restRequest = new ClientRequest(urlString);
         responseObj = restRequest.post();
         assertEquals(200, responseObj.getStatus());
-        // TODO: iterate through
+       
         JaxbTaskSummaryListResponse list = (JaxbTaskSummaryListResponse) responseObj.getEntity(JaxbTaskSummaryListResponse.class);
-        long taskId = list.getResult().get(0).getId();
-        
+        long taskId = -1;
+        for( TaskSummary taskSum : list.getResult() ) { 
+           if( taskSum.getProcessInstanceId() == procInstId )  {
+               taskId = taskSum.getId();
+           }
+        }
+        assertTrue( "Unable to determine taskId!", taskId > -1 );
         
         urlString = new URL(deploymentUrl, "/arquillian-test/rest/task/" + taskId + "/start?userId=salaboy").toExternalForm();
         System.out.println( ">> " + urlString );
@@ -277,6 +310,7 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
     }
     
     @Test
+    @Ignore
     @InSequence(2)
     public void testRestJaxbStartProcess() throws Exception { 
         // Start process
@@ -365,41 +399,35 @@ public class RestAndJmsIntegrationTest extends IntegrationBase {
     @InSequence(3)
     @Ignore
     public void testRestRemoteApiHumanTaskProcess() throws Exception {
-        System.out.println("clientRestRequest()");
-        // create REST request
-        RuntimeManager runtimeManager = new RemoteJmsSessionFactory(
-            "http://127.0.0.1:8080/arquillian-test", "test").newRuntimeManager();
+      
+        // start process
+        RuntimeManager runtimeManager = new RemoteRestSessionFactory( "http://127.0.0.1:8080/arquillian-test", "test").newRuntimeManager();
         RuntimeEngine engine = runtimeManager.getRuntimeEngine(EmptyContext.get());
         KieSession ksession = engine.getKieSession();
-        ProcessInstance processInstance = ksession.startProcess("org.jbpm.humantask");
-        System.out.println("Started process instance: " + processInstance + " " + (processInstance == null? "" : processInstance.getId()));
+        ProcessInstance processInstance = ksession.startProcess("org.jbpm.simplehumantask");
+        
+        // do task
         TaskService taskService = engine.getTaskService();
         List<TaskSummary> tasks = taskService.getTasksAssignedAsPotentialOwner("salaboy", "en-UK");
         if (tasks.size() != 1) {
         	throw new RuntimeException("Expecting one task " + tasks.size());
         }
         long taskId = tasks.get(0).getId();
-        System.out.println("Found task " + taskId);
-        System.out.println(taskService.getTaskById(taskId));
+        
         taskService.start(taskId, "salaboy");
         taskService.complete(taskId, "salaboy", null);
-        boolean failure = false;
-        System.out.println("Now expecting failure");
+        
         try {
         	taskService.complete(taskId, "salaboy", null);
+        	fail("Should not have been able to complete the task twice!");
         } catch (Throwable t) {
-        	t.printStackTrace();
-        	failure = true;
+        	// do nothing -- will have failed above
         }
-        if (!failure) {
-        	throw new RuntimeException("Cannot claim task twice");
-    	}
+        
         List<Status> statuses = new ArrayList<Status>();
         statuses.add(Status.Reserved);
         List<TaskSummary> taskIds = taskService.getTasksByStatusByProcessInstanceId(processInstance.getId(), statuses, "en-UK");
-        if (taskIds.size() != 2) {
-        	throw new RuntimeException("Expecting two tasks");
-        }
+        assertEquals("Expected 2 tasks.", 2, taskIds.size());
     }
     
 }

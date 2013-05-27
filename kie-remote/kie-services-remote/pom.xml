@@ -225,6 +225,13 @@
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
+    
+    <!--  war libs: authentication -->
+    <dependency>
+      <groupId>org.uberfire</groupId>
+      <artifactId>uberfire-security-server</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

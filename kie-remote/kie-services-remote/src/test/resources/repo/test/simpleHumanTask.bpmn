@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<definitions id="Definition"
+             targetNamespace="http://www.omg.org/bpmn20"
+             typeLanguage="http://www.java.com/javaTypes"
+             expressionLanguage="http://www.mvel.org/2.0"
+             xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"
+             xmlns:g="http://www.jboss.org/drools/flow/gpd"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+             xmlns:tns="http://www.jboss.org/drools">
+
+  <itemDefinition id="_approval_documentItem" structureRef="String" />
+  <itemDefinition id="_approval_translatedDocumentItem" structureRef="String" />
+  <itemDefinition id="_approval_reviewCommentItem" structureRef="String" />
+
+  <itemDefinition id="_2-approval_documentItem" structureRef="String" />
+  <itemDefinition id="_2-approval_translatedDocumentItem" structureRef="String" />
+  <itemDefinition id="_2-approval_reviewCommentItem" structureRef="String" />
+
+  <process processType="Private" isExecutable="true" id="org.jbpm.simplehumantask" name="SimpleHumanTaskSample" tns:packageName="defaultPackage" tns:version="1">
+
+    <!-- process variables -->
+    <property id="approval_document" itemSubjectRef="_approval_documentItem"/>
+    <property id="approval_translatedDocument" itemSubjectRef="_approval_translatedDocumentItem"/>
+    <property id="approval_reviewComment" itemSubjectRef="_approval_reviewCommentItem"/>
+
+    <!-- nodes -->
+    <startEvent id="_1" name="Start" />
+    <sequenceFlow id="_1-_2" sourceRef="_1" targetRef="_2" />
+    
+    <userTask id="_2" name="Write a Document" >
+      <ioSpecification>
+        <dataInput id="_2_CommentInput" name="Comment" />
+        <dataInput id="_2_TaskNameInput" name="TaskName" />
+        <dataInput id="_2_PriorityInput" name="Priority" />
+        <dataOutput id="_2_ResultOutput" name="Result" />
+        <inputSet>
+          <dataInputRefs>_2_CommentInput</dataInputRefs>
+          <dataInputRefs>_2_TaskNameInput</dataInputRefs>
+          <dataInputRefs>_2_PriorityInput</dataInputRefs>
+        </inputSet>
+        <outputSet>
+          <dataOutputRefs>_2_ResultOutput</dataOutputRefs>
+        </outputSet>
+      </ioSpecification>
+      <dataInputAssociation>
+        <targetRef>_2_CommentInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">Write a Document</from>
+          <to xsi:type="tFormalExpression">_2_CommentInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_2_TaskNameInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">Write a Document</from>
+          <to xsi:type="tFormalExpression">_2_TaskNameInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataInputAssociation>
+        <targetRef>_2_PriorityInput</targetRef>
+        <assignment>
+          <from xsi:type="tFormalExpression">null</from>
+          <to xsi:type="tFormalExpression">_2_PriorityInput</to>
+        </assignment>
+      </dataInputAssociation>
+      <dataOutputAssociation>
+        <sourceRef>_2_ResultOutput</sourceRef>
+        <targetRef>approval_document</targetRef>
+      </dataOutputAssociation>
+      <potentialOwner>
+        <resourceAssignmentExpression>
+          <formalExpression>salaboy</formalExpression>
+        </resourceAssignmentExpression>
+      </potentialOwner>
+    </userTask>
+    <sequenceFlow id="_2-_3" sourceRef="_2" targetRef="_3" />
+    
+    <scriptTask id="_3" name="Report" scriptFormat="http://www.java.com/java" >
+      <script>System.out.println("### REPORT - ");System.out.println("### \t");System.out.println("### \t approval_document: "+approval_document);System.out.println("### \t approval_translatedDocument: "+approval_translatedDocument);System.out.println("### \t approval_reviewComment: "+approval_reviewComment);</script>
+    </scriptTask>
+    <sequenceFlow id="_3-_4" sourceRef="_3" targetRef="_4" />
+
+    <endEvent id="_4" name="End" >
+        <terminateEventDefinition />
+    </endEvent>
+
+  </process>
+
+</definitions>

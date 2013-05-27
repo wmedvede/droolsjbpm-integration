@@ -13,6 +13,8 @@ import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.jboss.shrinkwrap.resolver.api.maven.Maven;
 import org.kie.commons.java.nio.file.spi.FileSystemProvider;
 import org.kie.commons.java.nio.fs.file.SimpleFileSystemProvider;
+import org.uberfire.security.auth.AuthenticationSource;
+import org.uberfire.security.server.auth.source.JACCAuthenticationSource;
 
 public class IntegrationBase {
 
@@ -35,7 +37,9 @@ public class IntegrationBase {
                 // services
                 "org.kie.commons:kie-nio2-fs",
                 // test
-                "org.jbpm:jbpm-shared-services:test-jar:6.0.0-SNAPSHOT"
+                "org.jbpm:jbpm-shared-services:test-jar:6.0.0-SNAPSHOT",
+                // authentication
+                "org.uberfire:uberfire-security-server"
         };
         
         File[] warLibs = Maven.resolver()
@@ -68,6 +72,7 @@ public class IntegrationBase {
                 .addClass(UnfinishedError.class)
                 .addAsResource("META-INF/persistence.xml")
                 .addAsServiceProvider(FileSystemProvider.class, SimpleFileSystemProvider.class)
+                .addAsServiceProvider(AuthenticationSource.class, JACCAuthenticationSource.class)
                 .addAsWebInfResource("WEB-INF/test-beans.xml", "beans.xml")
                 .addAsWebInfResource("META-INF/ejb-jar.xml", "ejb-jar.xml")
                 .setWebXML("WEB-INF/web.xml")

@@ -3,7 +3,7 @@ package org.kie.services.client.api;
 import org.kie.api.runtime.manager.RuntimeManager;
 import org.kie.services.client.api.command.RemoteRuntimeManager;
 
-public class RemoteJmsSessionFactory {
+public class RemoteJmsSessionFactory implements RemoteSessionFactory {
 
     private String url;
     private String deploymentId;

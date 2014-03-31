@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,6 +34,9 @@ import org.drools.core.command.runtime.process.GetWorkItemCommand;
 import org.drools.core.command.runtime.process.SignalEventCommand;
 import org.drools.core.command.runtime.process.StartProcessCommand;
 import org.drools.core.process.instance.WorkItem;
+import org.jbpm.kie.services.api.FormProviderService;
+import org.jbpm.formModeler.api.client.FormRenderContext;
+import org.jbpm.formModeler.api.client.FormRenderContextManager;
 import org.jbpm.process.audit.VariableInstanceLog;
 import org.jbpm.process.audit.command.FindVariableInstancesCommand;
 import org.kie.api.command.Command;
@@ -83,7 +87,13 @@ public class RuntimeResource extends ResourceBase {
     // Backwards compatability
     
     @Inject
-    private HistoryResource historyResource; 
+    private HistoryResource historyResource;
+
+    @Inject
+    private FormProviderService formProviderService;
+
+    @Inject
+    private FormRenderContextManager formRenderContextManager;
     
     // Rest methods --------------------------------------------------------------------------------------------------------------
 
@@ -106,6 +116,47 @@ public class RuntimeResource extends ResourceBase {
 
         JaxbProcessInstanceResponse responseObj = new JaxbProcessInstanceResponse(result, uriInfo.getRequestUri().toString());
         return createCorrectVariant(responseObj, headers);
+    }
+
+    @POST
+    @Path("/process/{processDefId: [_a-zA-Z0-9-:\\.]+}/startform")
+    public Response process_defId_startform(@PathParam("processDefId") String processId, @Context HttpServletRequest request) {
+        Map<String, List<String>> requestParams = getRequestParams(uriInfo);
+
+        String ctxUID = formProviderService.getFormDisplayProcess(deploymentId, processId);
+
+        String formUrl = uriInfo.getBaseUri().toString();
+
+        formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
+
+        formUrl += "forms/Controller?_fb=frc&_fp=Start&ctxUID=" + ctxUID + "&opener=" + request.getHeader("host");
+
+        JaxbProcessInstanceFormResponse response = new JaxbProcessInstanceFormResponse(formUrl, ctxUID, uriInfo.getRequestUri().toString());
+
+        return createCorrectVariant(response, headers);
+    }
+
+    @POST
+    @Path("/process/{processDefId: [_a-zA-Z0-9-:\\.]+}/startform/{ctxUID: [_a-zA-Z0-9-:\\.]+}")
+    public Response process_defId_startProcessFromForm(@PathParam("processDefId") String processId, @PathParam("ctxUID") String ctxUID) {
+        Map<String, List<String>> requestParams = getRequestParams(uriInfo);
+
+        FormRenderContext ctx = formRenderContextManager.getFormRenderContext(ctxUID);
+
+        if (ctx != null) {
+            Command<?> cmd = new StartProcessCommand(processId, ctx.getOutputData());
+
+            Object result = processRequestBean.doKieSessionOperation(
+                    cmd,
+                    deploymentId,
+                    null,
+                    "Unable to start process with process definition id '" + processId + "'");
+
+            formRenderContextManager.removeContext(ctxUID);
+            JaxbProcessInstanceResponse responseObj = new JaxbProcessInstanceResponse((ProcessInstance) result, uriInfo.getRequestUri().toString());
+            return createCorrectVariant(responseObj, headers);
+        }
+        throw RestOperationException.internalServerError("Unable to start process with process definition id '" + processId + "'");
     }
 
     @GET

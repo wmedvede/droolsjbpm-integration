@@ -69,6 +69,10 @@
 
     <!-- Rest -->
     <dependency>
+      <groupId>org.jboss.spec.javax.servlet</groupId>
+      <artifactId>jboss-servlet-api_3.0_spec</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
       <scope>provided</scope>
@@ -146,8 +150,11 @@
       <version>${version.org.powermock}</version>
       <scope>test</scope>
     </dependency>
+
+      <dependency>
+          <groupId>org.jbpm</groupId>
+          <artifactId>jbpm-form-modeler-api</artifactId>
+      </dependency>
   </dependencies>
-
-
 </project>
 

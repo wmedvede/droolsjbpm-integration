@@ -1,5 +1,7 @@
 package org.kie.services.remote.rest.jaxb;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -33,10 +35,7 @@ import org.kie.services.client.serialization.jaxb.impl.audit.JaxbVariableInstanc
 import org.kie.services.client.serialization.jaxb.impl.deploy.JaxbDeploymentJobResult;
 import org.kie.services.client.serialization.jaxb.impl.deploy.JaxbDeploymentUnit;
 import org.kie.services.client.serialization.jaxb.impl.deploy.JaxbDeploymentUnitList;
-import org.kie.services.client.serialization.jaxb.impl.process.JaxbProcessInstanceListResponse;
-import org.kie.services.client.serialization.jaxb.impl.process.JaxbProcessInstanceResponse;
-import org.kie.services.client.serialization.jaxb.impl.process.JaxbProcessInstanceWithVariablesResponse;
-import org.kie.services.client.serialization.jaxb.impl.process.JaxbWorkItem;
+import org.kie.services.client.serialization.jaxb.impl.process.*;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbContentResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskSummaryListResponse;
@@ -70,6 +69,7 @@ public class DynamicJAXBContext extends JAXBContext {
         types.add(JaxbProcessInstanceListResponse.class);
         types.add(JaxbProcessInstanceResponse.class);
         types.add(JaxbProcessInstanceWithVariablesResponse.class);
+        types.add(JaxbProcessInstanceFormResponse.class);
         types.add(JaxbWorkItem.class);
         types.add(JaxbDeploymentJobResult.class);
         types.add(JaxbDeploymentUnit.class);

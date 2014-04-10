@@ -150,11 +150,6 @@
       <version>${version.org.powermock}</version>
       <scope>test</scope>
     </dependency>
-
-      <dependency>
-          <groupId>org.jbpm</groupId>
-          <artifactId>jbpm-form-modeler-api</artifactId>
-      </dependency>
   </dependencies>
 </project>
 

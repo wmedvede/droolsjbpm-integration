@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -29,6 +30,7 @@ import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.services.client.serialization.jaxb.impl.JaxbCommandsRequest;
 import org.kie.services.client.serialization.jaxb.impl.JaxbCommandsResponse;
+import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskFormResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskSummaryListResponse;
 import org.kie.services.client.serialization.jaxb.rest.JaxbGenericResponse;
 import org.kie.services.remote.rest.exception.RestOperationException;
@@ -254,6 +256,20 @@ public class TaskResource extends ResourceBase {
             throw RestOperationException.notFound("Content for task " + taskId + " could not be found.");
         }
         return createCorrectVariant(content, headers);
+    }
+
+    @GET
+    @Path("/{taskId: [0-9-]+}/showTaskForm")
+    public Response taskId_form(@PathParam("taskId") long taskId, @Context HttpServletRequest request) {
+        String formUrl = uriInfo.getBaseUri().toString();
+
+        formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
+
+        formUrl += "org.kie.workbench.KIEWebapp/KIEWebapp.html?perspective=FormDisplayPerspective&standalone=true&taskId=" + taskId+ "&opener=" + request.getHeader("host");
+
+        JaxbTaskFormResponse response = new JaxbTaskFormResponse(formUrl, uriInfo.getRequestUri().toString());
+
+        return createCorrectVariant(response, headers);
     }
     
     @GET

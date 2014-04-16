@@ -37,6 +37,7 @@ import org.kie.services.client.serialization.jaxb.impl.deploy.JaxbDeploymentUnit
 import org.kie.services.client.serialization.jaxb.impl.deploy.JaxbDeploymentUnitList;
 import org.kie.services.client.serialization.jaxb.impl.process.*;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbContentResponse;
+import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskFormResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskSummaryListResponse;
 import org.kie.services.client.serialization.jaxb.rest.JaxbExceptionResponse;
@@ -65,6 +66,7 @@ public class DynamicJAXBContext extends JAXBContext {
         types.add(JaxbCommandsResponse.class);
         types.add(JaxbContentResponse.class);
         types.add(JaxbTaskResponse.class);
+        types.add(JaxbTaskFormResponse.class);
         types.add(JaxbTaskSummaryListResponse.class);
         types.add(JaxbProcessInstanceListResponse.class);
         types.add(JaxbProcessInstanceResponse.class);

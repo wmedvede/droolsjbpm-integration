@@ -26,13 +26,7 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.namespace.QName;
 
-import org.drools.core.command.runtime.process.AbortProcessInstanceCommand;
-import org.drools.core.command.runtime.process.AbortWorkItemCommand;
-import org.drools.core.command.runtime.process.CompleteWorkItemCommand;
-import org.drools.core.command.runtime.process.GetProcessInstanceCommand;
-import org.drools.core.command.runtime.process.GetWorkItemCommand;
-import org.drools.core.command.runtime.process.SignalEventCommand;
-import org.drools.core.command.runtime.process.StartProcessCommand;
+import org.drools.core.command.runtime.process.*;
 import org.drools.core.process.instance.WorkItem;
 import org.jbpm.process.audit.VariableInstanceLog;
 import org.jbpm.process.audit.command.FindVariableInstancesCommand;
@@ -115,15 +109,16 @@ public class RuntimeResource extends ResourceBase {
     public Response process_defId_startform(@PathParam("processDefId") String processId, @Context HttpServletRequest request) {
         Map<String, List<String>> requestParams = getRequestParams(uriInfo);
 
-        String formUrl = uriInfo.getBaseUri().toString();
+        List<String> result = (List<String>) processRequestBean.doKieSessionOperation(new GetProcessIdsCommand(), deploymentId, null);
 
-        formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
-
-        formUrl += "org.kie.workbench.KIEWebapp/KIEWebapp.html?perspective=FormDisplayPerspective&standalone=true&processId=" + processId+ "&domainId=" + deploymentId + "&opener=" + request.getHeader("host");
-
-        JaxbProcessInstanceFormResponse response = new JaxbProcessInstanceFormResponse(formUrl, uriInfo.getRequestUri().toString());
-
-        return createCorrectVariant(response, headers);
+        if (result != null && result.contains(processId)) {
+            String formUrl = uriInfo.getBaseUri().toString();
+            formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
+            formUrl += "org.kie.workbench.KIEWebapp/KIEWebapp.html?perspective=FormDisplayPerspective&standalone=true&processId=" + processId+ "&domainId=" + deploymentId + "&opener=" + request.getHeader("host");
+            JaxbProcessInstanceFormResponse response = new JaxbProcessInstanceFormResponse(formUrl, uriInfo.getRequestUri().toString());
+            return createCorrectVariant(response, headers);
+        }
+        throw RestOperationException.notFound("Process " + processId + " is not available.");
     }
 
     @GET

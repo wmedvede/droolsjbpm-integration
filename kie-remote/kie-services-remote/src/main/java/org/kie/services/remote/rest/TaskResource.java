@@ -261,6 +261,12 @@ public class TaskResource extends ResourceBase {
     @GET
     @Path("/{taskId: [0-9-]+}/showTaskForm")
     public Response taskId_form(@PathParam("taskId") long taskId, @Context HttpServletRequest request) {
+        TaskCommand<?> cmd = new GetTaskCommand(taskId);
+        Object result = doRestTaskOperation(taskId, cmd);
+        if( result == null ) {
+            throw RestOperationException.notFound("Task " + taskId + " could not be found.");
+        }
+        Task task = (Task) result;
         String formUrl = uriInfo.getBaseUri().toString();
 
         formUrl = formUrl.substring(0, formUrl.indexOf("rest"));

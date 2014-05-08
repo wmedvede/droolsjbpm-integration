@@ -28,6 +28,7 @@ import javax.xml.namespace.QName;
 
 import org.drools.core.command.runtime.process.*;
 import org.drools.core.process.instance.WorkItem;
+import org.drools.core.util.StringUtils;
 import org.jbpm.process.audit.VariableInstanceLog;
 import org.jbpm.process.audit.command.FindVariableInstancesCommand;
 import org.kie.api.command.Command;
@@ -40,6 +41,7 @@ import org.kie.services.client.serialization.jaxb.impl.process.JaxbWorkItem;
 import org.kie.services.client.serialization.jaxb.impl.process.*;
 import org.kie.services.client.serialization.jaxb.rest.JaxbGenericResponse;
 import org.kie.services.remote.rest.exception.RestOperationException;
+import org.kie.services.remote.util.FormURLGenerator;
 
 /**
  * If a method in this class is annotated by a @Path annotation, 
@@ -81,6 +83,9 @@ public class RuntimeResource extends ResourceBase {
     @Inject
     private HistoryResource historyResource;
 
+    @Inject
+    private FormURLGenerator formURLGenerator;
+
     // Rest methods --------------------------------------------------------------------------------------------------------------
 
     @POST
@@ -107,16 +112,15 @@ public class RuntimeResource extends ResourceBase {
     @POST
     @Path("/process/{processDefId: [_a-zA-Z0-9-:\\.]+}/startform")
     public Response process_defId_startform(@PathParam("processDefId") String processId, @Context HttpServletRequest request) {
-        Map<String, List<String>> requestParams = getRequestParams(uriInfo);
-
         List<String> result = (List<String>) processRequestBean.doKieSessionOperation(new GetProcessIdsCommand(), deploymentId, null);
 
         if (result != null && result.contains(processId)) {
-            String formUrl = uriInfo.getBaseUri().toString();
-            formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
-            formUrl += "org.kie.workbench.KIEWebapp/KIEWebapp.html?perspective=FormDisplayPerspective&standalone=true&processId=" + processId+ "&domainId=" + deploymentId + "&opener=" + request.getHeader("host");
-            JaxbProcessInstanceFormResponse response = new JaxbProcessInstanceFormResponse(formUrl, uriInfo.getRequestUri().toString());
-            return createCorrectVariant(response, headers);
+            Map<String, List<String>> requestParams = getRequestParams(uriInfo);
+            String formUrl = formURLGenerator.generateFormProcessURL(uriInfo.getBaseUri().toString(), processId, deploymentId, request.getHeader("host"), requestParams);
+            if (!StringUtils.isEmpty(formUrl)) {
+                JaxbProcessInstanceFormResponse response = new JaxbProcessInstanceFormResponse(formUrl, uriInfo.getRequestUri().toString());
+                return createCorrectVariant(response, headers);
+            }
         }
         throw RestOperationException.notFound("Process " + processId + " is not available.");
     }

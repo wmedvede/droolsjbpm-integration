@@ -19,6 +19,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.drools.core.util.StringUtils;
 import org.jbpm.kie.services.api.IdentityProvider;
 import org.jbpm.services.task.commands.*;
 import org.jbpm.services.task.impl.model.command.DeleteBAMTaskSummariesCommand;
@@ -30,10 +31,12 @@ import org.kie.api.task.model.Task;
 import org.kie.api.task.model.TaskSummary;
 import org.kie.services.client.serialization.jaxb.impl.JaxbCommandsRequest;
 import org.kie.services.client.serialization.jaxb.impl.JaxbCommandsResponse;
+import org.kie.services.client.serialization.jaxb.impl.process.JaxbProcessInstanceFormResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskFormResponse;
 import org.kie.services.client.serialization.jaxb.impl.task.JaxbTaskSummaryListResponse;
 import org.kie.services.client.serialization.jaxb.rest.JaxbGenericResponse;
 import org.kie.services.remote.rest.exception.RestOperationException;
+import org.kie.services.remote.util.FormURLGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +72,9 @@ public class TaskResource extends ResourceBase {
 
     @Inject
     protected IdentityProvider identityProvider;
+
+    @Inject
+    private FormURLGenerator formURLGenerator;
    
     private static String[] allowedOperations = { 
         "activate", 
@@ -263,19 +269,16 @@ public class TaskResource extends ResourceBase {
     public Response taskId_form(@PathParam("taskId") long taskId, @Context HttpServletRequest request) {
         TaskCommand<?> cmd = new GetTaskCommand(taskId);
         Object result = doRestTaskOperation(taskId, cmd);
-        if( result == null ) {
-            throw RestOperationException.notFound("Task " + taskId + " could not be found.");
+
+        if (result != null) {
+            Map<String, List<String>> requestParams = getRequestParams(uriInfo);
+            String formUrl = formURLGenerator.generateFormTaskURL(uriInfo.getBaseUri().toString(), taskId, request.getHeader("host"), requestParams);
+            if (!StringUtils.isEmpty(formUrl)) {
+                JaxbTaskFormResponse response = new JaxbTaskFormResponse(formUrl, uriInfo.getRequestUri().toString());
+                return createCorrectVariant(response, headers);
+            }
         }
-        Task task = (Task) result;
-        String formUrl = uriInfo.getBaseUri().toString();
-
-        formUrl = formUrl.substring(0, formUrl.indexOf("rest"));
-
-        formUrl += "org.kie.workbench.KIEWebapp/KIEWebapp.html?perspective=FormDisplayPerspective&standalone=true&taskId=" + taskId+ "&opener=" + request.getHeader("host");
-
-        JaxbTaskFormResponse response = new JaxbTaskFormResponse(formUrl, uriInfo.getRequestUri().toString());
-
-        return createCorrectVariant(response, headers);
+        throw RestOperationException.notFound("Task " + taskId + " could not be found.");
     }
     
     @GET

@@ -1,0 +1,413 @@
+[INFO] Scanning for projects...
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building KIE :: Maven Plugin 7.0.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:update-check (default-update-check) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (enforce-plugin-versions) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (ban-blacklisted-dependencies) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (enforce-java-version) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (enforce-maven-version) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:2.17:check (validate) @ kie-maven-plugin ---
+[INFO] There are 117 errors reported by Checkstyle 6.19 with /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/target/checkstyle-rules.xml ruleset.
+[WARNING] checkstyle:check violations detected but failOnViolation set to false
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (no-managed-deps) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- buildnumber-maven-plugin:1.4:create (get-scm-revision) @ kie-maven-plugin ---
+[INFO] Executing: /bin/sh -c cd '/home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin' && 'git' 'rev-parse' '--verify' 'HEAD'
+[INFO] Working directory: /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin
+[INFO] Storing buildNumber: 5b25ace1842144341085773c590a907ebdf11ca6 at timestamp: 1487173778115
+[INFO] Storing buildScmBranch: master
+[INFO] 
+[INFO] --- build-helper-maven-plugin:1.10:add-source (default) @ kie-maven-plugin ---
+[INFO] Source directory: /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/target/generated-sources/annotations added.
+[INFO] 
+[INFO] --- build-helper-maven-plugin:1.10:parse-version (default) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:process-resources (default-process-resources) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:compile (default-compile) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] Skipped compilation, all 8 classes are up to date
+[INFO] Replaying recorded messages...
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java:[-1,-1] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java uses or overrides a deprecated API.
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java:[-1,-1] Recompile with -Xlint:deprecation for details.
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java:[-1,-1] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java uses unchecked or unsafe operations.
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/main/java/org/kie/maven/plugin/IncludeProjectDependenciesComponentConfigurator.java:[-1,-1] Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:mojo-annotation-processor (default-mojo-annotation-processor) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] Skipped compilation, all 8 classes are up to date
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:export-package (default-export-package) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:plugin-descriptor (default-plugin-descriptor) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:sisu-index (default-sisu-index) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.4.1:enforce (enforce-direct-dependencies) @ kie-maven-plugin ---
+[INFO] Flag 'useClassesFromLastBuild' is set. Try to use existing output folder.
+[INFO] Analyze dependencies of artifact 'org.kie:kie-maven-plugin:takari-maven-plugin:7.0.0-SNAPSHOT'.
+[INFO] Artifact 'io.takari.maven.plugins:takari-plugin-integration-testing:pom:2.8.0:test' associated file '/home/wmedvede/.m2/repository/io/takari/maven/plugins/takari-plugin-integration-testing/2.8.0/takari-plugin-integration-testing-2.8.0.pom', is skipped.
+[INFO] No illegal transitive dependencies found in 'org.kie:kie-maven-plugin:takari-maven-plugin:7.0.0-SNAPSHOT'.
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:process-test-resources (default-process-test-resources) @ kie-maven-plugin ---
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:testProperties (default-testProperties) @ kie-maven-plugin ---
+[INFO] Incremental build configuration change detected, performing full build
+[WARNING] File '/home/wmedvede/.m2/settings.xml' does not exist! It will be ignored.
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:testCompile (default-testCompile) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] Skipped compilation, all 18 classes are up to date
+[INFO] Replaying recorded messages...
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/test/java/org/drools/compiler/xpath/tobeinstrumented/XPathTest.java:[-1,-1] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/test/java/org/drools/compiler/xpath/tobeinstrumented/XPathTest.java uses unchecked or unsafe operations.
+[INFO] /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/src/test/java/org/drools/compiler/xpath/tobeinstrumented/XPathTest.java:[-1,-1] Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] --- takari-lifecycle-plugin:1.11.11.jbossorg-1:sisu-test-index (default-sisu-test-index) @ kie-maven-plugin ---
+[INFO] Performing incremental build
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.18.1:test (default-test) @ kie-maven-plugin ---
+[INFO] Surefire report directory: /home/wmedvede/development/projects/droolsjbpm/droolsjbpm-integration/kie-maven-plugin/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running org.drools.compiler.xpath.tobeinstrumented.XPathTest
+16:49:40.649 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.Person.age:I.
+16:49:40.654 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtPrimitiveType javassist.CtPrimitiveType@9a7504c[int]
+16:49:40.655 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.Person]:
+public void $$_drools_write_age(int age) {
+  this.age = $1;
+  org.drools.core.phreak.ReactiveObjectUtil.notifyModification($0); 
+}
+
+16:49:40.662 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.School.children:Ljava/util/List;.
+16:49:40.662 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@23d2a7e8[public abstract interface class java.util.List implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@a875cc97[public abstract addAll (ILjava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@bd37cf5b[public replaceAll (Ljava/util/function/UnaryOperator;)V], javassist.CtMethod@771e96c6[public sort (Ljava/util/Comparator;)V], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@b587c812[public abstract get (I)Ljava/lang/Object;], javassist.CtMethod@392582a[public abstract set (ILjava/lang/Object;)Ljava/lang/Object;], javassist.CtMethod@98e9094b[public abstract add (ILjava/lang/Object;)V], javassist.CtMethod@4c6ea824[public abstract remove (I)Ljava/lang/Object;], javassist.CtMethod@6d856cae[public abstract indexOf (Ljava/lang/Object;)I], javassist.CtMethod@49fd438[public abstract lastIndexOf (Ljava/lang/Object;)I], javassist.CtMethod@182a892d[public abstract listIterator ()Ljava/util/ListIterator;], javassist.CtMethod@ed26a07c[public abstract listIterator (I)Ljava/util/ListIterator;], javassist.CtMethod@9e7a5ddf[public abstract subList (II)Ljava/util/List;], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.665 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.School]:
+public void $$_drools_write_children(java.util.List children) {
+  this.children = new org.drools.core.phreak.ReactiveList($1); 
+}
+
+16:49:40.668 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.Child.mother:Ljava/lang/String;.
+16:49:40.669 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@42d8062c[public final class java.lang.String implements java.io.Serializable, java.lang.Comparable, java.lang.CharSequence,  fields=java.lang.String.value:[C, java.lang.String.hash:I, java.lang.String.serialVersionUID:J, java.lang.String.serialPersistentFields:[Ljava/io/ObjectStreamField;, java.lang.String.CASE_INSENSITIVE_ORDER:Ljava/util/Comparator;,  constructors=javassist.CtConstructor@cb51256[public String ()V], javassist.CtConstructor@59906517[public String (Ljava/lang/String;)V], javassist.CtConstructor@5bfbf16f[public String ([C)V], javassist.CtConstructor@25af5db5[public String ([CII)V], javassist.CtConstructor@12cdcf4[public String ([III)V], javassist.CtConstructor@5bcea91b[public String ([BIII)V], javassist.CtConstructor@5f3a4b84[public String ([BI)V], javassist.CtConstructor@27f723[public String ([BIILjava/lang/String;)V], javassist.CtConstructor@670b40af[public String ([BIILjava/nio/charset/Charset;)V], javassist.CtConstructor@4923ab24[public String ([BLjava/lang/String;)V], javassist.CtConstructor@44c8afef[public String ([BLjava/nio/charset/Charset;)V], javassist.CtConstructor@7b69c6ba[public String ([BII)V], javassist.CtConstructor@46daef40[public String ([B)V], javassist.CtConstructor@12f41634[public String (Ljava/lang/StringBuffer;)V], javassist.CtConstructor@13c27452[public String (Ljava/lang/StringBuilder;)V], javassist.CtConstructor@262b2c86[ String ([CZ)V], javassist.CtConstructor@371a67ec[static <clinit> ()V],  methods=javassist.CtMethod@d8c09757[private static checkBounds ([BII)V], javassist.CtMethod@736b1e67[public length ()I], javassist.CtMethod@7ca7b284[public isEmpty ()Z], javassist.CtMethod@5b7f645f[public charAt (I)C], javassist.CtMethod@43d7bc32[public codePointAt (I)I], javassist.CtMethod@6f3adee6[public codePointBefore (I)I], javassist.CtMethod@2a149f0d[public codePointCount (II)I], javassist.CtMethod@cc8759fb[public offsetByCodePoints (II)I], javassist.CtMethod@53e850a9[ getChars ([CI)V], javassist.CtMethod@dcbcb589[public getChars (II[CI)V], javassist.CtMethod@5234ad7a[public getBytes (II[BI)V], javassist.CtMethod@93cef6c[public getBytes (Ljava/lang/String;)[B], javassist.CtMethod@18af8a68[public getBytes (Ljava/nio/charset/Charset;)[B], javassist.CtMethod@52fc9276[public getBytes ()[B], javassist.CtMethod@87a44f24[public equals (Ljava/lang/Object;)Z], javassist.CtMethod@b1fd5e6f[public contentEquals (Ljava/lang/StringBuffer;)Z], javassist.CtMethod@bf5940e[private nonSyncContentEquals (Ljava/lang/AbstractStringBuilder;)Z], javassist.CtMethod@4404fe75[public contentEquals (Ljava/lang/CharSequence;)Z], javassist.CtMethod@762677f8[public equalsIgnoreCase (Ljava/lang/String;)Z], javassist.CtMethod@f06ef777[public compareTo (Ljava/lang/String;)I], javassist.CtMethod@7bcf02b9[public compareToIgnoreCase (Ljava/lang/String;)I], javassist.CtMethod@74d1e2bf[public regionMatches (ILjava/lang/String;II)Z], javassist.CtMethod@6c981967[public regionMatches (ZILjava/lang/String;II)Z], javassist.CtMethod@9d35415b[public startsWith (Ljava/lang/String;I)Z], javassist.CtMethod@4f64d06e[public startsWith (Ljava/lang/String;)Z], javassist.CtMethod@a0ad615[public endsWith (Ljava/lang/String;)Z], javassist.CtMethod@c13165c[public hashCode ()I], javassist.CtMethod@2b9fc83f[public indexOf (I)I], javassist.CtMethod@485943aa[public indexOf (II)I], javassist.CtMethod@8a861a27[private indexOfSupplementary (II)I], javassist.CtMethod@38167375[public lastIndexOf (I)I], javassist.CtMethod@cab7ff34[public lastIndexOf (II)I], javassist.CtMethod@14bdeedd[private lastIndexOfSupplementary (II)I], javassist.CtMethod@d31e3d00[public indexOf (Ljava/lang/String;)I], javassist.CtMethod@90a96709[public indexOf (Ljava/lang/String;I)I], javassist.CtMethod@421adf1[static indexOf ([CIILjava/lang/String;I)I], javassist.CtMethod@a044760f[static indexOf ([CII[CIII)I], javassist.CtMethod@6a38a48a[public lastIndexOf (Ljava/lang/String;)I], javassist.CtMethod@dcdbf0bf[public lastIndexOf (Ljava/lang/String;I)I], javassist.CtMethod@7bec6ca7[static lastIndexOf ([CIILjava/lang/String;I)I], javassist.CtMethod@d34f8b45[static lastIndexOf ([CII[CIII)I], javassist.CtMethod@fa274337[public substring (I)Ljava/lang/String;], javassist.CtMethod@4ac127b2[public substring (II)Ljava/lang/String;], javassist.CtMethod@1ff1ab82[public subSequence (II)Ljava/lang/CharSequence;], javassist.CtMethod@d65c1a4b[public concat (Ljava/lang/String;)Ljava/lang/String;], javassist.CtMethod@198f6b55[public replace (CC)Ljava/lang/String;], javassist.CtMethod@7b83e6ea[public matches (Ljava/lang/String;)Z], javassist.CtMethod@bb11a83c[public contains (Ljava/lang/CharSequence;)Z], javassist.CtMethod@6b8a1f49[public replaceFirst (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;], javassist.CtMethod@c23c447a[public replaceAll (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;], javassist.CtMethod@79159a6d[public replace (Ljava/lang/CharSequence;Ljava/lang/CharSequence;)Ljava/lang/String;], javassist.CtMethod@82e6ed8[public split (Ljava/lang/String;I)[Ljava/lang/String;], javassist.CtMethod@f8017f51[public split (Ljava/lang/String;)[Ljava/lang/String;], javassist.CtMethod@8c89986c[public static transient join (Ljava/lang/CharSequence;[Ljava/lang/CharSequence;)Ljava/lang/String;], javassist.CtMethod@e4d922de[public static join (Ljava/lang/CharSequence;Ljava/lang/Iterable;)Ljava/lang/String;], javassist.CtMethod@25dca442[public toLowerCase (Ljava/util/Locale;)Ljava/lang/String;], javassist.CtMethod@7730d517[public toLowerCase ()Ljava/lang/String;], javassist.CtMethod@f9453ee3[public toUpperCase (Ljava/util/Locale;)Ljava/lang/String;], javassist.CtMethod@99a585f8[public toUpperCase ()Ljava/lang/String;], javassist.CtMethod@cc69f8a3[public trim ()Ljava/lang/String;], javassist.CtMethod@69cb6c6d[public toString ()Ljava/lang/String;], javassist.CtMethod@46bc4b69[public toCharArray ()[C], javassist.CtMethod@3c740e2d[public static transient format (Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;], javassist.CtMethod@5f0dec22[public static transient format (Ljava/util/Locale;Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;], javassist.CtMethod@9e87040d[public static valueOf (Ljava/lang/Object;)Ljava/lang/String;], javassist.CtMethod@a35bbbe1[public static valueOf ([C)Ljava/lang/String;], javassist.CtMethod@3b5cc8c1[public static valueOf ([CII)Ljava/lang/String;], javassist.CtMethod@7cbecf4c[public static copyValueOf ([CII)Ljava/lang/String;], javassist.CtMethod@b213e92c[public static copyValueOf ([C)Ljava/lang/String;], javassist.CtMethod@78e1ed0f[public static valueOf (Z)Ljava/lang/String;], javassist.CtMethod@78e1ea46[public static valueOf (C)Ljava/lang/String;], javassist.CtMethod@78e1eb00[public static valueOf (I)Ljava/lang/String;], javassist.CtMethod@78e1eb1f[public static valueOf (J)Ljava/lang/String;], javassist.CtMethod@78e1eaa3[public static valueOf (F)Ljava/lang/String;], javassist.CtMethod@78e1ea65[public static valueOf (D)Ljava/lang/String;], javassist.CtMethod@21ffbf93[public native intern ()Ljava/lang/String;], javassist.CtMethod@8ad62725[public volatile compareTo (Ljava/lang/Object;)I], ]
+16:49:40.671 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.Child]:
+public void $$_drools_write_mother(java.lang.String mother) {
+  this.mother = $1;
+  org.drools.core.phreak.ReactiveObjectUtil.notifyModification($0); 
+}
+
+16:49:40.672 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.Child.toys:Ljava/util/List;.
+16:49:40.672 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@23d2a7e8[public abstract interface class java.util.List implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@a875cc97[public abstract addAll (ILjava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@bd37cf5b[public replaceAll (Ljava/util/function/UnaryOperator;)V], javassist.CtMethod@771e96c6[public sort (Ljava/util/Comparator;)V], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@b587c812[public abstract get (I)Ljava/lang/Object;], javassist.CtMethod@392582a[public abstract set (ILjava/lang/Object;)Ljava/lang/Object;], javassist.CtMethod@98e9094b[public abstract add (ILjava/lang/Object;)V], javassist.CtMethod@4c6ea824[public abstract remove (I)Ljava/lang/Object;], javassist.CtMethod@6d856cae[public abstract indexOf (Ljava/lang/Object;)I], javassist.CtMethod@49fd438[public abstract lastIndexOf (Ljava/lang/Object;)I], javassist.CtMethod@182a892d[public abstract listIterator ()Ljava/util/ListIterator;], javassist.CtMethod@ed26a07c[public abstract listIterator (I)Ljava/util/ListIterator;], javassist.CtMethod@9e7a5ddf[public abstract subList (II)Ljava/util/List;], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.673 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.Child]:
+public void $$_drools_write_toys(java.util.List toys) {
+  this.toys = new org.drools.core.phreak.ReactiveList($1); 
+}
+
+16:49:40.676 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.TMFile.size:I.
+16:49:40.676 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtPrimitiveType javassist.CtPrimitiveType@9a7504c[int]
+16:49:40.677 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.TMFile]:
+public void $$_drools_write_size(int size) {
+  this.size = $1;
+  org.drools.core.phreak.ReactiveObjectUtil.notifyModification($0); 
+}
+
+16:49:40.679 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.members:Ljava/util/Set;.
+16:49:40.680 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@77ec78b9[public abstract interface class java.util.Set implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.681 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet]:
+public void $$_drools_write_members(java.util.Set members) {
+  this.members = new org.drools.core.phreak.ReactiveSet($1); 
+}
+
+16:49:40.684 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.members:Ljava/util/List;.
+16:49:40.684 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@23d2a7e8[public abstract interface class java.util.List implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@a875cc97[public abstract addAll (ILjava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@bd37cf5b[public replaceAll (Ljava/util/function/UnaryOperator;)V], javassist.CtMethod@771e96c6[public sort (Ljava/util/Comparator;)V], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@b587c812[public abstract get (I)Ljava/lang/Object;], javassist.CtMethod@392582a[public abstract set (ILjava/lang/Object;)Ljava/lang/Object;], javassist.CtMethod@98e9094b[public abstract add (ILjava/lang/Object;)V], javassist.CtMethod@4c6ea824[public abstract remove (I)Ljava/lang/Object;], javassist.CtMethod@6d856cae[public abstract indexOf (Ljava/lang/Object;)I], javassist.CtMethod@49fd438[public abstract lastIndexOf (Ljava/lang/Object;)I], javassist.CtMethod@182a892d[public abstract listIterator ()Ljava/util/ListIterator;], javassist.CtMethod@ed26a07c[public abstract listIterator (I)Ljava/util/ListIterator;], javassist.CtMethod@9e7a5ddf[public abstract subList (II)Ljava/util/List;], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.685 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory]:
+public void $$_drools_write_members(java.util.List members) {
+  this.members = new org.drools.core.phreak.ReactiveList($1); 
+}
+
+16:49:40.687 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.fieldSet:Ljava/util/Set;.
+16:49:40.687 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@77ec78b9[public abstract interface class java.util.Set implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.688 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections]:
+public void $$_drools_write_fieldSet(java.util.Set fieldSet) {
+  this.fieldSet = new org.drools.core.phreak.ReactiveSet($1); 
+}
+
+16:49:40.688 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.fieldCollection:Ljava/util/Collection;.
+16:49:40.688 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@87f383f[public abstract interface class java.util.Collection implements java.lang.Iterable,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@f946ec93[public removeIf (Ljava/util/function/Predicate;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], javassist.CtMethod@6abf7481[public stream ()Ljava/util/stream/Stream;], javassist.CtMethod@1c3d0fa8[public parallelStream ()Ljava/util/stream/Stream;], ]
+16:49:40.689 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections]:
+public void $$_drools_write_fieldCollection(java.util.Collection fieldCollection) {
+  this.fieldCollection = new org.drools.core.phreak.ReactiveCollection($1); 
+}
+
+16:49:40.690 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - Preparing field writer method for field: org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.fieldList:Ljava/util/List;.
+16:49:40.690 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - buildWriteInterceptionBodyFragment: class javassist.CtClassType javassist.CtClassType@23d2a7e8[public abstract interface class java.util.List implements java.util.Collection,  fields= constructors= methods=javassist.CtMethod@ca3de8c2[public abstract size ()I], javassist.CtMethod@7ca7b284[public abstract isEmpty ()Z], javassist.CtMethod@ce4e5584[public abstract contains (Ljava/lang/Object;)Z], javassist.CtMethod@979ba9ef[public abstract iterator ()Ljava/util/Iterator;], javassist.CtMethod@71169e1f[public abstract toArray ()[Ljava/lang/Object;], javassist.CtMethod@17561c1c[public abstract toArray ([Ljava/lang/Object;)[Ljava/lang/Object;], javassist.CtMethod@55ba0306[public abstract add (Ljava/lang/Object;)Z], javassist.CtMethod@2cefb369[public abstract remove (Ljava/lang/Object;)Z], javassist.CtMethod@60f2a7f2[public abstract containsAll (Ljava/util/Collection;)Z], javassist.CtMethod@a6d32430[public abstract addAll (Ljava/util/Collection;)Z], javassist.CtMethod@a875cc97[public abstract addAll (ILjava/util/Collection;)Z], javassist.CtMethod@34ebce6d[public abstract removeAll (Ljava/util/Collection;)Z], javassist.CtMethod@1c228d4c[public abstract retainAll (Ljava/util/Collection;)Z], javassist.CtMethod@bd37cf5b[public replaceAll (Ljava/util/function/UnaryOperator;)V], javassist.CtMethod@771e96c6[public sort (Ljava/util/Comparator;)V], javassist.CtMethod@33115c0e[public abstract clear ()V], javassist.CtMethod@87a44f24[public abstract equals (Ljava/lang/Object;)Z], javassist.CtMethod@c13165c[public abstract hashCode ()I], javassist.CtMethod@b587c812[public abstract get (I)Ljava/lang/Object;], javassist.CtMethod@392582a[public abstract set (ILjava/lang/Object;)Ljava/lang/Object;], javassist.CtMethod@98e9094b[public abstract add (ILjava/lang/Object;)V], javassist.CtMethod@4c6ea824[public abstract remove (I)Ljava/lang/Object;], javassist.CtMethod@6d856cae[public abstract indexOf (Ljava/lang/Object;)I], javassist.CtMethod@49fd438[public abstract lastIndexOf (Ljava/lang/Object;)I], javassist.CtMethod@182a892d[public abstract listIterator ()Ljava/util/ListIterator;], javassist.CtMethod@ed26a07c[public abstract listIterator (I)Ljava/util/ListIterator;], javassist.CtMethod@9e7a5ddf[public abstract subList (II)Ljava/util/List;], javassist.CtMethod@eaab58de[public spliterator ()Ljava/util/Spliterator;], ]
+16:49:40.690 [main] DEBUG o.k.m.plugin.BytecodeInjectReactive - writing method into [org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections]:
+public void $$_drools_write_fieldList(java.util.List fieldList) {
+  this.fieldList = new org.drools.core.phreak.ReactiveList($1); 
+}
+
+16:49:40.692 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.Person now having the following methods:
+16:49:40.693 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.setAge(int)
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.Person.getLeftTuples()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public int org.drools.compiler.xpath.tobeinstrumented.model.Person.getAge()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.$$_drools_write_age(int)
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.Person.toString()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.Person.getName()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.694 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.695 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.Person in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.Person.class.
+16:49:40.695 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.Child now having the following methods:
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.addToy(org.drools.compiler.xpath.tobeinstrumented.model.Toy)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.Child.getLeftTuples()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.List org.drools.compiler.xpath.tobeinstrumented.model.Child.getToys()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.Child.getMother()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.setMother(java.lang.String)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.$$_drools_write_mother(java.lang.String)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Child.$$_drools_write_toys(java.util.List)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.setAge(int)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public int org.drools.compiler.xpath.tobeinstrumented.model.Person.getAge()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.Person.$$_drools_write_age(int)
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.Person.toString()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.Person.getName()
+16:49:40.696 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.Child in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.Child.class.
+16:49:40.697 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.School now having the following methods:
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.School.addChild(org.drools.compiler.xpath.tobeinstrumented.model.Child)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.List org.drools.compiler.xpath.tobeinstrumented.model.School.getChildren()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.School.removeChild(org.drools.compiler.xpath.tobeinstrumented.model.Child)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.School.getLeftTuples()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.School.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.School.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.School.$$_drools_write_children(java.util.List)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.School.getName()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String java.lang.Object.toString()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.698 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.School in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.School.class.
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.TMFile now having the following methods:
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.TMFile.getLeftTuples()
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFile.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFile.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.699 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFile.$$_drools_write_size(int)
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.TMFile.toString()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.TMFile.getName()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public int org.drools.compiler.xpath.tobeinstrumented.model.TMFile.getSize()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFile.setSize(int)
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.700 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.TMFile in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.TMFile.class.
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet now having the following methods:
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Set org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.getFiles()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.getLeftTuples()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.$$_drools_write_members(java.util.Set)
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.getName()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String java.lang.Object.toString()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.701 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.TMFileSet in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.TMFileSet.class.
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory now having the following methods:
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.List org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.getFiles()
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.getLeftTuples()
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.702 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.$$_drools_write_members(java.util.List)
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.getName()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String java.lang.Object.toString()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.703 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.TMDirectory in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.TMDirectory.class.
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Bytecode-injected class for org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections now having the following methods:
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.getFieldCollection()
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.List org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.getFieldList()
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Set org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.getFieldSet()
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.util.Collection org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.getLeftTuples()
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.removeLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.addLeftTuple(org.drools.core.spi.Tuple)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.$$_drools_write_fieldSet(java.util.Set)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.$$_drools_write_fieldCollection(java.util.Collection)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public void org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.$$_drools_write_fieldList(java.util.List)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public java.lang.String org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.toString()
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait(long,int) throws java.lang.InterruptedException
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.wait(long) throws java.lang.InterruptedException
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final void java.lang.Object.wait() throws java.lang.InterruptedException
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public boolean java.lang.Object.equals(java.lang.Object)
+16:49:40.704 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public native int java.lang.Object.hashCode()
+16:49:40.705 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native java.lang.Class java.lang.Object.getClass()
+16:49:40.705 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notify()
+16:49:40.705 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest -  public final native void java.lang.Object.notifyAll()
+16:49:40.705 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - Written bytecode for org.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections in file: ./target/JAVASSIST/org.drools.compiler.xpath.tobeinstrumented.modelorg.drools.compiler.xpath.tobeinstrumented.model.PojoWithCollections.class.
+16:49:40.903 [main] INFO  o.k.internal.utils.ServiceDiscovery - Discovered kie.conf url=jar:file:/home/wmedvede/.m2/repository/org/optaplanner/optaplanner-core/7.0.0-SNAPSHOT/optaplanner-core-7.0.0-SNAPSHOT.jar!/META-INF/kie.conf 
+16:49:40.993 [main] INFO  o.k.internal.utils.ServiceDiscovery - Adding Assembler org.optaplanner.core.impl.solver.kie.KieSolverAssemblerService
+
+16:49:42.039 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.040 [main] DEBUG o.d.c.k.b.impl.KieRepositoryImpl - Cannot load a KieRepositoryScanner, using the DummyKieScanner
+16:49:42.203 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.231 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.231 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.235 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.245 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.245 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.246 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+X.File0
+Y.File0
+16:49:42.258 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.258 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.259 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+X.File1
+16:49:42.259 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.259 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.259 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+X.File2
+Y.File2
+16:49:42.260 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.260 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.260 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+X.File0R
+16:49:42.261 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.261 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.321 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.329 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.345 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.345 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.345 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.346 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.346 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.448 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.458 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.466 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.466 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.468 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.469 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.469 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.509 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.516 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.516 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.516 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.517 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.524 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.524 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.524 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+Y.File0
+X.File0
+16:49:42.527 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.527 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.527 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+X.File1
+16:49:42.528 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.528 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.528 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+Y.File2
+X.File2
+16:49:42.531 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.531 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.568 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.574 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+Charles
+16:49:42.581 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.581 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.582 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+Debbie
+16:49:42.582 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.582 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.583 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.583 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.583 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.583 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+Debbie
+16:49:42.584 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.584 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.584 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.585 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.585 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.586 [main] INFO  o.d.c.x.tobeinstrumented.XPathTest - testPojoWithCollectionsBytecode(): PojoWithCollections [fieldCollection=ReactiveCollection [[]], fieldList=ReactiveList[[]], fieldSet=ReactiveSet[[]]]
+16:49:42.616 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.622 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.629 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.629 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.630 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.630 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.630 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.680 [main] INFO  o.d.c.k.b.impl.KieRepositoryImpl - KieModule was added: MemoryKieModule[releaseId=org.default:artifact:1.0.0-SNAPSHOT]
+16:49:42.687 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.701 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.701 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+16:49:42.701 [main] DEBUG org.drools.core.common.DefaultAgenda - State was INACTIVE is now FIRING_ALL_RULES
+16:49:42.702 [main] DEBUG org.drools.core.common.DefaultAgenda - State was FIRING_ALL_RULES is now HALTING
+16:49:42.702 [main] DEBUG org.drools.core.common.DefaultAgenda - State was HALTING is now INACTIVE
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.239 sec - in org.drools.compiler.xpath.tobeinstrumented.XPathTest
+Running org.drools.compiler.xpath.tobeinstrumented.InjectReactiveMojoConfigTest
+[[^org\.drools$, ^to\.instrument$, ^to\.instrument\..*$]]
+[[^org\.drools$, ^xyz\.my$]]
+[[^.*$]]
+[[^my$]]
+[[^org\.drools$, ^org\.drools\..*$]]
+[[^org\.drools$, ^org\.drools\..*$, ^xyz\.my$, ^xyz\.my\..*$]]
+[[^org\.drools$]]
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 sec - in org.drools.compiler.xpath.tobeinstrumented.InjectReactiveMojoConfigTest
+
+Results :
+
+Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 7.641 s
+[INFO] Finished at: 2017-02-15T16:49:42+01:00
+[INFO] Final Memory: 113M/1584M
+[INFO] ------------------------------------------------------------------------

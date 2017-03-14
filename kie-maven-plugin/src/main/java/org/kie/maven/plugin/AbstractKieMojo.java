@@ -16,6 +16,7 @@
 package org.kie.maven.plugin;
 
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.logging.Log;
 
 import java.util.Map;
 
@@ -31,4 +32,10 @@ public abstract class AbstractKieMojo extends AbstractMojo {
         }
     }
 
+    @Override
+    public void setLog( Log log ) {
+        System.out.println( "XXXXXXXXXX-printed on STDOUT: " + log.getClass() );
+        super.setLog( log );
+        log.info( "YYYYYYYYYY-printed on the LOG: " + log.getClass() );
+    }
 }

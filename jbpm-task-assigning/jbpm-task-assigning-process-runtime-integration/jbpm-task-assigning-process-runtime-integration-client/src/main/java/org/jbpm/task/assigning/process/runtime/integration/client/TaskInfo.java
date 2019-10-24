@@ -34,7 +34,7 @@ public class TaskInfo {
     private String actualOwner;
     private Set<PotentialOwner> potentialOwners;
     private Map<String, Object> inputData;
-    private PlanningParameters planningParameters;
+    private PlanningData planningData;
 
     public long getTaskId() {
         return taskId;
@@ -132,11 +132,11 @@ public class TaskInfo {
         this.inputData = inputData;
     }
 
-    public PlanningParameters getPlanningParameters() {
-        return planningParameters;
+    public PlanningData getPlanningData() {
+        return planningData;
     }
 
-    public void setPlanningParameters(PlanningParameters planningParameters) {
-        this.planningParameters = planningParameters;
+    public void setPlanningData(PlanningData planningData) {
+        this.planningData = planningData;
     }
 }

@@ -16,21 +16,46 @@
 
 package org.jbpm.task.assigning.model.solver.realtime;
 
+import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
+import org.jbpm.task.assigning.model.TaskOrUser;
 import org.optaplanner.core.impl.score.director.ScoreDirector;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
 
 public class ReleaseTaskProblemFactChange implements ProblemFactChange<TaskAssigningSolution> {
 
-    private long id;
+    private Task task;
 
-    public ReleaseTaskProblemFactChange(long id) {
-        this.id = id;
+    public ReleaseTaskProblemFactChange(Task task) {
+        this.task = task;
     }
 
     @Override
     public void doChange(ScoreDirector<TaskAssigningSolution> scoreDirector) {
-        //TODO implement here.
-        throw new RuntimeException("fact change not implemented");
+        Task workingTask = scoreDirector.lookUpWorkingObjectOrReturnNull(task);
+        if (workingTask == null || workingTask.getPreviousTaskOrUser() == null) {
+            // The task could have been removed in the middle by a previous change
+            // or it's simply not yet assigned.
+            return;
+        }
+
+        //un-link the task from the chain.
+        TaskOrUser previousTaskOrUser = workingTask.getPreviousTaskOrUser();
+        Task nextTask = workingTask.getNextTask();
+        if (nextTask != null) {
+            //re-link the chain where the workingTask belonged if any
+            scoreDirector.beforeVariableChanged(nextTask, "previousTaskOrUser");
+            nextTask.setPreviousTaskOrUser(previousTaskOrUser);
+            scoreDirector.afterVariableChanged(nextTask, "previousTaskOrUser");
+        }
+        scoreDirector.beforeVariableChanged(workingTask, "previousTaskOrUser");
+        workingTask.setPreviousTaskOrUser(null);
+        scoreDirector.afterVariableChanged(workingTask, "previousTaskOrUser");
+        if (workingTask.isPinned()) {
+            scoreDirector.beforeProblemPropertyChanged(workingTask);
+            workingTask.setPinned(false);
+            scoreDirector.afterProblemPropertyChanged(workingTask);
+        }
+        scoreDirector.triggerVariableListeners();
     }
 }

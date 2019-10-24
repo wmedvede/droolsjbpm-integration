@@ -50,19 +50,19 @@ public class ProcessRuntimeIntegrationClientImplTest {
         planningInfo1.setTaskId(63);
         planningInfo1.setProcessInstanceId(43);
         planningInfo1.setContainerId("task-assignments_18.0.0-SNAPSHOT");
-        planningInfo1.getPlanningParameters().setAssignedUser("maciek");
-        planningInfo1.getPlanningParameters().setIndex(789);
-        planningInfo1.getPlanningParameters().setPinned(false);
-        planningInfo1.getPlanningParameters().setPublished(true);
+        planningInfo1.getPlanningData().setAssignedUser("maciek");
+        planningInfo1.getPlanningData().setIndex(789);
+        planningInfo1.getPlanningData().setPinned(false);
+        planningInfo1.getPlanningData().setPublished(true);
 
         TaskPlanningInfo planningInfo2 = new TaskPlanningInfo();
         planningInfo2.setTaskId(64);
         planningInfo2.setProcessInstanceId(43);
         planningInfo2.setContainerId("task-assignments_18.0.0-SNAPSHOT");
-        planningInfo2.getPlanningParameters().setAssignedUser("mary");
-        planningInfo2.getPlanningParameters().setIndex(456);
-        planningInfo2.getPlanningParameters().setPinned(true);
-        planningInfo2.getPlanningParameters().setPublished(false);
+        planningInfo2.getPlanningData().setAssignedUser("mary");
+        planningInfo2.getPlanningData().setIndex(456);
+        planningInfo2.getPlanningData().setPinned(true);
+        planningInfo2.getPlanningData().setPublished(false);
 
         client.applyPlanning(Arrays.asList(planningInfo1, planningInfo2), "planning_user");
     }
@@ -130,9 +130,11 @@ public class ProcessRuntimeIntegrationClientImplTest {
         List<TaskPlanningInfo> planningInfos = new ArrayList<>();
 
         tasks.forEach(taskInfo -> {
-            TaskPlanningInfo planningInfo = new TaskPlanningInfo(taskInfo.getContainerId(), taskInfo.getTaskId(), taskInfo.getProcessInstanceId());
-            planningInfo.getPlanningParameters().setAssignedUser(potentialOwners[random.nextInt(potentialOwners.length)]);
-            planningInfo.getPlanningParameters().setIndex(1234);
+            TaskPlanningInfo planningInfo = new TaskPlanningInfo(taskInfo.getContainerId(),
+                                                                 taskInfo.getTaskId(),
+                                                                 taskInfo.getProcessInstanceId());
+            planningInfo.getPlanningData().setAssignedUser(potentialOwners[random.nextInt(potentialOwners.length)]);
+            planningInfo.getPlanningData().setIndex(1234);
             planningInfos.add(planningInfo);
         });
         client.applyPlanning(planningInfos, "planning_user");

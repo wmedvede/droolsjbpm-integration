@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClientFactory;
 import org.jbpm.task.assigning.user.system.integration.impl.WildflyUserSystemService;
+import org.kie.server.api.model.KieServerConfig;
 import org.kie.server.services.api.KieContainerInstance;
 import org.kie.server.services.api.KieServerExtension;
 import org.kie.server.services.api.KieServerRegistry;
@@ -50,6 +51,7 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
     private final List<Object> services = new ArrayList<>();
     private boolean initialized = false;
     private KieServerRegistry registry;
+    private PlanningDataService dataService;
     private TaskAssigningService taskAssigningService;
     private ExecutorService executorService;
 
@@ -72,8 +74,11 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
         }
         this.registry = registry;
 
+        startDataService(registry.getConfig());
+
         //TODO, review this initialization
-        ProcessRuntimeIntegrationClient runtimeIntegrationClient = getRuntimeIntegrationClient();
+        ProcessRuntimeIntegrationClient runtimeClient = getRuntimeIntegrationClient();
+        ProcessRuntimeIntegrationDelegate runtimeClientDelegate = new ProcessRuntimeIntegrationDelegate(runtimeClient, dataService);
 
         //TODO, review this initialization
         WildflyUserSystemService userSystemService = getUserSystemService();
@@ -86,7 +91,7 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
                 new ArrayBlockingQueue<>(3));
 
         this.taskAssigningService = new TaskAssigningService(new SolverDefRegistryImpl(),
-                                                             runtimeIntegrationClient,
+                                                             runtimeClientDelegate,
                                                              userSystemService,
                                                              executorService);
         taskAssigningService.init();
@@ -163,5 +168,10 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
         return ProcessRuntimeIntegrationClientFactory.newIntegrationClient("http://localhost:8080/kie-server/services/rest/server",
                                                                            "wbadmin",
                                                                            "wbadmin");
+    }
+
+    private void startDataService(KieServerConfig config) {
+        dataService = new PlanningDataService();
+        dataService.init(config);
     }
 }

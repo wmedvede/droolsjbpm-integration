@@ -32,7 +32,7 @@ import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull
 /**
  * This class is intended to manage the solver life-cycle in a multi-threaded environment.
  */
-public class SolverExecutor implements Runnable {
+public class SolverExecutor extends RunnableBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolverExecutor.class);
 
@@ -41,7 +41,6 @@ public class SolverExecutor implements Runnable {
 
     private final AtomicBoolean starting = new AtomicBoolean(false);
     private final AtomicBoolean started = new AtomicBoolean(false);
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
     private final Semaphore startPermit = new Semaphore(0);
 
     public SolverExecutor(final Solver<TaskAssigningSolution> solver,
@@ -50,7 +49,7 @@ public class SolverExecutor implements Runnable {
         checkNotNull("eventListener", eventListener);
         this.solver = solver;
         this.solver.addEventListener((event) -> {
-            if (!isDestroyed()) {
+            if (isAlive()) {
                 eventListener.bestSolutionChanged(event);
             }
         });
@@ -84,20 +83,14 @@ public class SolverExecutor implements Runnable {
      * soon as possible by invoking the solver.terminateEarly() method. If the solver wasn't started it just finalizes
      * current thread.
      */
+    @Override
     public void destroy() {
-        destroyed.set(true);
+        super.destroy();
         if (isStarted()) {
             solver.terminateEarly();
         } else {
             startPermit.release();
         }
-    }
-
-    /**
-     * @return true if the solver has been destroyed, false in any other case.
-     */
-    public boolean isDestroyed() {
-        return destroyed.get();
     }
 
     /**
@@ -109,8 +102,10 @@ public class SolverExecutor implements Runnable {
     public void addProblemFactChanges(final List<ProblemFactChange<TaskAssigningSolution>> changes) {
         if (isStarted() && !isDestroyed()) {
             solver.addProblemFactChanges(changes);
+        } else if (!isStarted()) {
+            throw new RuntimeException("SolverExecutor has not been started. Be sure it's started and not destroyed prior to executing this method");
         } else {
-            throw new RuntimeException("SolverExecutor wasn't yet started");
+            throw new RuntimeException("SolverExecutor has been destroyed. Be sure it's started and not destroyed prior to executing this method");
         }
     }
 
@@ -120,11 +115,12 @@ public class SolverExecutor implements Runnable {
             LOGGER.debug("SolverExecutor is waiting for a solution to start with.");
             startPermit.acquire();
             LOGGER.debug("SolverExecutor will be started.");
-            if (!isDestroyed()) {
+            if (isAlive()) {
                 started.set(true);
                 solver.solve(solution);
             }
         } catch (InterruptedException e) {
+            super.destroy();
             LOGGER.error("SolverWorked was interrupted.", e);
         }
     }

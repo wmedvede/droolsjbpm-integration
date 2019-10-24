@@ -24,15 +24,23 @@ public class TaskPlanningInfo {
     private String containerId;
     private long taskId;
     private long processInstanceId;
-    private PlanningParameters planningParameters = new PlanningParameters();
+    private PlanningData planningData;
 
     public TaskPlanningInfo() {
     }
 
+    //TODO check if we keep this constructor
     public TaskPlanningInfo(String containerId, long taskId, long processInstanceId) {
         this.containerId = containerId;
         this.taskId = taskId;
         this.processInstanceId = processInstanceId;
+    }
+
+    public TaskPlanningInfo(String containerId, long taskId, long processInstanceId, PlanningData planningData) {
+        this.containerId = containerId;
+        this.taskId = taskId;
+        this.processInstanceId = processInstanceId;
+        this.planningData = planningData;
     }
 
     public String getContainerId() {
@@ -59,7 +67,7 @@ public class TaskPlanningInfo {
         this.processInstanceId = processInstanceId;
     }
 
-    public PlanningParameters getPlanningParameters() {
-        return planningParameters;
+    public PlanningData getPlanningData() {
+        return planningData;
     }
 }

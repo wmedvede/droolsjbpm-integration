@@ -33,7 +33,7 @@ import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.model.TaskOrUser;
 import org.jbpm.task.assigning.model.User;
-import org.jbpm.task.assigning.process.runtime.integration.client.PlanningParameters;
+import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.InProgress;
@@ -43,7 +43,7 @@ import static org.jbpm.task.assigning.process.runtime.integration.client.TaskSta
 
 /**
  * This class is intended for the construction of a TaskAssigningSolution given a set TaskInfo and a set of User.
- * The solution is constructed considering the PlanningParameters for each task.
+ * The solution is constructed considering the PlanningData for each task.
  */
 public class SolutionBuilder {
 
@@ -92,7 +92,6 @@ public class SolutionBuilder {
 
     private List<TaskInfo> taskInfos;
     private List<org.jbpm.task.assigning.user.system.integration.User> externalUsers;
-    private PublishedTaskCache publishedTasks;
 
     public SolutionBuilder() {
     }
@@ -104,11 +103,6 @@ public class SolutionBuilder {
 
     public SolutionBuilder withUsers(List<org.jbpm.task.assigning.user.system.integration.User> externalUsers) {
         this.externalUsers = externalUsers;
-        return this;
-    }
-
-    public SolutionBuilder withCache(PublishedTaskCache publishedTasks) {
-        this.publishedTasks = publishedTasks;
         return this;
     }
 
@@ -128,26 +122,27 @@ public class SolutionBuilder {
                     // Finally tasks with no actualOwner (Suspended) are skipped, since they'll be properly added to the
                     // solution when they change to Ready status and the proper jBPM event is raised.
 
-                    final PlanningParameters currentParameters = taskInfo.getPlanningParameters();
+                    final PlanningData planningData = taskInfo.getPlanningData();
                     boolean published;
                     boolean pinned;
-                    if (currentParameters != null) {
+                    if (planningData != null) {
                         //the task was already planned.
-                        published = InProgress == taskInfo.getStatus() || currentParameters.isPublished();
-                        pinned = published || currentParameters.isPinned();
-                        if (Objects.equals(currentParameters.getAssignedUser(), taskInfo.getActualOwner())) {
+                        published = InProgress == taskInfo.getStatus() || planningData.isPublished();
+                        pinned = published || planningData.isPinned();
+                        task.setPinned(pinned);
+                        task.setPublished(published);
+                        if (Objects.equals(planningData.getAssignedUser(), taskInfo.getActualOwner())) {
                             //preserve currentParameters.
-                            addTaskToUser(assignedTasksByUserId, task, currentParameters.getAssignedUser(), currentParameters.getIndex(), published, pinned);
+                            addTaskToUser(assignedTasksByUserId, task, planningData.getAssignedUser(), planningData.getIndex(), published, pinned);
                         } else {
                             addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, published, pinned);
                         }
                     } else {
                         published = InProgress == taskInfo.getStatus();
                         pinned = published;
+                        task.setPinned(pinned);
+                        task.setPublished(published);
                         addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, published, pinned);
-                    }
-                    if (published && publishedTasks != null) {
-                        publishedTasks.put(taskInfo.getTaskId());
                     }
                 }
             }
@@ -160,7 +155,8 @@ public class SolutionBuilder {
                 .collect(Collectors.toMap(User::getEntityId, Function.identity()));
         usersById.put(User.PLANNING_USER.getEntityId(), User.PLANNING_USER);
         //TODO, check if this dummy task is ok, by now if we don't add it there are problems when e.g. all tasks has
-        //been completed in the jBPM.
+        //been completed in the jBPM and thus all the tasks are removed from the solution. In this case as soon the
+        //solution gets with 0 tasks an exception is thrown.
         allTasks.add(DUMMY_TASK);
 
         usersById.values().forEach(user -> {

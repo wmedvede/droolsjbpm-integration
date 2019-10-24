@@ -19,6 +19,7 @@ package org.jbpm.task.assigning.runtime.service;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
@@ -54,12 +55,13 @@ public class SolverHandler {
     private final ReentrantLock lock = new ReentrantLock();
     private TaskAssigningSolution currentSolution = null;
     private TaskAssigningSolution nextSolution = null;
-    private final PublishedTaskCache publishedTasks = new PublishedTaskCache();
 
     private Solver<TaskAssigningSolution> solver;
     private SolverExecutor solverExecutor;
     private SolutionSynchronizer solutionSynchronizer;
     private SolutionProcessor solutionProcessor;
+    private AtomicBoolean enableUpdate = new AtomicBoolean(false);
+    private long processEndTime;
 
     public SolverHandler(final SolverDef solverDef,
                          final ProcessRuntimeIntegrationClient runtimeClient,
@@ -83,8 +85,8 @@ public class SolverHandler {
 
     public void start() {
         solverExecutor = new SolverExecutor(solver, this::onBestSolutionChange);
-        solutionSynchronizer = new SolutionSynchronizer(solverExecutor, publishedTasks, runtimeClient, userSystemService,
-                                                        10000, this::onSynchronizeSolution);
+        solutionSynchronizer = new SolutionSynchronizer(solverExecutor, runtimeClient, userSystemService,
+                                                        10000, this::onUpdateSolution);
         solutionProcessor = new SolutionProcessor(runtimeClient, this::onSolutionProcessed);
         executorService.execute(solverExecutor); //is started by the SolutionSynchronizer
         executorService.execute(solutionSynchronizer);
@@ -115,12 +117,19 @@ public class SolverHandler {
         }
         if (solverExecutor.isDestroyed()) {
             LOGGER.debug("SolverExecutor has been destroyed. Changes will be discarded", changes);
+            return;
         }
         if (!changes.isEmpty()) {
             solverExecutor.addProblemFactChanges(changes);
+        } else {
+            LOGGER.info("It looks line an empty change list was provided. Nothing will be done since it has effect on the solution.");
         }
     }
 
+    /**
+     * Invoked when the solver produces a new solution.
+     * @param event event produced by the solver.
+     */
     private void onBestSolutionChange(BestSolutionChangedEvent<TaskAssigningSolution> event) {
         if (event.isEveryProblemFactChangeProcessed() && event.getNewBestSolution().getScore().isSolutionInitialized()) {
             lock.lock();
@@ -130,7 +139,8 @@ public class SolverHandler {
                 } else {
                     currentSolution = event.getNewBestSolution();
                     nextSolution = null;
-                    solutionProcessor.process(currentSolution, (PublishedTaskCache) publishedTasks.clone());
+                    enableUpdate.set(false);
+                    solutionProcessor.process(currentSolution);
                 }
             } finally {
                 lock.unlock();
@@ -138,35 +148,55 @@ public class SolverHandler {
         }
     }
 
+    /**
+     * Invoked when the last produced solution has been processed by the SolutionProcessor.
+     * @param result result produced by the SolutionProcessor.
+     */
     private void onSolutionProcessed(SolutionProcessor.Result result) {
         LOGGER.debug("Solution was processed with result: " + result.hasError());
         lock.lock();
         try {
-            if (nextSolution != null) {
+            enableUpdate.set(false);
+            if (!result.getProgramedChanges().isEmpty()) {
+                //a ver si esta linea mejora el loop
+                addProblemFactChanges(result.getProgramedChanges());
+                nextSolution = null;
+            } else if (nextSolution != null) {
                 currentSolution = nextSolution;
                 nextSolution = null;
-                solutionProcessor.process(currentSolution, (PublishedTaskCache) publishedTasks.clone());
+                solutionProcessor.process(currentSolution);
+            } else {
+                processEndTime = System.currentTimeMillis();
+                enableUpdate.set(true);
             }
         } finally {
             lock.unlock();
         }
     }
 
-    private void onSynchronizeSolution(List<TaskInfo> taskInfos) {
-        // 1) iterate the tasks and program the proper problem fact changes.
+    /**
+     * Invoked every time the SolutionSynchronizer gets updated information from the jBPM runtime. This method
+     * analyses the list of refreshed information and create and program the necessary changes into the solver.
+     * @param result List of tasks information returned from the jBPM runtime.
+     */
+    private void onUpdateSolution(SolutionSynchronizer.Result result) {
         lock.lock();
         try {
-            final List<ProblemFactChange<TaskAssigningSolution>> changes = new SolutionChangesBuilder()
-                    .withSolution(currentSolution)
-                    .withTasks(taskInfos)
-                    .withCache(publishedTasks)
-                    .build();
-            //TODO review if it could be better to release the lock before adding the changes.
-            if (changes.size() > 0) {
-                addProblemFactChanges(changes);
+            if (enableUpdate.get() && (result.getReadStartTime() > processEndTime)) {
+                final List<ProblemFactChange<TaskAssigningSolution>> changes = new SolutionChangesBuilder()
+                        .withSolution(currentSolution)
+                        .withTasks(result.getTaskInfos())
+                        .build();
+                applyIfNotEmpty(changes);
             }
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void applyIfNotEmpty(List<ProblemFactChange<TaskAssigningSolution>> changes) {
+        if (!changes.isEmpty()) {
+            addProblemFactChanges(changes);
         }
     }
 

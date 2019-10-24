@@ -17,8 +17,10 @@
 package org.jbpm.task.assigning.runtime.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -26,8 +28,10 @@ import java.util.function.Consumer;
 import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.model.User;
+import org.jbpm.task.assigning.model.solver.realtime.AssignTaskProblemFactChange;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskPlanningInfo;
+import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +42,10 @@ import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull
  * This class manges the processing of new a solution produced by the solver. It must typically apply all the required
  * changes in the jBPM runtime.
  */
-public class SolutionProcessor implements Runnable {
+public class SolutionProcessor extends RunnableBase {
+
+    //TODO, configurable parameter in future iteration.
+    private static final int PUBLISH_WINDOW_SIZE = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolutionProcessor.class);
 
@@ -47,16 +54,16 @@ public class SolutionProcessor implements Runnable {
 
     private final Semaphore solutionResource = new Semaphore(0);
     private final AtomicBoolean processing = new AtomicBoolean(false);
-    private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
     private TaskAssigningSolution solution;
-    private PublishedTaskCache publishedTasks;
 
     public static class Result {
 
         private Exception error;
+        private List<ProblemFactChange<TaskAssigningSolution>> programedChanges;
 
-        public Result() {
+        public Result(List<ProblemFactChange<TaskAssigningSolution>> programedChanges) {
+            this.programedChanges = programedChanges;
         }
 
         private Result(Exception error) {
@@ -69,6 +76,10 @@ public class SolutionProcessor implements Runnable {
 
         public Exception getError() {
             return error;
+        }
+
+        public List<ProblemFactChange<TaskAssigningSolution>> getProgramedChanges() {
+            return programedChanges;
         }
     }
 
@@ -99,41 +110,42 @@ public class SolutionProcessor implements Runnable {
      * A null value will throw an exception.
      * @param solution a solution to process.
      */
-    public void process(final TaskAssigningSolution solution, final PublishedTaskCache publishedTasks) {
+    public void process(final TaskAssigningSolution solution) {
         checkNotNull("solution", solution);
-        checkNotNull("publishedTasks", publishedTasks);
         processing.set(true);
         this.solution = solution;
-        this.publishedTasks = publishedTasks;
         solutionResource.release();
     }
 
+    @Override
     public void destroy() {
-        destroyed.set(true);
-        solutionResource.release(); //in case it was waiting for a solution to process.
+        super.destroy();
+        solutionResource.release(); //un-lock in case it was waiting for a solution to process.
     }
 
     @Override
     public void run() {
-        while (!destroyed.get() && !Thread.currentThread().isInterrupted()) {
+        while (isAlive()) {
             try {
                 solutionResource.acquire();
-                if (!destroyed.get()) {
-                    doProcess(solution, publishedTasks);
+                if (isAlive()) {
+                    doProcess(solution);
                 }
             } catch (InterruptedException e) {
+                super.destroy();
                 LOGGER.error("Solution Processor was interrupted", e);
             }
         }
     }
 
-    private void doProcess(final TaskAssigningSolution solution, final PublishedTaskCache publishedTasks) {
+    private void doProcess(final TaskAssigningSolution solution) {
         LOGGER.debug("Starting processing of solution: " + solution);
-        final int publishWindowSize = 4;
         final List<TaskPlanningInfo> taskPlanningInfos = new ArrayList<>(solution.getTaskList().size());
+        final Map<Long, Task> tasksById = new HashMap<>();
         List<TaskPlanningInfo> userTaskPlanningInfos;
         Iterator<TaskPlanningInfo> userTaskPlanningInfosIt;
         TaskPlanningInfo taskPlanningInfo;
+        final List<ProblemFactChange<TaskAssigningSolution>> programmedChanges = new ArrayList<>();
         int index;
         int publishedCount;
         for (User user : solution.getUserList()) {
@@ -145,36 +157,38 @@ public class SolutionProcessor implements Runnable {
                 if (DUMMY_TASK.getId().equals(nextTask.getId())) {
                     break;
                 }
-                taskPlanningInfo = new TaskPlanningInfo(nextTask.getContainerId(), nextTask.getId(), nextTask.getProcessInstanceId());
-                taskPlanningInfo.getPlanningParameters().setPublished(publishedTasks.isPublished(nextTask.getId()));
-                taskPlanningInfo.getPlanningParameters().setPinned(nextTask.isPinned());
-                taskPlanningInfo.getPlanningParameters().setAssignedUser(user.getUser().getEntityId());
-                taskPlanningInfo.getPlanningParameters().setIndex(index++);
+                tasksById.put(nextTask.getId(), nextTask);
+                taskPlanningInfo = new TaskPlanningInfo(nextTask.getContainerId(),
+                                                        nextTask.getId(),
+                                                        nextTask.getProcessInstanceId(),
+                                                        new PlanningDataImpl(nextTask.getId()));
+
+                taskPlanningInfo.getPlanningData().setPublished(nextTask.isPublished());
+                taskPlanningInfo.getPlanningData().setPinned(nextTask.isPinned());
+                taskPlanningInfo.getPlanningData().setAssignedUser(user.getUser().getEntityId());
+                taskPlanningInfo.getPlanningData().setIndex(index++);
                 userTaskPlanningInfos.add(taskPlanningInfo);
-                publishedCount += taskPlanningInfo.getPlanningParameters().isPublished() ? 1 : 0;
+                publishedCount += taskPlanningInfo.getPlanningData().isPublished() ? 1 : 0;
                 nextTask = nextTask.getNextTask();
             }
             userTaskPlanningInfosIt = userTaskPlanningInfos.iterator();
-            while (userTaskPlanningInfosIt.hasNext() && publishedCount <= publishWindowSize) {
+            while (userTaskPlanningInfosIt.hasNext() && publishedCount < PUBLISH_WINDOW_SIZE) {
                 taskPlanningInfo = userTaskPlanningInfosIt.next();
-                if (!taskPlanningInfo.getPlanningParameters().isPublished()) {
-                    taskPlanningInfo.getPlanningParameters().setPublished(true);
-                    //TODO, ojo cuando decido publicar una tareas, inmediatamente tengo que ponerla pinned
-                    //osea que tengo que programar ese cambio...
-                    //guardo en la BD pero ademas tengo q meter un problem fact change para dejar la tarea pinned ?
-                    //NO...¿?
+                if (!taskPlanningInfo.getPlanningData().isPublished()) {
+                    final Task taskToPublish = tasksById.get(taskPlanningInfo.getTaskId());
+                    programmedChanges.add(new AssignTaskProblemFactChange(taskToPublish, taskToPublish.getUser(), true));
                     publishedCount++;
                 }
             }
             taskPlanningInfos.addAll(userTaskPlanningInfos);
         }
+
         //TODO set the proper user insead of "wbadmin"
+        //TODO check the error management when this method throws exceptions.
         runtimeClient.applyPlanning(taskPlanningInfos, "wbadmin");
-
-        //TODO check the error management.
         processing.set(false);
-        resultConsumer.accept(new Result());
 
+        resultConsumer.accept(new Result(programmedChanges));
         LOGGER.debug("Solution processing finished: " + solution);
     }
 }

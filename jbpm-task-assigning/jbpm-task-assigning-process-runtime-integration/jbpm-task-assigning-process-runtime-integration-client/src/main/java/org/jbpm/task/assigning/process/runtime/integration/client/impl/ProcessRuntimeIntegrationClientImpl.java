@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.jbpm.task.assigning.process.runtime.integration.client.PlanningParameters;
 import org.jbpm.task.assigning.process.runtime.integration.client.PotentialOwner;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
@@ -83,24 +81,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
         public String value() {
             return value;
-        }
-    }
-
-    protected enum PLANNING_PARAMETER {
-
-        ASSIGNED_USER("planning_param_assigned_user"),
-        ORDER("planning_param_order"),
-        PINNED("planning_param_pinned"),
-        PUBLISHED("planning_param_published");
-
-        private String paramName;
-
-        PLANNING_PARAMETER(String paramName) {
-            this.paramName = paramName;
-        }
-
-        public String paramName() {
-            return paramName;
         }
     }
 
@@ -221,10 +201,7 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
         for (TaskInfo taskInfo : taskInfos) {
             planningInfo = taskToPlanningInfo.get(taskInfo.getTaskId());
             if (planningInfo != null) {
-                userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningParameters().getAssignedUser());
-                if (!planningInfo.getPlanningParameters().equals(taskInfo.getPlanningParameters())) {
-                    updatePlanningParameters(taskInfo.getContainerId(), taskInfo.getTaskId(), planningInfo.getPlanningParameters());
-                }
+                userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningData().getAssignedUser());
             }
         }
         //TODO analyze if in the end we'll return something here
@@ -233,10 +210,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
     private void init() {
         registerQueries();
-    }
-
-    private void updatePlanningParameters(String containerId, long taskId, PlanningParameters planningParameters) {
-        userTaskServicesClient.saveTaskContent(containerId, taskId, toMap(planningParameters));
     }
 
     private List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize) {
@@ -329,9 +302,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
                     taskInfo.setActualOwner(actualOwner);
                 }
                 taskInfo.setInputData(userTaskServicesClient.getTaskInputContentByTaskId(taskInfo.getContainerId(), taskId));
-                //TODO use another repository for storing this information.
-                taskInfo.setPlanningParameters(fromMap(userTaskServicesClient.getTaskOutputContentByTaskId(taskInfo.getContainerId(), taskId)));
-
                 result.add(taskInfo);
             }
 
@@ -415,30 +385,5 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
     private static String toString(Object value) {
         return value != null ? value.toString() : null;
-    }
-
-    private static Map<String, Object> toMap(PlanningParameters planningParameters) {
-        Map<String, Object> result = new HashMap<>();
-        result.put(PLANNING_PARAMETER.ASSIGNED_USER.paramName(), planningParameters.getAssignedUser());
-        result.put(PLANNING_PARAMETER.ORDER.paramName(), planningParameters.getIndex());
-        result.put(PLANNING_PARAMETER.PINNED.paramName(), planningParameters.isPinned());
-        result.put(PLANNING_PARAMETER.PUBLISHED.paramName(), planningParameters.isPublished());
-        return result;
-    }
-
-    private PlanningParameters fromMap(Map<String, Object> values) {
-        if (values == null) {
-            return null;
-        }
-        PlanningParameters result = null;
-        String assignedUser = toString(values.get(PLANNING_PARAMETER.ASSIGNED_USER.paramName()));
-        if (isNotEmpty(assignedUser)) {
-            result = new PlanningParameters();
-            result.setAssignedUser(assignedUser);
-            result.setPublished(toBoolean(values.get(PLANNING_PARAMETER.PUBLISHED.paramName())));
-            result.setPinned(toBoolean(values.get(PLANNING_PARAMETER.PINNED.paramName())));
-            result.setIndex(toInt(values.get(PLANNING_PARAMETER.ORDER.paramName()), -1));
-        }
-        return result;
     }
 }

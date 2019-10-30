@@ -18,7 +18,6 @@ public class PlanningDataImpl implements PlanningData {
     private long taskId;
     private String assignedUser;
     private int index;
-    private boolean pinned;
     private boolean published;
 
     public PlanningDataImpl() {
@@ -28,11 +27,10 @@ public class PlanningDataImpl implements PlanningData {
         this.taskId = taskId;
     }
 
-    public PlanningDataImpl(long taskId, String assignedUser, int index, boolean pinned, boolean published) {
+    public PlanningDataImpl(long taskId, String assignedUser, int index, boolean published) {
         this.taskId = taskId;
         this.assignedUser = assignedUser;
         this.index = index;
-        this.pinned = pinned;
         this.published = published;
     }
 
@@ -67,16 +65,6 @@ public class PlanningDataImpl implements PlanningData {
     }
 
     @Override
-    public boolean isPinned() {
-        return pinned;
-    }
-
-    @Override
-    public void setPinned(boolean pinned) {
-        this.pinned = pinned;
-    }
-
-    @Override
     public boolean isPublished() {
         return published;
     }
@@ -97,13 +85,12 @@ public class PlanningDataImpl implements PlanningData {
         PlanningDataImpl that = (PlanningDataImpl) o;
         return taskId == that.taskId &&
                 index == that.index &&
-                pinned == that.pinned &&
                 published == that.published &&
                 Objects.equals(assignedUser, that.assignedUser);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, assignedUser, index, pinned, published);
+        return Objects.hash(taskId, assignedUser, index, published);
     }
 }

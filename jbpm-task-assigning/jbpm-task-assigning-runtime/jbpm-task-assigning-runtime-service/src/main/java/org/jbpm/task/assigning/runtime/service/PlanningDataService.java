@@ -20,10 +20,11 @@ import org.kie.server.api.model.KieServerConfig;
 import org.kie.server.services.jbpm.jpa.PersistenceUnitInfoImpl;
 import org.kie.server.services.jbpm.jpa.PersistenceUnitInfoLoader;
 
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_CFG_PERSISTANCE_DS;
+
 public class PlanningDataService {
 
-    private static final String TASK_ASSIGNING_PERSISTENCE_XML_LOCATION = "/jpa/taskAssigning/META-INF/persistence.xml";
-    private static final String TASK_ASSIGNING_CFG_PERSISTANCE_DS = "org.kie.server.persistence.taskAssigning.ds";
+    private static final String JBPM_TASK_ASSIGNING_PERSISTENCE_XML_LOCATION = "/jpa/taskAssigning/META-INF/persistence.xml";
 
     private EntityManagerFactory emf;
     private EntityManager em;
@@ -56,11 +57,11 @@ public class PlanningDataService {
 
     protected EntityManagerFactory build(InitialContext ctx, Map<String, String> properties) {
         try {
-            InputStream inputStream = PlanningDataService.class.getResourceAsStream(TASK_ASSIGNING_PERSISTENCE_XML_LOCATION);
+            InputStream inputStream = PlanningDataService.class.getResourceAsStream(JBPM_TASK_ASSIGNING_PERSISTENCE_XML_LOCATION);
             PersistenceUnitInfo info = PersistenceUnitInfoLoader.load(inputStream, ctx, this.getClass().getClassLoader());
             // prepare persistence unit root location
-            URL root = PersistenceUnitInfoLoader.class.getResource(TASK_ASSIGNING_PERSISTENCE_XML_LOCATION);
-            String jarLocation = root.toExternalForm().split("!")[0].replace(TASK_ASSIGNING_PERSISTENCE_XML_LOCATION, "");
+            URL root = PersistenceUnitInfoLoader.class.getResource(JBPM_TASK_ASSIGNING_PERSISTENCE_XML_LOCATION);
+            String jarLocation = root.toExternalForm().split("!")[0].replace(JBPM_TASK_ASSIGNING_PERSISTENCE_XML_LOCATION, "");
             try {
                 ((PersistenceUnitInfoImpl) info).setPersistenceUnitRootUrl(new URL(jarLocation));
             } catch (Exception e) {
@@ -92,7 +93,7 @@ public class PlanningDataService {
         persistenceProperties.put("hibernate.dialect", config.getConfigItemValue(KieServerConstants.CFG_PERSISTANCE_DIALECT, "org.hibernate.dialect.H2Dialect"));
         persistenceProperties.put("hibernate.default_schema", config.getConfigItemValue(KieServerConstants.CFG_PERSISTANCE_DEFAULT_SCHEMA));
         persistenceProperties.put("hibernate.transaction.jta.platform", config.getConfigItemValue(KieServerConstants.CFG_PERSISTANCE_TM, "JBossAS"));
-        persistenceProperties.put("javax.persistence.jtaDataSource", config.getConfigItemValue(TASK_ASSIGNING_CFG_PERSISTANCE_DS, "java:jboss/datasources/ExampleDS"));
+        persistenceProperties.put("javax.persistence.jtaDataSource", config.getConfigItemValue(JBPM_TASK_ASSIGNING_CFG_PERSISTANCE_DS, "java:jboss/datasources/ExampleDS"));
 
         System.getProperties().stringPropertyNames()
                 .stream()

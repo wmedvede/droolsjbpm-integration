@@ -15,7 +15,7 @@
  */
 
 package org.jbpm.task.assigning.solver;
-    dialect "java"
+dialect "java"
 
 import org.optaplanner.core.api.score.buildin.bendable.BendableScoreHolder;
 

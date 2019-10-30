@@ -16,6 +16,8 @@
 
 package org.jbpm.task.assigning.model;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +33,8 @@ import org.optaplanner.core.api.domain.variable.CustomShadowVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariableGraphType;
 import org.optaplanner.core.api.domain.variable.PlanningVariableReference;
+
+import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 
 /**
  * Task is the only planning entity that will be changed during the problem solving, and we have only one
@@ -93,6 +97,38 @@ import org.optaplanner.core.api.domain.variable.PlanningVariableReference;
 @XStreamAlias("TaTask")
 public class Task extends TaskOrUser {
 
+    /**
+     * This task was introduced for dealing with situations where the solution ends up with no tasks. e.g. there is a
+     * solution with tasks A and B, and a user completes both tasks in the jBPM runtime. When the completion events
+     * are processed both tasks are removed from the solution with the proper problem fact changes. The solution remains
+     * thus with no tasks and an exception is thrown.
+     * Since the only potential owner for the dummy task is the PLANNING_USER this task won't affect the score dramatically.
+     * <p>
+     * Additionally by banning this task for being pinned we avoid running into the "all pinned tasks issue" see
+     * https://issues.jboss.org/browse/PLANNER-241
+     */
+    public static final Task DUMMY_TASK = new ImmutableTask(-1,
+                                                            -1,
+                                                            "dummy-process",
+                                                            "dummy-container",
+                                                            "dummy-task",
+                                                            10,
+                                                            Collections.unmodifiableMap(new HashMap<>()),
+                                                            false,
+                                                            Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(PLANNING_USER))),
+                                                            Collections.unmodifiableSet(new HashSet<>()));
+
+    public static final Task DUMMY_TASK_PLANNER_241 = new ImmutableTask(-2,
+                                                                        -1,
+                                                                        "dummy-process",
+                                                                        "dummy-container",
+                                                                        "dummy-task-planner-241",
+                                                                        10,
+                                                                        Collections.unmodifiableMap(new HashMap<>()),
+                                                                        false,
+                                                                        Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(PLANNING_USER))),
+                                                                        Collections.unmodifiableSet(new HashSet<>()));
+
     private long processInstanceId;
     private String processId;
     private String containerId;
@@ -102,7 +138,6 @@ public class Task extends TaskOrUser {
 
     @PlanningPin
     private boolean pinned;
-    private boolean published;
 
     private Set<OrganizationalEntity> potentialOwners = new HashSet<>();
     private Set<TypedLabel> typedLabels = new HashSet<>();
@@ -169,6 +204,28 @@ public class Task extends TaskOrUser {
         this.inputData = inputData;
     }
 
+    protected Task(long id,
+                   long processInstanceId,
+                   String processId,
+                   String containerId,
+                   String name,
+                   int priority,
+                   Map<String, Object> inputData,
+                   boolean pinned,
+                   Set<OrganizationalEntity> potentialOwners,
+                   Set<TypedLabel> typedLabels) {
+        super(id);
+        this.processInstanceId = processInstanceId;
+        this.processId = processId;
+        this.containerId = containerId;
+        this.name = name;
+        this.priority = priority;
+        this.inputData = inputData;
+        this.pinned = pinned;
+        this.potentialOwners = potentialOwners;
+        this.typedLabels = typedLabels;
+    }
+
     public long getProcessInstanceId() {
         return processInstanceId;
     }
@@ -223,14 +280,6 @@ public class Task extends TaskOrUser {
 
     public void setPinned(boolean pinned) {
         this.pinned = pinned;
-    }
-
-    public boolean isPublished() {
-        return published;
-    }
-
-    public void setPublished(boolean published) {
-        this.published = published;
     }
 
     /**
@@ -323,11 +372,74 @@ public class Task extends TaskOrUser {
      * @return 0 if the assigned user can execute this task, -1 in any other case.
      */
     public int acceptsAssignedUser() {
-        if (User.PLANNING_USER.getEntityId().equals(getUser().getEntityId())) {
+        if (PLANNING_USER.getEntityId().equals(getUser().getEntityId())) {
             //planning user belongs to all the groups by definition.
             return 0;
         }
         //the user is a potential owner.
         return TaskHelper.isPotentialOwner(this, getUser()) ? 0 : -1;
+    }
+
+    private static class ImmutableTask extends Task {
+
+        private ImmutableTask() {
+            //required by the FieldSolutionCloner.
+        }
+
+        private ImmutableTask(long id, long processInstanceId, String processId, String containerId, String name,
+                              int priority, Map<String, Object> inputData, boolean pinned,
+                              Set<OrganizationalEntity> potentialOwners, Set<TypedLabel> typedLabels) {
+            super(id, processInstanceId, processId, containerId, name, priority, inputData, pinned, potentialOwners,
+                  typedLabels);
+        }
+
+        @Override
+        public void setPinned(boolean pinned) {
+            //this task can never be pined
+        }
+
+        @Override
+        public void setProcessInstanceId(long processInstanceId) {
+            throwImmutableException("processInstanceId");
+        }
+
+        @Override
+        public void setProcessId(String processId) {
+            throwImmutableException("processId");
+        }
+
+        @Override
+        public void setContainerId(String containerId) {
+            throwImmutableException("containerId");
+        }
+
+        @Override
+        public void setName(String name) {
+            throwImmutableException("name");
+        }
+
+        @Override
+        public void setPriority(int priority) {
+            throwImmutableException("priority");
+        }
+
+        @Override
+        public void setInputData(Map<String, Object> inputData) {
+            throwImmutableException("inputData");
+        }
+
+        @Override
+        public void setPotentialOwners(Set<OrganizationalEntity> potentialOwners) {
+            throwImmutableException("potentialOwners");
+        }
+
+        @Override
+        public void setTypedLabels(Set<TypedLabel> typedLabels) {
+            throwImmutableException("typedLabels");
+        }
+
+        private void throwImmutableException(String filedName) {
+            throw new RuntimeException("Task: " + getName() + " don't accept modifications of field: " + filedName);
+        }
     }
 }

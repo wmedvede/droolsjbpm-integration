@@ -30,15 +30,15 @@ public class SolutionBuilderTest {
     @Test
     public void addInOrderTest() {
 
-        SolutionBuilder.AssignedTask task1 = new SolutionBuilder.AssignedTask(new Task(-1, "Task1", -1), 4, false, true);
-        SolutionBuilder.AssignedTask task2 = new SolutionBuilder.AssignedTask(new Task(-1, "Task2", -1), 7, false, true);
-        SolutionBuilder.AssignedTask task3 = new SolutionBuilder.AssignedTask(new Task(-1, "Task3", -1), 1, false, false);
-        SolutionBuilder.AssignedTask task4 = new SolutionBuilder.AssignedTask(new Task(-1, "Task4", -1), 3, false, false);
-        SolutionBuilder.AssignedTask task5 = new SolutionBuilder.AssignedTask(new Task(-1, "Task5", -1), 8, false, false);
+        SolutionBuilder.AssignedTask task1 = new SolutionBuilder.AssignedTask(new Task(-1, "Task1", -1), 4, true);
+        SolutionBuilder.AssignedTask task2 = new SolutionBuilder.AssignedTask(new Task(-1, "Task2", -1), 7, true);
+        SolutionBuilder.AssignedTask task3 = new SolutionBuilder.AssignedTask(new Task(-1, "Task3", -1), 1, false);
+        SolutionBuilder.AssignedTask task4 = new SolutionBuilder.AssignedTask(new Task(-1, "Task4", -1), 3, false);
+        SolutionBuilder.AssignedTask task5 = new SolutionBuilder.AssignedTask(new Task(-1, "Task5", -1), 8, false);
         List<SolutionBuilder.AssignedTask> tasks = new ArrayList<>(Arrays.asList(task1, task2, task3, task4, task5));
 
         List<SolutionBuilder.AssignedTask> tasksByAdding = new ArrayList<>();
-        tasks.forEach(assignedTask -> SolutionBuilder.addInOrder(tasksByAdding, assignedTask.getTask(), assignedTask.getIndex(), assignedTask.isPublished(), assignedTask.isPinned()));
+        tasks.forEach(assignedTask -> SolutionBuilder.addInOrder(tasksByAdding, assignedTask.getTask(), assignedTask.getIndex(), assignedTask.isPinned()));
         for (int i = 0; i < tasks.size(); i++) {
             assertEquals(tasks.get(i).getTask().getName(), tasksByAdding.get(i).getTask().getName());
         }
@@ -53,31 +53,31 @@ public class SolutionBuilderTest {
         Task newTask13 = new Task(-1, "newTask13", -1);
         Task newTask14 = new Task(-1, "newTask14", -1);
 
-        SolutionBuilder.addInOrder(tasks, newTask6, -1, false, true);
+        SolutionBuilder.addInOrder(tasks, newTask6, -1, true);
         assertTaskInPosition(tasks, newTask6, 2);
 
-        SolutionBuilder.addInOrder(tasks, newTask7, -1, false, true);
+        SolutionBuilder.addInOrder(tasks, newTask7, -1, true);
         assertTaskInPosition(tasks, newTask7, 3);
 
-        SolutionBuilder.addInOrder(tasks, newTask8, 5, false, true);
+        SolutionBuilder.addInOrder(tasks, newTask8, 5, true);
         assertTaskInPosition(tasks, newTask8, 1);
 
-        SolutionBuilder.addInOrder(tasks, newTask9, 0, false, false);
+        SolutionBuilder.addInOrder(tasks, newTask9, 0, false);
         assertTaskInPosition(tasks, newTask9, 5);
 
-        SolutionBuilder.addInOrder(tasks, newTask10, -1, false, false);
+        SolutionBuilder.addInOrder(tasks, newTask10, -1, false);
         assertTaskInPosition(tasks, newTask10, 9);
 
-        SolutionBuilder.addInOrder(tasks, newTask11, 2, false, false);
+        SolutionBuilder.addInOrder(tasks, newTask11, 2, false);
         assertTaskInPosition(tasks, newTask11, 7);
 
-        SolutionBuilder.addInOrder(tasks, newTask12, 7, false, true);
+        SolutionBuilder.addInOrder(tasks, newTask12, 7, true);
         assertTaskInPosition(tasks, newTask12, 3);
 
-        SolutionBuilder.addInOrder(tasks, newTask13, 2, false, false);
+        SolutionBuilder.addInOrder(tasks, newTask13, 2, false);
         assertTaskInPosition(tasks, newTask13, 9);
 
-        SolutionBuilder.addInOrder(tasks, newTask14, 3, false, true);
+        SolutionBuilder.addInOrder(tasks, newTask14, 3, true);
         assertTaskInPosition(tasks, newTask14, 0);
     }
 

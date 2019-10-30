@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-package org.jbpm.services.task.assigning.solver;
-    dialect "java"
+package org.jbpm.task.assigning.solver;
+dialect "java"
 
 import org.optaplanner.core.api.score.buildin.bendable.BendableScoreHolder;
 

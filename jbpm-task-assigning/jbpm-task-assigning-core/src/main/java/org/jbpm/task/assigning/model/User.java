@@ -86,7 +86,7 @@ public class User extends TaskOrUser implements OrganizationalEntity {
 
     @Override
     public Integer getEndTime() {
-        return 0;
+        return 0; //in minutes. Don't change, can not be null.
     }
 
     @Override

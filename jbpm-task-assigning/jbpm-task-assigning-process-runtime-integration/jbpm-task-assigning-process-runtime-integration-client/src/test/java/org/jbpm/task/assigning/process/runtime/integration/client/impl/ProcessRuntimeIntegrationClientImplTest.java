@@ -52,7 +52,6 @@ public class ProcessRuntimeIntegrationClientImplTest {
         planningInfo1.setContainerId("task-assignments_18.0.0-SNAPSHOT");
         planningInfo1.getPlanningData().setAssignedUser("maciek");
         planningInfo1.getPlanningData().setIndex(789);
-        planningInfo1.getPlanningData().setPinned(false);
         planningInfo1.getPlanningData().setPublished(true);
 
         TaskPlanningInfo planningInfo2 = new TaskPlanningInfo();
@@ -61,7 +60,6 @@ public class ProcessRuntimeIntegrationClientImplTest {
         planningInfo2.setContainerId("task-assignments_18.0.0-SNAPSHOT");
         planningInfo2.getPlanningData().setAssignedUser("mary");
         planningInfo2.getPlanningData().setIndex(456);
-        planningInfo2.getPlanningData().setPinned(true);
         planningInfo2.getPlanningData().setPublished(false);
 
         client.applyPlanning(Arrays.asList(planningInfo1, planningInfo2), "planning_user");

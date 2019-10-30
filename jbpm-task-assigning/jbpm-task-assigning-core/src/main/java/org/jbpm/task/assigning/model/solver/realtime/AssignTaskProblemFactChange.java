@@ -40,17 +40,10 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
 
     private Task task;
     private User user;
-    private boolean published;
 
     public AssignTaskProblemFactChange(Task task, User user) {
         this.task = task;
         this.user = user;
-    }
-
-    public AssignTaskProblemFactChange(Task task, User user, boolean published) {
-        this.task = task;
-        this.user = user;
-        this.published = published;
     }
 
     public Task getTask() {
@@ -83,7 +76,6 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
             task.setPreviousTaskOrUser(null);
             task.setUser(null);
             task.setPinned(false);
-            task.setPublished(false);
             task.setNextTask(null);
             task.setStartTime(null);
             task.setEndTime(null);
@@ -93,16 +85,11 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
 
         if (insertPosition == workingTask) {
             //nothing to do, the task is already pinned and belongs to user. (see findInsertPosition)
-            //only check if the published status needs to be set.
-            if (checkAndPublish(scoreDirector, workingTask, published)) {
-                scoreDirector.triggerVariableListeners();
-            }
         } else if (insertPosition.getNextTask() == workingTask) {
             //the task is already in the correct position but not pinned. (see findInsertPosition)
             scoreDirector.beforeProblemPropertyChanged(workingTask);
             workingTask.setPinned(true);
             scoreDirector.afterProblemPropertyChanged(workingTask);
-            checkAndPublish(scoreDirector, workingTask, published);
             scoreDirector.triggerVariableListeners();
         } else {
             //the task needs to be re-positioned, might belong to user or not.
@@ -139,7 +126,6 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
             scoreDirector.beforeProblemPropertyChanged(workingTask);
             workingTask.setPinned(true);
             scoreDirector.afterProblemPropertyChanged(workingTask);
-            checkAndPublish(scoreDirector, workingTask, published);
             scoreDirector.triggerVariableListeners();
         }
     }
@@ -168,15 +154,5 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
             nextTask = nextTask.getNextTask();
         }
         return result;
-    }
-
-    private boolean checkAndPublish(ScoreDirector<TaskAssigningSolution> scoreDirector, Task task, boolean published) {
-        if (published && !task.isPublished()) {
-            scoreDirector.beforeProblemPropertyChanged(task);
-            task.setPublished(true);
-            scoreDirector.afterProblemPropertyChanged(task);
-            return true;
-        }
-        return false;
     }
 }

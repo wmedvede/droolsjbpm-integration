@@ -25,7 +25,6 @@ import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.jbpm.task.assigning.user.system.integration.UserSystemService;
-import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,7 @@ public class SolutionSynchronizer extends RunnableBase {
     private final ProcessRuntimeIntegrationClient runtimeClient;
     private final UserSystemService userSystemService;
     private final long period;
-    private final Consumer<Result> taskInfoConsumer;
+    private final Consumer<Result> resultConsumer;
 
     private final Semaphore startPermit = new Semaphore(0);
 
@@ -97,19 +96,20 @@ public class SolutionSynchronizer extends RunnableBase {
 
     public SolutionSynchronizer(final SolverExecutor solverExecutor,
                                 final ProcessRuntimeIntegrationClient runtimeClient,
-                                final UserSystemService userSystemService,
+                                final UserSystemService userSystem,
                                 final long period,
-                                final Consumer<Result> taskInfoConsumer) {
+                                final Consumer<Result> resultConsumer) {
         checkNotNull("solverExecutor", solverExecutor);
         checkNotNull("runtimeClient", runtimeClient);
-        checkCondition("period", period > 5);
-        checkNotNull("taskInfoConsumer", taskInfoConsumer);
+        checkNotNull("userSystem", userSystem);
+        checkCondition("period", period > 0);
+        checkNotNull("resultConsumer", resultConsumer);
 
         this.solverExecutor = solverExecutor;
         this.runtimeClient = runtimeClient;
-        this.userSystemService = userSystemService;
+        this.userSystemService = userSystem;
         this.period = period;
-        this.taskInfoConsumer = taskInfoConsumer;
+        this.resultConsumer = resultConsumer;
     }
 
     /**
@@ -168,7 +168,7 @@ public class SolutionSynchronizer extends RunnableBase {
                             final List<TaskInfo> updatedTaskInfos = loadTaskInfos();
                             LOGGER.debug("Status was read successful.");
                             if (isAlive()) {
-                                taskInfoConsumer.accept(new Result(readStartTime, updatedTaskInfos));
+                                resultConsumer.accept(new Result(readStartTime, updatedTaskInfos));
                             }
                         } catch (Exception e) {
                             LOGGER.error("An error was produced during solution status refresh from external repository" +

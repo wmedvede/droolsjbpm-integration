@@ -28,29 +28,28 @@ import java.util.function.Consumer;
 import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.model.User;
-import org.jbpm.task.assigning.model.solver.realtime.AssignTaskProblemFactChange;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskPlanningInfo;
-import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jbpm.task.assigning.runtime.service.SolutionBuilder.DUMMY_TASK;
+import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
+import static org.jbpm.task.assigning.model.Task.DUMMY_TASK_PLANNER_241;
+import static org.kie.soup.commons.validation.PortablePreconditions.checkCondition;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
 /**
  * This class manges the processing of new a solution produced by the solver. It must typically apply all the required
- * changes in the jBPM runtime.
+ * changes in the jBPM runtime and eventually produce problem fact changes if the published tasks needs to be adjusted.
  */
 public class SolutionProcessor extends RunnableBase {
-
-    //TODO, configurable parameter in future iteration.
-    private static final int PUBLISH_WINDOW_SIZE = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolutionProcessor.class);
 
     private final ProcessRuntimeIntegrationClient runtimeClient;
     private final Consumer<Result> resultConsumer;
+    private final String targetUserId;
+    private final int publishWindowSize;
 
     private final Semaphore solutionResource = new Semaphore(0);
     private final AtomicBoolean processing = new AtomicBoolean(false);
@@ -60,11 +59,6 @@ public class SolutionProcessor extends RunnableBase {
     public static class Result {
 
         private Exception error;
-        private List<ProblemFactChange<TaskAssigningSolution>> programedChanges;
-
-        public Result(List<ProblemFactChange<TaskAssigningSolution>> programedChanges) {
-            this.programedChanges = programedChanges;
-        }
 
         private Result(Exception error) {
             this.error = error;
@@ -77,17 +71,26 @@ public class SolutionProcessor extends RunnableBase {
         public Exception getError() {
             return error;
         }
-
-        public List<ProblemFactChange<TaskAssigningSolution>> getProgramedChanges() {
-            return programedChanges;
-        }
     }
 
-    public SolutionProcessor(final ProcessRuntimeIntegrationClient runtimeClient, final Consumer<Result> resultConsumer) {
+    /**
+     * @param runtimeClient a ProcessRuntimeClient instance for executing methods into the jBPM runtime.
+     * @param resultConsumer a consumer for processing the results.
+     * @param targetUserId a user identifier for using as the "on behalf of" user when interacting with the jBPM runtime.
+     * @param publishWindowSize Integer value > 0 that indicates the number of tasks to be published.
+     */
+    public SolutionProcessor(final ProcessRuntimeIntegrationClient runtimeClient,
+                             final Consumer<Result> resultConsumer,
+                             final String targetUserId,
+                             final int publishWindowSize) {
         checkNotNull("runtimeClient", runtimeClient);
         checkNotNull("resultConsumer", resultConsumer);
+        checkNotNull("targetUserId", targetUserId);
+        checkCondition("publishWindowSize", publishWindowSize > 0);
         this.runtimeClient = runtimeClient;
         this.resultConsumer = resultConsumer;
+        this.targetUserId = targetUserId;
+        this.publishWindowSize = publishWindowSize;
     }
 
     /**
@@ -145,7 +148,6 @@ public class SolutionProcessor extends RunnableBase {
         List<TaskPlanningInfo> userTaskPlanningInfos;
         Iterator<TaskPlanningInfo> userTaskPlanningInfosIt;
         TaskPlanningInfo taskPlanningInfo;
-        final List<ProblemFactChange<TaskAssigningSolution>> programmedChanges = new ArrayList<>();
         int index;
         int publishedCount;
         for (User user : solution.getUserList()) {
@@ -154,41 +156,38 @@ public class SolutionProcessor extends RunnableBase {
             publishedCount = 0;
             Task nextTask = user.getNextTask();
             while (nextTask != null) {
-                if (DUMMY_TASK.getId().equals(nextTask.getId())) {
-                    break;
-                }
-                tasksById.put(nextTask.getId(), nextTask);
-                taskPlanningInfo = new TaskPlanningInfo(nextTask.getContainerId(),
-                                                        nextTask.getId(),
-                                                        nextTask.getProcessInstanceId(),
-                                                        new PlanningDataImpl(nextTask.getId()));
+                if (!DUMMY_TASK.getId().equals(nextTask.getId()) && !DUMMY_TASK_PLANNER_241.getId().equals(nextTask.getId())) {
+                    //dummy tasks has nothing to with the jBPM runtime, don't process them
+                    tasksById.put(nextTask.getId(), nextTask);
+                    taskPlanningInfo = new TaskPlanningInfo(nextTask.getContainerId(),
+                                                            nextTask.getId(),
+                                                            nextTask.getProcessInstanceId(),
+                                                            new PlanningDataImpl(nextTask.getId()));
 
-                taskPlanningInfo.getPlanningData().setPublished(nextTask.isPublished());
-                taskPlanningInfo.getPlanningData().setPinned(nextTask.isPinned());
-                taskPlanningInfo.getPlanningData().setAssignedUser(user.getUser().getEntityId());
-                taskPlanningInfo.getPlanningData().setIndex(index++);
-                userTaskPlanningInfos.add(taskPlanningInfo);
-                publishedCount += taskPlanningInfo.getPlanningData().isPublished() ? 1 : 0;
+                    taskPlanningInfo.getPlanningData().setPublished(nextTask.isPinned());
+                    taskPlanningInfo.getPlanningData().setAssignedUser(user.getUser().getEntityId());
+                    taskPlanningInfo.getPlanningData().setIndex(index++);
+                    userTaskPlanningInfos.add(taskPlanningInfo);
+                    publishedCount += taskPlanningInfo.getPlanningData().isPublished() ? 1 : 0;
+                }
                 nextTask = nextTask.getNextTask();
             }
             userTaskPlanningInfosIt = userTaskPlanningInfos.iterator();
-            while (userTaskPlanningInfosIt.hasNext() && publishedCount < PUBLISH_WINDOW_SIZE) {
+            while (userTaskPlanningInfosIt.hasNext() && publishedCount < publishWindowSize) {
                 taskPlanningInfo = userTaskPlanningInfosIt.next();
                 if (!taskPlanningInfo.getPlanningData().isPublished()) {
-                    final Task taskToPublish = tasksById.get(taskPlanningInfo.getTaskId());
-                    programmedChanges.add(new AssignTaskProblemFactChange(taskToPublish, taskToPublish.getUser(), true));
+                    taskPlanningInfo.getPlanningData().setPublished(true);
                     publishedCount++;
                 }
             }
             taskPlanningInfos.addAll(userTaskPlanningInfos);
         }
 
-        //TODO set the proper user insead of "wbadmin"
         //TODO check the error management when this method throws exceptions.
-        runtimeClient.applyPlanning(taskPlanningInfos, "wbadmin");
+        runtimeClient.applyPlanning(taskPlanningInfos, targetUserId);
         processing.set(false);
 
-        resultConsumer.accept(new Result(programmedChanges));
+        resultConsumer.accept(new Result(null));
         LOGGER.debug("Solution processing finished: " + solution);
     }
 }

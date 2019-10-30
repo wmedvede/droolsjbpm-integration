@@ -30,10 +30,6 @@ public interface PlanningData {
 
     void setIndex(int index);
 
-    boolean isPinned();
-
-    void setPinned(boolean pinned);
-
     boolean isPublished();
 
     void setPublished(boolean published);
@@ -41,5 +37,4 @@ public interface PlanningData {
     void setAssignedUser(String assignedUser);
 
     String getAssignedUser();
-
 }

@@ -36,21 +36,27 @@ import org.kie.server.services.impl.KieServerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_EXT_DISABLED;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_URL;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER;
+import static org.jbpm.task.assigning.runtime.service.util.PropertyUtil.readSystemProperty;
+
 public class TaskAssigningKieServerExtension implements KieServerExtension {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TaskAssigningKieServerExtension.class);
 
-    public static final String CAPABILITY_BRP_TASK_ASSIGNING = "BRP-TASK-ASSIGNING"; // Business Resource Planning Task Assigning
-    public static final String KIE_OPTAPLANNER_TASK_ASSIGNING_EXT_DISABLED = "org.optaplanner.server.taskAssigning.ext.disabled";
+    /**
+     * Business Resource Planning Task Assigning
+     */
+    public static final String CAPABILITY_BRP_TASK_ASSIGNING = "BRP-TASK-ASSIGNING";
 
-    //TODO WM this value should be "false" by default.
-    private static final boolean DISABLED = Boolean.parseBoolean(System.getProperty(KIE_OPTAPLANNER_TASK_ASSIGNING_EXT_DISABLED, "false"));
+    private static final boolean DISABLED = readSystemProperty(JBPM_TASK_ASSIGNING_EXT_DISABLED, true, value -> !Boolean.FALSE.toString().equals(value));
 
     public static final String EXTENSION_NAME = "OptaPlannerTaskAssigning";
 
     private final List<Object> services = new ArrayList<>();
     private boolean initialized = false;
-    private KieServerRegistry registry;
     private PlanningDataService dataService;
     private TaskAssigningService taskAssigningService;
     private ExecutorService executorService;
@@ -69,10 +75,9 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
     public void init(KieServerImpl kieServer, KieServerRegistry registry) {
         LOGGER.debug("Initializing " + EXTENSION_NAME + " extension.");
         if (DISABLED) {
-            LOGGER.debug(EXTENSION_NAME + " is currently disabled. Use the " + KIE_OPTAPLANNER_TASK_ASSIGNING_EXT_DISABLED + " to enable it if needed.");
+            LOGGER.debug(EXTENSION_NAME + " is currently disabled. Use the " + JBPM_TASK_ASSIGNING_EXT_DISABLED + " to enable it if needed.");
             return;
         }
-        this.registry = registry;
 
         startDataService(registry.getConfig());
 
@@ -164,10 +169,11 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
     }
 
     private ProcessRuntimeIntegrationClient getRuntimeIntegrationClient() {
-        //TODO, review this initialization and add proper parametrization.
-        return ProcessRuntimeIntegrationClientFactory.newIntegrationClient("http://localhost:8080/kie-server/services/rest/server",
-                                                                           "wbadmin",
-                                                                           "wbadmin");
+        //TODO, future iteration will add the ability of getting the available process runtime url by asking he controller.
+        String url = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_URL, "http://localhost:8080/kie-server/services/rest/server", value -> value);
+        String user = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER, "wbadmin", value -> value);
+        String pwd = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD, null, value -> value);
+        return ProcessRuntimeIntegrationClientFactory.newIntegrationClient(url, user, pwd);
     }
 
     private void startDataService(KieServerConfig config) {

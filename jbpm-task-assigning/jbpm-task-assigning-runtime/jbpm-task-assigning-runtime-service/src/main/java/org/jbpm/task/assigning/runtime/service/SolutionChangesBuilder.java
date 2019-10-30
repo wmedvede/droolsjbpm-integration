@@ -32,12 +32,14 @@ import org.jbpm.task.assigning.model.solver.realtime.RemoveTaskProblemFactChange
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
 
-import static org.jbpm.task.assigning.runtime.service.SolutionBuilder.DUMMY_TASK;
+import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
+import static org.jbpm.task.assigning.model.Task.DUMMY_TASK_PLANNER_241;
+import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 import static org.jbpm.task.assigning.runtime.service.SolutionBuilder.fromTaskInfo;
 
 /**
  * This class manages the calculation of the impact (i.e. the set of changes to be applied) on a solution given the
- * refreshed information about the tasks in the jBPM runtime.
+ * refreshed information about the tasks from the jBPM runtime.
  */
 public class SolutionChangesBuilder {
 
@@ -63,6 +65,7 @@ public class SolutionChangesBuilder {
         final Map<Long, Task> taskById = solution.getTaskList()
                 .stream()
                 .filter(task -> !DUMMY_TASK.getId().equals(task.getId()))
+                .filter(task -> !DUMMY_TASK_PLANNER_241.getId().equals(task.getId()))
                 .collect(Collectors.toMap(Task::getId, Function.identity()));
         final Map<String, User> userById = solution.getUserList()
                 .stream()
@@ -82,12 +85,6 @@ public class SolutionChangesBuilder {
                         // task was probably assigned to someone else in the past and released from the task list administration
                         // since the planner never leave tasks in Released status.
                         // release the task in the plan and let it be assigned again.
-
-
-                        //TODO MAÑANa seguir aca
-                        //OJO, si se hizo el release en la lista de tareas y en la solution dice que hay asignaciones....
-                        //Qué hacemos...... se puede 1) respetar el release desde la lista de tareas o imponer
-                        //lo que han en la memoria, pero es una opcion.... por ahora esta bien hacer el release...
                         changes.add(new ReleaseTaskProblemFactChange(task));
                     }
                     break;
@@ -106,8 +103,9 @@ public class SolutionChangesBuilder {
                         // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
                         // with the user system.)
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(newTask, user, true));
-                    } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId())) {
+                        changes.add(new AssignTaskProblemFactChange(newTask, user));
+                    } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
+                            (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
                         // if Reserved:
                         //       the task was probably manually re-assigned from the task list to another user. We must respect
                         //       this assignment.
@@ -115,11 +113,13 @@ public class SolutionChangesBuilder {
                         //       the task was probably re-assigned to another user from the task list prior to start.
                         //       We must correct this assignment so it's reflected in the plan and also respect it.
 
+                        //Or the task was published and not yet pinned
+
                         final User user = userById.get(taskInfo.getActualOwner());
                         // TODO, check that the user exists. (future iteration when we manage a more fine grained interaction
                         // with the user system.)
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(task, user, true));
+                        changes.add(new AssignTaskProblemFactChange(task, user));
                     }
                     break;
                 case Suspended:
@@ -137,16 +137,18 @@ public class SolutionChangesBuilder {
                             // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
                             // with the user system.)
                             // assign and ensure the task is published since the task was already seen by the public audience.
-                            changes.add(new AssignTaskProblemFactChange(newTask, user, true));
+                            changes.add(new AssignTaskProblemFactChange(newTask, user));
                         }
-                    } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId())) {
+                    } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
+                            (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
                         // the task was assigned to someone else from the task list prior to the suspension, we must
                         // reflect that change in the plan.
+                        // Or the task was published and not yet pinned.
                         final User user = userById.get(taskInfo.getActualOwner());
                         // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
                         // with the user system.)
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(task, user, true));
+                        changes.add(new AssignTaskProblemFactChange(task, user));
                     }
             }
         }
@@ -157,6 +159,20 @@ public class SolutionChangesBuilder {
         for (Task oldTask : taskById.values()) {
             changes.add(new RemoveTaskProblemFactChange(oldTask));
         }
+
+        applyWorkaroundForPLANNER_241(solution, changes);
         return changes;
+    }
+
+    /**
+     * This method adds a second dummy task for avoiding the issue produced by https://issues.jboss.org/browse/PLANNER-241
+     * and will be removed as soon it's fixed. Note that workaround doesn't have a huge impact on the solution since
+     * the dummy task is added only once and to the planning user.
+     */
+    private void applyWorkaroundForPLANNER_241(TaskAssigningSolution solution, List<ProblemFactChange<TaskAssigningSolution>> changes) {
+        boolean hasDummyTask2 = solution.getTaskList().stream().anyMatch(task -> DUMMY_TASK_PLANNER_241.getId().equals(task.getId()));
+        if (!hasDummyTask2) {
+            changes.add(new AssignTaskProblemFactChange(DUMMY_TASK_PLANNER_241, PLANNING_USER));
+        }
     }
 }

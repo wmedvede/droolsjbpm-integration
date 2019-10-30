@@ -36,40 +36,28 @@ import org.jbpm.task.assigning.model.User;
 import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 
+import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.InProgress;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Ready;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Reserved;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Suspended;
 
 /**
- * This class is intended for the construction of a TaskAssigningSolution given a set TaskInfo and a set of User.
- * The solution is constructed considering the PlanningData for each task.
+ * This class is intended for the restoring of a TaskAssigningSolution given a set TaskInfo, a set of User, and the
+ * corresponding PlanningData for each task. I'ts typically used when the solver needs to be started during the application
+ * startup procedure.
  */
 public class SolutionBuilder {
-
-    public static final Task DUMMY_TASK;
-
-    static {
-        DUMMY_TASK = new Task(-1,
-                              -1,
-                              "dummy-process",
-                              "dummy-container",
-                              "dummy-task",
-                              10, new HashMap<>());
-        DUMMY_TASK.getPotentialOwners().add(User.PLANNING_USER);
-    }
 
     static class AssignedTask {
 
         private Task task;
         private int index;
-        private boolean published;
         private boolean pinned;
 
-        AssignedTask(Task task, int index, boolean published, boolean pinned) {
+        AssignedTask(Task task, int index, boolean pinned) {
             this.task = task;
             this.index = index;
-            this.published = published;
             this.pinned = pinned;
         }
 
@@ -79,10 +67,6 @@ public class SolutionBuilder {
 
         int getIndex() {
             return index;
-        }
-
-        boolean isPublished() {
-            return published;
         }
 
         boolean isPinned() {
@@ -123,26 +107,21 @@ public class SolutionBuilder {
                     // solution when they change to Ready status and the proper jBPM event is raised.
 
                     final PlanningData planningData = taskInfo.getPlanningData();
-                    boolean published;
                     boolean pinned;
                     if (planningData != null) {
                         //the task was already planned.
-                        published = InProgress == taskInfo.getStatus() || planningData.isPublished();
-                        pinned = published || planningData.isPinned();
+                        pinned = InProgress == taskInfo.getStatus() || planningData.isPublished();
                         task.setPinned(pinned);
-                        task.setPublished(published);
                         if (Objects.equals(planningData.getAssignedUser(), taskInfo.getActualOwner())) {
                             //preserve currentParameters.
-                            addTaskToUser(assignedTasksByUserId, task, planningData.getAssignedUser(), planningData.getIndex(), published, pinned);
+                            addTaskToUser(assignedTasksByUserId, task, planningData.getAssignedUser(), planningData.getIndex(), pinned);
                         } else {
-                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, published, pinned);
+                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, pinned);
                         }
                     } else {
-                        published = InProgress == taskInfo.getStatus();
-                        pinned = published;
+                        pinned = InProgress == taskInfo.getStatus();
                         task.setPinned(pinned);
-                        task.setPublished(published);
-                        addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, published, pinned);
+                        addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, pinned);
                     }
                 }
             }
@@ -154,9 +133,7 @@ public class SolutionBuilder {
                 .map(SolutionBuilder::fromExternalUser)
                 .collect(Collectors.toMap(User::getEntityId, Function.identity()));
         usersById.put(User.PLANNING_USER.getEntityId(), User.PLANNING_USER);
-        //TODO, check if this dummy task is ok, by now if we don't add it there are problems when e.g. all tasks has
-        //been completed in the jBPM and thus all the tasks are removed from the solution. In this case as soon the
-        //solution gets with 0 tasks an exception is thrown.
+        //Add the DUMMY_TASK to avoid running into scenarios where the solution remains with no tasks.
         allTasks.add(DUMMY_TASK);
 
         usersById.values().forEach(user -> {
@@ -187,9 +164,19 @@ public class SolutionBuilder {
      */
     static void addTasksToUser(User user, List<Task> tasks) {
         TaskOrUser previousTask = user;
+
+        // startTime, endTime, nextTask and user are shadow variables that should be calculated by the solver
+        // however right now this is still not happening when the solver is started with a recovered solution
+        // see: https://issues.jboss.org/browse/PLANNER-1316 so by now we initialize them here as part of the
+        // solution restoring.
         for (Task nextTask : tasks) {
             previousTask.setNextTask(nextTask);
+
+            nextTask.setStartTime(previousTask.getEndTime());
+            nextTask.setEndTime(nextTask.getStartTime() + nextTask.getDuration());
             nextTask.setPreviousTaskOrUser(previousTask);
+            nextTask.setUser(user);
+
             previousTask = nextTask;
         }
     }
@@ -198,16 +185,14 @@ public class SolutionBuilder {
                               Task task,
                               String actualOwner,
                               int index,
-                              boolean published,
                               boolean pinned) {
         final List<SolutionBuilder.AssignedTask> userAssignedTasks = tasksByUser.computeIfAbsent(actualOwner, key -> new ArrayList<>());
-        addInOrder(userAssignedTasks, task, index, published, pinned);
+        addInOrder(userAssignedTasks, task, index, pinned);
     }
 
     static void addInOrder(List<SolutionBuilder.AssignedTask> assignedTasks,
                            Task task,
                            int index,
-                           boolean published,
                            boolean pinned) {
         int insertIndex = 0;
         SolutionBuilder.AssignedTask currentTask;
@@ -224,7 +209,7 @@ public class SolutionBuilder {
             }
             insertIndex = !found ? insertIndex + 1 : insertIndex;
         }
-        assignedTasks.add(insertIndex, new SolutionBuilder.AssignedTask(task, index, published, pinned));
+        assignedTasks.add(insertIndex, new SolutionBuilder.AssignedTask(task, index, pinned));
     }
 
     static Task fromTaskInfo(TaskInfo taskInfo) {

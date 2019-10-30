@@ -24,7 +24,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
-import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.jbpm.task.assigning.user.system.integration.UserSystemService;
 import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
@@ -33,6 +32,10 @@ import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_TARGET_USER;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_SYNC_PERIOD;
+import static org.jbpm.task.assigning.runtime.service.util.PropertyUtil.readSystemProperty;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
 /**
@@ -61,7 +64,10 @@ public class SolverHandler {
     private SolutionSynchronizer solutionSynchronizer;
     private SolutionProcessor solutionProcessor;
     private AtomicBoolean enableUpdate = new AtomicBoolean(false);
-    private long processEndTime;
+    private long lastProcessEndTime;
+    private final String targetUserId = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_TARGET_USER, null, value -> value);
+    private static final int publishWindowSize = readSystemProperty(JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE, 2, Integer::parseInt);
+    private static final long syncPeriod = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_PERIOD, 5000L, Long::parseLong);
 
     public SolverHandler(final SolverDef solverDef,
                          final ProcessRuntimeIntegrationClient runtimeClient,
@@ -84,10 +90,13 @@ public class SolverHandler {
     }
 
     public void start() {
+        disableUpdates();
         solverExecutor = new SolverExecutor(solver, this::onBestSolutionChange);
         solutionSynchronizer = new SolutionSynchronizer(solverExecutor, runtimeClient, userSystemService,
-                                                        10000, this::onUpdateSolution);
-        solutionProcessor = new SolutionProcessor(runtimeClient, this::onSolutionProcessed);
+                                                        syncPeriod, this::onUpdateSolution);
+
+        solutionProcessor = new SolutionProcessor(runtimeClient, this::onSolutionProcessed, targetUserId,
+                                                  publishWindowSize);
         executorService.execute(solverExecutor); //is started by the SolutionSynchronizer
         executorService.execute(solutionSynchronizer);
         executorService.execute(solutionProcessor); //automatically starts and waits for a solution to process.
@@ -112,17 +121,17 @@ public class SolverHandler {
     private void addProblemFactChanges(List<ProblemFactChange<TaskAssigningSolution>> changes) {
         checkNotNull("changes", changes);
         if (!solverExecutor.isStarted()) {
-            LOGGER.debug("SolverExecutor has not yet been started. Changes will be discarded", changes);
+            LOGGER.info("SolverExecutor has not yet been started. Changes will be discarded", changes);
             return;
         }
         if (solverExecutor.isDestroyed()) {
-            LOGGER.debug("SolverExecutor has been destroyed. Changes will be discarded", changes);
+            LOGGER.info("SolverExecutor has been destroyed. Changes will be discarded", changes);
             return;
         }
         if (!changes.isEmpty()) {
             solverExecutor.addProblemFactChanges(changes);
         } else {
-            LOGGER.info("It looks line an empty change list was provided. Nothing will be done since it has effect on the solution.");
+            LOGGER.info("It looks line an empty change list was provided. Nothing will be done since it has no effect on the solution.");
         }
     }
 
@@ -139,7 +148,7 @@ public class SolverHandler {
                 } else {
                     currentSolution = event.getNewBestSolution();
                     nextSolution = null;
-                    enableUpdate.set(false);
+                    disableUpdates();
                     solutionProcessor.process(currentSolution);
                 }
             } finally {
@@ -156,18 +165,13 @@ public class SolverHandler {
         LOGGER.debug("Solution was processed with result: " + result.hasError());
         lock.lock();
         try {
-            enableUpdate.set(false);
-            if (!result.getProgramedChanges().isEmpty()) {
-                //a ver si esta linea mejora el loop
-                addProblemFactChanges(result.getProgramedChanges());
-                nextSolution = null;
-            } else if (nextSolution != null) {
+            disableUpdates();
+            if (nextSolution != null) {
                 currentSolution = nextSolution;
                 nextSolution = null;
                 solutionProcessor.process(currentSolution);
             } else {
-                processEndTime = System.currentTimeMillis();
-                enableUpdate.set(true);
+                enableUpdates(System.currentTimeMillis());
             }
         } finally {
             lock.unlock();
@@ -182,7 +186,7 @@ public class SolverHandler {
     private void onUpdateSolution(SolutionSynchronizer.Result result) {
         lock.lock();
         try {
-            if (enableUpdate.get() && (result.getReadStartTime() > processEndTime)) {
+            if (isEnableUpdates() && !isDirty(result)) {
                 final List<ProblemFactChange<TaskAssigningSolution>> changes = new SolutionChangesBuilder()
                         .withSolution(currentSolution)
                         .withTasks(result.getTaskInfos())
@@ -196,12 +200,32 @@ public class SolverHandler {
 
     private void applyIfNotEmpty(List<ProblemFactChange<TaskAssigningSolution>> changes) {
         if (!changes.isEmpty()) {
+            LOGGER.debug("Current solution will be updated with {} changes from last synchronization", changes.size());
             addProblemFactChanges(changes);
+        } else {
+            LOGGER.debug("There are no changes to apply from last synchronization.", changes.size());
         }
     }
 
     private Solver<TaskAssigningSolution> createSolver(SolverDef solverDef) {
         SolverFactory<TaskAssigningSolution> solverFactory = SolverFactory.createFromXmlResource(solverDef.getSolverConfigFile());
         return solverFactory.buildSolver();
+    }
+
+    private void disableUpdates() {
+        enableUpdate.set(false);
+    }
+
+    private void enableUpdates(long lastProcessEndTime) {
+        this.lastProcessEndTime = lastProcessEndTime;
+        enableUpdate.set(true);
+    }
+
+    private boolean isEnableUpdates() {
+        return enableUpdate.get();
+    }
+
+    private boolean isDirty(SolutionSynchronizer.Result result) {
+        return result.getReadStartTime() < lastProcessEndTime;
     }
 }

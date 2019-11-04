@@ -3,8 +3,10 @@ package org.jbpm.task.assigning.runtime.service;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
@@ -19,11 +21,14 @@ import org.kie.server.api.KieServerConstants;
 import org.kie.server.api.model.KieServerConfig;
 import org.kie.server.services.jbpm.jpa.PersistenceUnitInfoImpl;
 import org.kie.server.services.jbpm.jpa.PersistenceUnitInfoLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_CFG_PERSISTANCE_DS;
 
 public class PlanningDataService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlanningDataService.class);
     private static final String JBPM_TASK_ASSIGNING_PERSISTENCE_XML_LOCATION = "/jpa/taskAssigning/META-INF/persistence.xml";
 
     private EntityManagerFactory emf;
@@ -37,17 +42,35 @@ public class PlanningDataService {
             em = emf.createEntityManager();
             tx = (UserTransaction) ctx.lookup("java:jboss/UserTransaction");
         } catch (Exception e) {
-            throw new RuntimeException("Unable to start PlanningDataService: " + e.getMessage(), e);
+            LOGGER.error("PlanningDataService initialization failed.", e);
+            throw new RuntimeException("PlanningDataService initialization failed: " + e.getMessage(), e);
         }
     }
 
-    public void addOrUpdate(PlanningData planningData) {
+    public void applyPlanning(List<PlanningData> planningDataList) {
         try {
             tx.begin();
-            em.merge(planningData);
+            final Set<Long> newPlanningDataIds = new HashSet<>();
+            final List<PlanningDataImpl> oldPlanningDataList = em.createQuery("select pd from PlanningDataImpl pd", PlanningDataImpl.class).getResultList();
+            planningDataList.forEach(newData -> {
+                em.merge(new PlanningDataImpl(newData.getTaskId(), newData.getAssignedUser(), newData.getIndex(), newData.isPublished(), false));
+                newPlanningDataIds.add(newData.getTaskId());
+            });
+            oldPlanningDataList.stream()
+                    .filter(oldData -> !newPlanningDataIds.contains(oldData.getTaskId()))
+                    .forEach(oldData -> {
+                        oldData.setDetached(true);
+                        em.merge(oldData);
+                    });
             tx.commit();
         } catch (Exception e) {
-            throw new RuntimeException("An error was produced during planningData addOrUpdate: " + e.getMessage(), e);
+            LOGGER.error("An error was produced during applyPlanning processing.", e);
+            try {
+                tx.rollback();
+            } catch (Exception re) {
+                LOGGER.error("An error was produced during applyPlanning processing rollback.", re);
+            }
+            throw new RuntimeException("An error was produced during applyPlanning: " + e.getMessage(), e);
         }
     }
 

@@ -37,4 +37,8 @@ public interface PlanningData {
     void setAssignedUser(String assignedUser);
 
     String getAssignedUser();
+
+    boolean isDetached();
+
+    void setDetached(boolean detached);
 }

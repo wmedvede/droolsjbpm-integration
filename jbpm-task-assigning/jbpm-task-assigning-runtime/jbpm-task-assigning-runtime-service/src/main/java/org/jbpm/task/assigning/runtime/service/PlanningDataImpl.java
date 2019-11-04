@@ -18,7 +18,8 @@ public class PlanningDataImpl implements PlanningData {
     private long taskId;
     private String assignedUser;
     private int index;
-    private boolean published;
+    private short published = 0;
+    private short detached = 0;
 
     public PlanningDataImpl() {
     }
@@ -27,11 +28,12 @@ public class PlanningDataImpl implements PlanningData {
         this.taskId = taskId;
     }
 
-    public PlanningDataImpl(long taskId, String assignedUser, int index, boolean published) {
+    public PlanningDataImpl(long taskId, String assignedUser, int index, boolean published, boolean detached) {
         this.taskId = taskId;
         this.assignedUser = assignedUser;
         this.index = index;
-        this.published = published;
+        setPublished(published);
+        setDetached(detached);
     }
 
     @Override
@@ -66,12 +68,22 @@ public class PlanningDataImpl implements PlanningData {
 
     @Override
     public boolean isPublished() {
-        return published;
+        return published == 1;
     }
 
     @Override
     public void setPublished(boolean published) {
-        this.published = published;
+        this.published = (short) (published ? 1 : 0);
+    }
+
+    @Override
+    public boolean isDetached() {
+        return detached == 1;
+    }
+
+    @Override
+    public void setDetached(boolean detached) {
+        this.detached = (short) (detached ? 1 : 0);
     }
 
     @Override
@@ -84,13 +96,14 @@ public class PlanningDataImpl implements PlanningData {
         }
         PlanningDataImpl that = (PlanningDataImpl) o;
         return taskId == that.taskId &&
+                Objects.equals(assignedUser, that.assignedUser) &&
                 index == that.index &&
                 published == that.published &&
-                Objects.equals(assignedUser, that.assignedUser);
+                detached == that.detached;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, assignedUser, index, published);
+        return Objects.hash(taskId, assignedUser, index, published, detached);
     }
 }

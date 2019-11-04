@@ -1,6 +1,7 @@
 package org.jbpm.task.assigning.runtime.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
@@ -29,7 +30,7 @@ public class ProcessRuntimeIntegrationDelegate implements ProcessRuntimeIntegrat
     @Override
     public List<TaskPlanningResult> applyPlanning(List<TaskPlanningInfo> planningInfos, String userId) {
         final List<TaskPlanningResult> result = runtimeClient.applyPlanning(planningInfos, userId);
-        planningInfos.forEach(taskPlanningInfo -> dataService.addOrUpdate(taskPlanningInfo.getPlanningData()));
+        dataService.applyPlanning(planningInfos.stream().map(TaskPlanningInfo::getPlanningData).collect(Collectors.toList()));
         return result;
     }
 }

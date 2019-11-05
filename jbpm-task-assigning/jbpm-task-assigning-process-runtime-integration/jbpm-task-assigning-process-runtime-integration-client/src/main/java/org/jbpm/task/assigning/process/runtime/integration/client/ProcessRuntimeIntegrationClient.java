@@ -20,9 +20,11 @@ import java.util.List;
 
 public interface ProcessRuntimeIntegrationClient {
 
-    List<TaskInfo> findTasks(List<TaskStatus> status,
-                             Integer page,
-                             Integer pageSize);
+    List<TaskInfo> findTasks(List<TaskStatus> status, Integer page, Integer pageSize);
+
+    List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize);
 
     List<TaskPlanningResult> applyPlanning(List<TaskPlanningInfo> planningInfos, String userId);
+
+    void delegateTask(TaskPlanningInfo planningInfo, String userId);
 }

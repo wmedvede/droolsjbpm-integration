@@ -185,6 +185,11 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
     }
 
     @Override
+    public void delegateTask(TaskPlanningInfo planningInfo, String userId) {
+        userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningData().getAssignedUser());
+    }
+
+    @Override
     public List<TaskPlanningResult> applyPlanning(List<TaskPlanningInfo> planningInfos, String userId) {
         long minTaskId = planningInfos.stream().mapToLong(TaskPlanningInfo::getTaskId).min().orElse(0);
         long maxTaskId = planningInfos.stream().mapToLong(TaskPlanningInfo::getTaskId).max().orElse(0);
@@ -204,7 +209,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
                 userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningData().getAssignedUser());
             }
         }
-        //TODO analyze if in the end we'll return something here
         return Collections.emptyList();
     }
 
@@ -212,7 +216,7 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
         registerQueries();
     }
 
-    private List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize) {
+    public List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize) {
         return findTasks(new FindTasksQueryFilterSpecBuilder()
                                  .withStatusIn(status)
                                  .fromTaskId(fromTaskId)

@@ -60,6 +60,10 @@ public class SolutionProcessor extends RunnableBase {
 
         private Exception error;
 
+        private Result() {
+
+        }
+
         private Result(Exception error) {
             this.error = error;
         }
@@ -183,11 +187,17 @@ public class SolutionProcessor extends RunnableBase {
             taskPlanningInfos.addAll(userTaskPlanningInfos);
         }
 
-        //TODO check the error management when this method throws exceptions.
-        runtimeClient.applyPlanning(taskPlanningInfos, targetUserId);
-        processing.set(false);
+        Result result;
+        try {
+            runtimeClient.applyPlanning(taskPlanningInfos, targetUserId);
+            result = new Result();
+        } catch (Exception e) {
+            LOGGER.error("An error was produced during solution processing, applyPlanning execution failed.", e);
+            result = new Result(e);
+        }
 
-        resultConsumer.accept(new Result(null));
+        processing.set(false);
+        resultConsumer.accept(result);
         LOGGER.debug("Solution processing finished: " + solution);
     }
 }

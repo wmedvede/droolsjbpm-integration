@@ -30,22 +30,30 @@ import org.jbpm.task.assigning.model.solver.realtime.AssignTaskProblemFactChange
 import org.jbpm.task.assigning.model.solver.realtime.ReleaseTaskProblemFactChange;
 import org.jbpm.task.assigning.model.solver.realtime.RemoveTaskProblemFactChange;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
+import org.jbpm.task.assigning.user.system.integration.UserSystemService;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
 import static org.jbpm.task.assigning.model.Task.DUMMY_TASK_PLANNER_241;
 import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 import static org.jbpm.task.assigning.runtime.service.SolutionBuilder.fromTaskInfo;
+import static org.jbpm.task.assigning.runtime.service.util.UserUtil.fromExternalUser;
 
 /**
- * This class manages the calculation of the impact (i.e. the set of changes to be applied) on a solution given the
- * refreshed information about the tasks from the jBPM runtime.
+ * This class performs the calculation of the impact (i.e. the set of changes to be applied) on a solution given the
+ * updated information about the tasks in the jBPM runtime.
  */
 public class SolutionChangesBuilder {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(SolutionChangesBuilder.class);
 
     private TaskAssigningSolution solution;
 
     private List<TaskInfo> taskInfos;
+
+    private UserSystemService systemService;
 
     public SolutionChangesBuilder() {
     }
@@ -60,6 +68,11 @@ public class SolutionChangesBuilder {
         return this;
     }
 
+    public SolutionChangesBuilder withUserSystem(UserSystemService userSystemService) {
+        this.systemService = userSystemService;
+        return this;
+    }
+
     public List<ProblemFactChange<TaskAssigningSolution>> build() {
         final List<ProblemFactChange<TaskAssigningSolution>> changes = new ArrayList<>();
         final Map<Long, Task> taskById = solution.getTaskList()
@@ -67,7 +80,7 @@ public class SolutionChangesBuilder {
                 .filter(task -> !DUMMY_TASK.getId().equals(task.getId()))
                 .filter(task -> !DUMMY_TASK_PLANNER_241.getId().equals(task.getId()))
                 .collect(Collectors.toMap(Task::getId, Function.identity()));
-        final Map<String, User> userById = solution.getUserList()
+        final Map<String, User> usersById = solution.getUserList()
                 .stream()
                 .collect(Collectors.toMap(User::getEntityId, Function.identity()));
 
@@ -99,11 +112,9 @@ public class SolutionChangesBuilder {
                         //        We add it to the solution since this assignment might affect the workload, etc., of the plan.
 
                         final Task newTask = fromTaskInfo(taskInfo);
-                        final User user = userById.get(taskInfo.getActualOwner());
-                        // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
-                        // with the user system.)
+                        final User user = getUser(usersById, taskInfo.getActualOwner());
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(newTask, user));
+                        changes.add(new AssignTaskProblemFactChange(newTask, user, true));
                     } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
                             (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
                         // if Reserved:
@@ -115,11 +126,9 @@ public class SolutionChangesBuilder {
 
                         //Or the task was published and not yet pinned
 
-                        final User user = userById.get(taskInfo.getActualOwner());
-                        // TODO, check that the user exists. (future iteration when we manage a more fine grained interaction
-                        // with the user system.)
+                        final User user = getUser(usersById, taskInfo.getActualOwner());
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(task, user));
+                        changes.add(new AssignTaskProblemFactChange(task, user, true));
                     }
                     break;
                 case Suspended:
@@ -133,35 +142,46 @@ public class SolutionChangesBuilder {
                         if (taskInfo.getActualOwner() != null) {
                             // we add it to the solution since this assignment might affect the workload, etc., of the plan.
                             final Task newTask = fromTaskInfo(taskInfo);
-                            final User user = userById.get(taskInfo.getActualOwner());
-                            // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
-                            // with the user system.)
+                            final User user = getUser(usersById, taskInfo.getActualOwner());
                             // assign and ensure the task is published since the task was already seen by the public audience.
-                            changes.add(new AssignTaskProblemFactChange(newTask, user));
+                            changes.add(new AssignTaskProblemFactChange(newTask, user, true));
                         }
                     } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
                             (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
                         // the task was assigned to someone else from the task list prior to the suspension, we must
                         // reflect that change in the plan.
                         // Or the task was published and not yet pinned.
-                        final User user = userById.get(taskInfo.getActualOwner());
-                        // TODO check that the user exists. (future iteration when we manage a more fine grained interaction
-                        // with the user system.)
+                        final User user = getUser(usersById, taskInfo.getActualOwner());
                         // assign and ensure the task is published since the task was already seen by the public audience.
-                        changes.add(new AssignTaskProblemFactChange(task, user));
+                        changes.add(new AssignTaskProblemFactChange(task, user, true));
                     }
             }
         }
 
-        // finally all the tasks that were part of the solution and are no longer in the taskInfos must be removed
-        // since they were already Completed, Exited, or any other status were they will never get out from.
-        // No users will work on this tasks any more.
         for (Task oldTask : taskById.values()) {
             changes.add(new RemoveTaskProblemFactChange(oldTask));
         }
 
         applyWorkaroundForPLANNER_241(solution, changes);
         return changes;
+    }
+
+    private User getUser(Map<String, User> usersById, String userId) {
+        User user = usersById.get(userId);
+        if (user == null) {
+            LOGGER.debug("User {} was not found in current solution, it'll we looked up in the external user system .", userId);
+            org.jbpm.task.assigning.user.system.integration.User externalUser = systemService.findUser(userId);
+            if (externalUser != null) {
+                user = fromExternalUser(externalUser);
+            } else {
+                // We add it by convention, since the task list administration supports the delegation to non-existent users.
+                LOGGER.debug("User {} was not found in the external user system, it looks like it's a manual" +
+                                     " assignment from the tasks administration. It'll be added to the solution" +
+                                     " to respect the assignment.", userId);
+                user = new User(userId.hashCode(), userId);
+            }
+        }
+        return user;
     }
 
     /**

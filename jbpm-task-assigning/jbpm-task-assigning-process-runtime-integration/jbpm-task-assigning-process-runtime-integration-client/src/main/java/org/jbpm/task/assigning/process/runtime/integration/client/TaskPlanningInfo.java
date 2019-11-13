@@ -29,13 +29,6 @@ public class TaskPlanningInfo {
     public TaskPlanningInfo() {
     }
 
-    //TODO check if we keep this constructor
-    public TaskPlanningInfo(String containerId, long taskId, long processInstanceId) {
-        this.containerId = containerId;
-        this.taskId = taskId;
-        this.processInstanceId = processInstanceId;
-    }
-
     public TaskPlanningInfo(String containerId, long taskId, long processInstanceId, PlanningData planningData) {
         this.containerId = containerId;
         this.taskId = taskId;

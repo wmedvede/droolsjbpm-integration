@@ -18,16 +18,12 @@ package org.jbpm.task.assigning.runtime.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbpm.task.assigning.model.Group;
 import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
@@ -35,17 +31,17 @@ import org.jbpm.task.assigning.model.TaskOrUser;
 import org.jbpm.task.assigning.model.User;
 import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
+import org.jbpm.task.assigning.runtime.service.util.UserUtil;
 
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.InProgress;
-import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Ready;
-import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Reserved;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Suspended;
 
 /**
- * This class is intended for the restoring of a TaskAssigningSolution given a set TaskInfo, a set of User, and the
- * corresponding PlanningData for each task. I'ts typically used when the solver needs to be started during the application
- * startup procedure.
+ * This class is intended for the restoring of a TaskAssigningSolution given a set TaskInfo, a set of User and the
+ * corresponding PlanningData for each task. I'ts typically used when the solver needs to be started during the
+ * application startup procedure.
  */
 public class SolutionBuilder {
 
@@ -91,70 +87,56 @@ public class SolutionBuilder {
     }
 
     public TaskAssigningSolution build() {
-        final List<Task> unAssignedTasks = new ArrayList<>();
+        final List<Task> tasks = new ArrayList<>();
         final Map<String, List<SolutionBuilder.AssignedTask>> assignedTasksByUserId = new HashMap<>();
+        final Map<String, User> usersById = externalUsers.stream()
+                .map(UserUtil::fromExternalUser)
+                .collect(Collectors.toMap(User::getEntityId, Function.identity()));
+        usersById.put(User.PLANNING_USER.getEntityId(), User.PLANNING_USER);
 
         taskInfos.forEach(taskInfo -> {
             final Task task = fromTaskInfo(taskInfo);
-            if (Ready == taskInfo.getStatus()) {
-                //ready tasks are assigned to nobody.
-                unAssignedTasks.add(task);
-            } else if (Reserved == taskInfo.getStatus() || InProgress == taskInfo.getStatus() || Suspended == taskInfo.getStatus()) {
-                if (StringUtils.isNoneEmpty(taskInfo.getActualOwner())) {
-                    // If actualOwner is empty the only chance is that the task was in Ready status and changed to
-                    // Suspended, since Reserved and InProgress tasks has always an owner in jBPM.
-                    // Finally tasks with no actualOwner (Suspended) are skipped, since they'll be properly added to the
-                    // solution when they change to Ready status and the proper jBPM event is raised.
-
-                    final PlanningData planningData = taskInfo.getPlanningData();
-                    boolean pinned;
-                    if (planningData != null) {
-                        //the task was already planned.
-                        pinned = InProgress == taskInfo.getStatus() || planningData.isPublished();
-                        task.setPinned(pinned);
-                        if (Objects.equals(planningData.getAssignedUser(), taskInfo.getActualOwner())) {
-                            //preserve currentParameters.
+            switch (taskInfo.getStatus()) {
+                case Ready:
+                    tasks.add(task);
+                    break;
+                case Reserved:
+                case InProgress:
+                case Suspended:
+                    if (isNoneEmpty(taskInfo.getActualOwner())) {
+                        // If actualOwner is empty the only chance is that the task was in Ready status and changed to
+                        // Suspended, since Reserved and InProgress tasks has always an owner in jBPM.
+                        // Finally tasks with no actualOwner but (Suspended) are skipped, since they'll be properly added to
+                        // the solution when they change to Ready status and the proper jBPM event is raised.
+                        tasks.add(task);
+                        final PlanningData planningData = taskInfo.getPlanningData();
+                        if (planningData != null && taskInfo.getActualOwner().equals(planningData.getAssignedUser())) {
+                            boolean pinned = InProgress == taskInfo.getStatus() || Suspended == taskInfo.getStatus() ||
+                                    planningData.isPublished() || !usersById.containsKey(taskInfo.getActualOwner());
                             addTaskToUser(assignedTasksByUserId, task, planningData.getAssignedUser(), planningData.getIndex(), pinned);
                         } else {
-                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, pinned);
+                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, true);
                         }
-                    } else {
-                        pinned = InProgress == taskInfo.getStatus();
-                        task.setPinned(pinned);
-                        addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, pinned);
                     }
-                }
+                    break;
             }
-        });
-
-        final List<Task> allTasks = new ArrayList<>();
-        final List<User> allUsers = new ArrayList<>();
-        final Map<String, User> usersById = externalUsers.stream()
-                .map(SolutionBuilder::fromExternalUser)
-                .collect(Collectors.toMap(User::getEntityId, Function.identity()));
-        usersById.put(User.PLANNING_USER.getEntityId(), User.PLANNING_USER);
-        //Add the DUMMY_TASK to avoid running into scenarios where the solution remains with no tasks.
-        allTasks.add(DUMMY_TASK);
-
-        usersById.values().forEach(user -> {
-            List<SolutionBuilder.AssignedTask> assignedTasks = assignedTasksByUserId.get(user.getEntityId());
-            if (assignedTasks != null) {
-                //add the tasks for this user.
-                final List<Task> userTasks = assignedTasks.stream().map(AssignedTask::getTask).collect(Collectors.toList());
-                addTasksToUser(user, userTasks);
-                allTasks.addAll(userTasks);
-            }
-            allUsers.add(user);
         });
 
         assignedTasksByUserId.forEach((key, assignedTasks) -> {
-            if (!usersById.containsKey(key)) {
-                //Find the tasks that are assigned to users that are no longer available and let the Solver assign them again.
-                unAssignedTasks.addAll(assignedTasks.stream().map(AssignedTask::getTask).collect(Collectors.toList()));
+            User user = usersById.get(key);
+            if (user == null) {
+                //create the user by convention.
+                user = new User(key.hashCode(), key);
+                usersById.put(key, user);
             }
+            final List<Task> userTasks = assignedTasks.stream().map(AssignedTask::getTask).collect(Collectors.toList());
+            addTasksToUser(user, userTasks);
         });
-        allTasks.addAll(unAssignedTasks);
-        return new TaskAssigningSolution(-1, allUsers, allTasks);
+
+        //Add the DUMMY_TASK to avoid running into scenarios where the solution remains with no tasks.
+        tasks.add(DUMMY_TASK);
+        final List<User> users = new ArrayList<>(usersById.values());
+        return new TaskAssigningSolution(-1, users, tasks);
     }
 
     /**
@@ -164,11 +146,9 @@ public class SolutionBuilder {
      */
     static void addTasksToUser(User user, List<Task> tasks) {
         TaskOrUser previousTask = user;
-
-        // startTime, endTime, nextTask and user are shadow variables that should be calculated by the solver
-        // however right now this is still not happening when the solver is started with a recovered solution
-        // see: https://issues.jboss.org/browse/PLANNER-1316 so by now we initialize them here as part of the
-        // solution restoring.
+        // startTime, endTime, nextTask and user are shadow variables that should be calculated by the solver at
+        // start time. However this is not yet implemented see: https://issues.jboss.org/browse/PLANNER-1316 so by now
+        // they are initialized as part of the solution restoring.
         for (Task nextTask : tasks) {
             previousTask.setNextTask(nextTask);
 
@@ -186,14 +166,15 @@ public class SolutionBuilder {
                               String actualOwner,
                               int index,
                               boolean pinned) {
+        task.setPinned(pinned);
         final List<SolutionBuilder.AssignedTask> userAssignedTasks = tasksByUser.computeIfAbsent(actualOwner, key -> new ArrayList<>());
-        addInOrder(userAssignedTasks, task, index, pinned);
+        addInOrder(userAssignedTasks, task, index);
     }
 
     static void addInOrder(List<SolutionBuilder.AssignedTask> assignedTasks,
                            Task task,
-                           int index,
-                           boolean pinned) {
+                           int index) {
+        boolean pinned = task.isPinned();
         int insertIndex = 0;
         SolutionBuilder.AssignedTask currentTask;
         final Iterator<SolutionBuilder.AssignedTask> it = assignedTasks.iterator();
@@ -230,16 +211,6 @@ public class SolutionBuilder {
             });
         }
         return task;
-    }
-
-    static User fromExternalUser(org.jbpm.task.assigning.user.system.integration.User externalUser) {
-        final User user = new User(externalUser.getId().hashCode(), externalUser.getId());
-        final Set<Group> groups = new HashSet<>();
-        user.setGroups(groups);
-        if (externalUser.getGroups() != null) {
-            externalUser.getGroups().forEach(externalGroup -> groups.add(new Group(externalGroup.getId().hashCode(), externalGroup.getId())));
-        }
-        return user;
     }
 }
 

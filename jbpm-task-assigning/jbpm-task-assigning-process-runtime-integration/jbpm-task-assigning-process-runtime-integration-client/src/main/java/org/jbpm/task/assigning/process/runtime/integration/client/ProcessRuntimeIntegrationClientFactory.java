@@ -29,8 +29,7 @@ import org.kie.server.client.UserTaskServicesClient;
 public class ProcessRuntimeIntegrationClientFactory {
 
     static {
-        //Ensure user bypass is on to be able to e.g. let the client "admin" user to claim tasks on behalf of other
-        // users
+        //Ensure user bypass is on to be able to e.g. let the client "admin" user to claim tasks on behalf of other users
         System.setProperty("org.kie.server.bypass.auth.user", Boolean.TRUE.toString());
     }
 
@@ -41,11 +40,6 @@ public class ProcessRuntimeIntegrationClientFactory {
         final KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(endpoint, login, password);
         configuration.setTimeout(60000);
         configuration.setCapabilities(Collections.singletonList(KieServerConstants.CAPABILITY_BPM));
-
-        //TODO set additional configuration parameters if necessary.
-        //final String kieServerEndpoint = System.getProperty(KieServerConstants.KIE_SERVER_LOCATION);
-        //configuration.setMarshallingFormat(isKieServerRendererEnabled() ? MarshallingFormat.JSON : MarshallingFormat.XSTREAM);
-        //configuration.setLoadBalancer(LoadBalancer.getDefault(endpoint));
         return KieServicesFactory.newKieServicesClient(configuration);
     }
 
@@ -56,12 +50,5 @@ public class ProcessRuntimeIntegrationClientFactory {
         UserTaskServicesClient userTaskServicesClient = servicesClient.getServicesClient(UserTaskServicesClient.class);
         QueryServicesClient queryServicesClient = servicesClient.getServicesClient(QueryServicesClient.class);
         return new ProcessRuntimeIntegrationClientImpl(userTaskServicesClient, queryServicesClient);
-    }
-
-    //TODO remove this method.
-    public static KieServicesClient newKieServicesClient(final String endpoint,
-                                                         final String login,
-                                                         final String password) {
-        return createKieServicesClient(endpoint, login, password);
     }
 }

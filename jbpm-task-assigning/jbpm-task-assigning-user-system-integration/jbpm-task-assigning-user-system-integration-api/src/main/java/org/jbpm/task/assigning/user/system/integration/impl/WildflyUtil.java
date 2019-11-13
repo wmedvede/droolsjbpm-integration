@@ -44,7 +44,7 @@ public class WildflyUtil {
     /**
      * Reads a Wildfly roles.properties configuration file and extracts the user definitions and the corresponding
      * groups. Can be useful when we start processing jBPM runtime tasks and we want to build the users configuration.
-     * @param resource url for a resource in the classpath with the roles.properties file.
+     * @param input InputStream with the user + roles file in the WF format.
      * @return a UserGroupInfo instance with the Users and Groups loaded.
      * @throws IOException
      */

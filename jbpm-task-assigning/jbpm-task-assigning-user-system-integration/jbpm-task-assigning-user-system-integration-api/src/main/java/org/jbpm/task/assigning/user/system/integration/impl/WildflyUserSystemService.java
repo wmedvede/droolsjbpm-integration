@@ -16,6 +16,7 @@
 
 package org.jbpm.task.assigning.user.system.integration.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jbpm.task.assigning.user.system.integration.User;
@@ -25,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * TODO move/refactor this class to the proper module/place, etc.
- * By now we just want an easy way of reading the users/groups from a WF configuration.
  */
 public class WildflyUserSystemService implements UserSystemService {
 
@@ -38,12 +38,20 @@ public class WildflyUserSystemService implements UserSystemService {
         try {
             userGroupInfo = WildflyUtil.buildWildflyUsers(getClass(), WF_ROLES_FILE);
         } catch (Exception e) {
-            LOGGER.error("An error was produced during users file loading", e);
+            LOGGER.error("An error was produced during users file loading from resource: " + WF_ROLES_FILE, e);
+            userGroupInfo = new WildflyUtil.UserGroupInfo(new ArrayList<>(), new ArrayList<>());
         }
     }
 
     @Override
     public List<User> findAllUsers() {
         return userGroupInfo.getUsers();
+    }
+
+    @Override
+    public User findUser(String id) {
+        return userGroupInfo.getUsers().stream()
+                .filter(user -> user.getId().equals(id))
+                .findFirst().orElse(null);
     }
 }

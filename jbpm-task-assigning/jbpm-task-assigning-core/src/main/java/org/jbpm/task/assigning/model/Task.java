@@ -107,9 +107,6 @@ public class Task extends TaskOrUser {
      * are processed both tasks are removed from the solution with the proper problem fact changes. The solution remains
      * thus with no tasks and an exception is thrown.
      * Since the only potential owner for the dummy task is the PLANNING_USER this task won't affect the score dramatically.
-     * <p>
-     * Additionally by banning this task for being pinned we avoid running into the "all pinned tasks issue" see
-     * https://issues.jboss.org/browse/PLANNER-241
      */
     public static final Task DUMMY_TASK = new ImmutableTask(-1,
                                                             -1,
@@ -122,6 +119,10 @@ public class Task extends TaskOrUser {
                                                             Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(PLANNING_USER))),
                                                             Collections.unmodifiableSet(new HashSet<>()));
 
+    /**
+     * This task was introduced for dealing with situations where all tasks are pinned and avoid falling into
+     * https://issues.jboss.org/browse/PLANNER-241. Will be removed when issue is fixed.
+     */
     public static final Task DUMMY_TASK_PLANNER_241 = new ImmutableTask(-2,
                                                                         -1,
                                                                         "dummy-process",

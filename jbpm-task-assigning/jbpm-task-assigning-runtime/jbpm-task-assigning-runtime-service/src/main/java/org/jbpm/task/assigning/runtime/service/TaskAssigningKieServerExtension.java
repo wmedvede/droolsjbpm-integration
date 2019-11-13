@@ -19,13 +19,12 @@ package org.jbpm.task.assigning.runtime.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Executors;
 
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClientFactory;
+import org.jbpm.task.assigning.user.system.integration.UserSystemService;
 import org.jbpm.task.assigning.user.system.integration.impl.WildflyUserSystemService;
 import org.kie.server.api.model.KieServerConfig;
 import org.kie.server.services.api.KieContainerInstance;
@@ -40,6 +39,7 @@ import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBP
 import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD;
 import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_URL;
 import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER;
+import static org.jbpm.task.assigning.runtime.service.TaskAssigningConstants.TASK_ASSIGNING_SOLVER_CONFIG_RESOURCE;
 import static org.jbpm.task.assigning.runtime.service.util.PropertyUtil.readSystemProperty;
 
 public class TaskAssigningKieServerExtension implements KieServerExtension {
@@ -58,8 +58,9 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
     private final List<Object> services = new ArrayList<>();
     private boolean initialized = false;
     private PlanningDataService dataService;
+    private ProcessRuntimeIntegrationClient runtimeClient;
+    private UserSystemService userSystemService;
     private TaskAssigningService taskAssigningService;
-    private ExecutorService executorService;
 
     @Override
     public boolean isInitialized() {
@@ -79,29 +80,18 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
             return;
         }
 
-        startDataService(registry.getConfig());
+        initDataService(registry.getConfig());
+        initRuntimeClient(getDataService());
+        initUserSystemService();
 
-        //TODO, review this initialization
-        ProcessRuntimeIntegrationClient runtimeClient = getRuntimeIntegrationClient();
-        ProcessRuntimeIntegrationDelegate runtimeClientDelegate = new ProcessRuntimeIntegrationDelegate(runtimeClient, dataService);
-
-        //TODO, review this initialization
-        WildflyUserSystemService userSystemService = getUserSystemService();
-
-        this.executorService = new ThreadPoolExecutor(
-                3,
-                3,
-                10, // thread keep alive time
-                TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(3));
-
-        this.taskAssigningService = new TaskAssigningService(new SolverDefRegistryImpl(),
-                                                             runtimeClientDelegate,
-                                                             userSystemService,
+        final ExecutorService executorService = Executors.newFixedThreadPool(3);
+        this.taskAssigningService = new TaskAssigningService(getSolverDef(),
+                                                             getRuntimeClient(),
+                                                             getUserSystemService(),
                                                              executorService);
         taskAssigningService.init();
         this.services.add(taskAssigningService);
-        initialized = true;
+        this.initialized = true;
     }
 
     @Override
@@ -163,21 +153,44 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
         return 26;
     }
 
-    private WildflyUserSystemService getUserSystemService() {
-        //TODO, move this initialization to SPI and add proper parametrization
-        return new WildflyUserSystemService();
+    private SolverDef getSolverDef() {
+        String solverConfigResource = System.getProperty(TASK_ASSIGNING_SOLVER_CONFIG_RESOURCE,
+                                                         "taskAssigningSolverConfig.xml");
+        return new SolverDef(solverConfigResource);
     }
 
-    private ProcessRuntimeIntegrationClient getRuntimeIntegrationClient() {
-        //TODO, future iteration will add the ability of getting the available process runtime url by asking he controller.
+    private void initUserSystemService() {
+        //TODO (SPI based user system integration will came up with https://issues.jboss.org/browse/PLANNER-1626)
+        userSystemService = new WildflyUserSystemService();
+    }
+
+    private UserSystemService getUserSystemService() {
+        return userSystemService;
+    }
+
+    private void initDataService(KieServerConfig config) {
+        dataService = new PlanningDataService();
+        dataService.init(config);
+    }
+
+    private PlanningDataService getDataService() {
+        return dataService;
+    }
+
+    private void initRuntimeClient(PlanningDataService dataService) {
+        ProcessRuntimeIntegrationClient directClient = createRuntimeIntegrationClient();
+        runtimeClient = new ProcessRuntimeIntegrationDelegate(directClient, dataService);
+    }
+
+    private ProcessRuntimeIntegrationClient getRuntimeClient() {
+        return runtimeClient;
+    }
+
+    private ProcessRuntimeIntegrationClient createRuntimeIntegrationClient() {
+        //TODO, future iteration will add the ability of getting the available kie-server runtime urls by asking the controller.
         String url = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_URL, "http://localhost:8080/kie-server/services/rest/server", value -> value);
         String user = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER, "wbadmin", value -> value);
         String pwd = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD, null, value -> value);
         return ProcessRuntimeIntegrationClientFactory.newIntegrationClient(url, user, pwd);
-    }
-
-    private void startDataService(KieServerConfig config) {
-        dataService = new PlanningDataService();
-        dataService.init(config);
     }
 }

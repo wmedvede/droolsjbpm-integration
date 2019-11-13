@@ -21,4 +21,6 @@ import java.util.List;
 public interface UserSystemService {
 
     List<User> findAllUsers();
+
+    User findUser(String id);
 }

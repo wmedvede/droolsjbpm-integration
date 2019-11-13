@@ -18,19 +18,13 @@ package org.jbpm.task.assigning.runtime.service;
 
 public class SolverDef {
 
-    private String solverId;
-    private String solverConfigFile;
+    private String solverConfigResource;
 
-    public SolverDef(String solverId, String solverConfigFile) {
-        this.solverId = solverId;
-        this.solverConfigFile = solverConfigFile;
+    public SolverDef(String solverConfigResource) {
+        this.solverConfigResource = solverConfigResource;
     }
 
-    public String getSolverId() {
-        return solverId;
-    }
-
-    public String getSolverConfigFile() {
-        return solverConfigFile;
+    public String getSolverConfigResource() {
+        return solverConfigResource;
     }
 }

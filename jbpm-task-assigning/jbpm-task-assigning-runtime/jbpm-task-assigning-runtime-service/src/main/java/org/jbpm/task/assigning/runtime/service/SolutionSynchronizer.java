@@ -36,11 +36,10 @@ import static org.kie.soup.commons.validation.PortablePreconditions.checkConditi
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
 /**
- * This class manages reading of current jBPM state and offer the results to the consumer for updating current solution
- * with the potential changes. Additionally at the first time, when the SolverExecutor is not yet started, it manages
- * the initial solution recovery from the proper repository and invokes the SolverExecutor start.
- * As soon the SolverExecutor was started it starts the synchronization with the configured period by implementing a
- * polling strategy.
+ * This class manages the periodical reading (polling strategy) of current tasks from the jBPM runtime and the supply of
+ * the results to the "resultConsumer" for updating the current solution with the potential changes. It also determines
+ * if the SolverExecutor needs to be started depending on his status, whenever the SolverExecutor is stopped it'll be
+ * started by reading the recovered solution from the jBPM runtime.
  */
 public class SolutionSynchronizer extends RunnableBase {
 
@@ -51,12 +50,12 @@ public class SolutionSynchronizer extends RunnableBase {
     private final UserSystemService userSystemService;
     private final long period;
     private final Consumer<Result> resultConsumer;
+    private int solverExecutorStarts = 0;
 
     private final Semaphore startPermit = new Semaphore(0);
 
     public static class Result {
 
-        private Exception error;
         long readStartTime;
         private List<TaskInfo> taskInfos;
 
@@ -65,32 +64,12 @@ public class SolutionSynchronizer extends RunnableBase {
             this.taskInfos = taskInfos;
         }
 
-        private Result(Exception error) {
-            this.error = error;
-        }
-
-        public boolean hasError() {
-            return error != null;
-        }
-
-        public Exception getError() {
-            return error;
-        }
-
         public long getReadStartTime() {
             return readStartTime;
         }
 
-        public void setReadStartTime(long readStartTime) {
-            this.readStartTime = readStartTime;
-        }
-
         public List<TaskInfo> getTaskInfos() {
             return taskInfos;
-        }
-
-        public void setTaskInfos(List<TaskInfo> taskInfos) {
-            this.taskInfos = taskInfos;
         }
     }
 
@@ -113,15 +92,14 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     /**
-     * This method starts the SolutionSynchronizer. It's a non thread-safe method, but only the first invocation
-     * has effect.
+     * Starts the SolutionSynchronizer. Thread-safe method, only the first invocation has effect.
      */
     public void start() {
         startPermit.release();
     }
 
     /**
-     * This method programmes the subsequent finalization of the processing, that will be produced as soon as possible.
+     * Starts the synchronizing finalization, that will be produced as soon as possible.
      * It's a non thread-safe method, but only first invocation has effect.
      */
     @Override
@@ -134,7 +112,6 @@ public class SolutionSynchronizer extends RunnableBase {
     public void run() {
         LOGGER.debug("Solution Synchronizer Started");
         try {
-            //wait until the start() method is invoked at any point of time.
             startPermit.acquire();
         } catch (InterruptedException e) {
             super.destroy();
@@ -144,24 +121,28 @@ public class SolutionSynchronizer extends RunnableBase {
             try {
                 Thread.sleep(period);
                 if (isAlive()) {
-                    if (!solverExecutor.isStarted()) {
+                    if (solverExecutor.isStopped()) {
                         try {
-                            LOGGER.debug("Solution Synchronizer loading initial solution.");
+                            LOGGER.debug("Solution Synchronizer will recover the solution from the jBPM runtime for starting the solver.");
                             final TaskAssigningSolution recoveredSolution = recoverSolution();
                             if (isAlive() && !solverExecutor.isDestroyed()) {
                                 if (!recoveredSolution.getTaskList().isEmpty()) {
                                     solverExecutor.start(recoveredSolution);
-                                    LOGGER.debug("Initial solution was successfully loaded.");
+                                    LOGGER.debug("Solution was successfully recovered. Solver was started for #{} time.", ++solverExecutorStarts);
+                                    if (solverExecutorStarts > 1) {
+                                        LOGGER.debug("It looks like it was necessary to restart the solver. It might" +
+                                                             " have been caused due to errors during the solution applying in the jBPM runtime");
+                                    }
                                 } else {
-                                    LOGGER.debug("It looks like there are no tasks for loading an initial solution at this moment. " +
-                                                         "Next attempt will be in " + period + " milliseconds");
+                                    LOGGER.debug("It looks like there are no tasks for recovering the solution at this moment." +
+                                                         " Next attempt will be in " + period + " milliseconds");
                                 }
                             }
                         } catch (Exception e) {
-                            LOGGER.error("An error was produced during initial solution loading. " +
-                                                 "Next attempt will be in " + period + " milliseconds", e);
+                            LOGGER.error("An error was produced during solution recovering." +
+                                                 " Next attempt will be in " + period + " milliseconds", e);
                         }
-                    } else {
+                    } else if (solverExecutor.isStarted()) {
                         try {
                             LOGGER.debug("Refreshing solution status from external repository.");
                             final long readStartTime = System.currentTimeMillis();
@@ -171,8 +152,8 @@ public class SolutionSynchronizer extends RunnableBase {
                                 resultConsumer.accept(new Result(readStartTime, updatedTaskInfos));
                             }
                         } catch (Exception e) {
-                            LOGGER.error("An error was produced during solution status refresh from external repository" +
-                                                 "Next attempt will be in " + period + " milliseconds", e);
+                            LOGGER.error("An error was produced during solution status refresh from external repository." +
+                                                 " Next attempt will be in " + period + " milliseconds", e);
                         }
                     }
                 }

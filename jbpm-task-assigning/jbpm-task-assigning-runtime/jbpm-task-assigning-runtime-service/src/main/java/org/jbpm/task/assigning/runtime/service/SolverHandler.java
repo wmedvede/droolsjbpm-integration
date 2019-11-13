@@ -97,7 +97,7 @@ public class SolverHandler {
 
         solutionProcessor = new SolutionProcessor(runtimeClient, this::onSolutionProcessed, targetUserId,
                                                   publishWindowSize);
-        executorService.execute(solverExecutor); //is started by the SolutionSynchronizer
+        executorService.execute(solverExecutor); //is started/stopped by the SolutionSynchronizer.
         executorService.execute(solutionSynchronizer);
         executorService.execute(solutionProcessor); //automatically starts and waits for a solution to process.
         solutionSynchronizer.start();
@@ -121,17 +121,13 @@ public class SolverHandler {
     private void addProblemFactChanges(List<ProblemFactChange<TaskAssigningSolution>> changes) {
         checkNotNull("changes", changes);
         if (!solverExecutor.isStarted()) {
-            LOGGER.info("SolverExecutor has not yet been started. Changes will be discarded", changes);
-            return;
-        }
-        if (solverExecutor.isDestroyed()) {
-            LOGGER.info("SolverExecutor has been destroyed. Changes will be discarded", changes);
+            LOGGER.info("SolverExecutor has not been started. Changes will be discarded", changes);
             return;
         }
         if (!changes.isEmpty()) {
             solverExecutor.addProblemFactChanges(changes);
         } else {
-            LOGGER.info("It looks line an empty change list was provided. Nothing will be done since it has no effect on the solution.");
+            LOGGER.info("It looks like an empty change list was provided. Nothing will be done since it has no effect on the solution.");
         }
     }
 
@@ -162,11 +158,16 @@ public class SolverHandler {
      * @param result result produced by the SolutionProcessor.
      */
     private void onSolutionProcessed(SolutionProcessor.Result result) {
-        LOGGER.debug("Solution was processed with result: " + result.hasError());
         lock.lock();
         try {
             disableUpdates();
-            if (nextSolution != null) {
+            if (result.hasError()) {
+                LOGGER.error("An error was produced during the solution processing. The solver will be restarted with"
+                                     + " a recovered solution from the jBPM runtime.", result.getError());
+                solverExecutor.stop();
+                currentSolution = null;
+                nextSolution = null;
+            } else if (nextSolution != null) {
                 currentSolution = nextSolution;
                 nextSolution = null;
                 solutionProcessor.process(currentSolution);
@@ -180,7 +181,7 @@ public class SolverHandler {
 
     /**
      * Invoked every time the SolutionSynchronizer gets updated information from the jBPM runtime. This method
-     * analyses the list of refreshed information and create and program the necessary changes into the solver.
+     * analyses the updated information and creates and program the necessary changes into the solver.
      * @param result List of tasks information returned from the jBPM runtime.
      */
     private void onUpdateSolution(SolutionSynchronizer.Result result) {
@@ -190,6 +191,7 @@ public class SolverHandler {
                 final List<ProblemFactChange<TaskAssigningSolution>> changes = new SolutionChangesBuilder()
                         .withSolution(currentSolution)
                         .withTasks(result.getTaskInfos())
+                        .withUserSystem(userSystemService)
                         .build();
                 applyIfNotEmpty(changes);
             }
@@ -203,12 +205,12 @@ public class SolverHandler {
             LOGGER.debug("Current solution will be updated with {} changes from last synchronization", changes.size());
             addProblemFactChanges(changes);
         } else {
-            LOGGER.debug("There are no changes to apply from last synchronization.", changes.size());
+            LOGGER.debug("There are no changes to apply from last synchronization.");
         }
     }
 
     private Solver<TaskAssigningSolution> createSolver(SolverDef solverDef) {
-        SolverFactory<TaskAssigningSolution> solverFactory = SolverFactory.createFromXmlResource(solverDef.getSolverConfigFile());
+        SolverFactory<TaskAssigningSolution> solverFactory = SolverFactory.createFromXmlResource(solverDef.getSolverConfigResource());
         return solverFactory.buildSolver();
     }
 

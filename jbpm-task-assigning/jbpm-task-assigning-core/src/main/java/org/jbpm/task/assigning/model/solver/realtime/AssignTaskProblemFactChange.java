@@ -16,6 +16,8 @@
 
 package org.jbpm.task.assigning.model.solver.realtime;
 
+import java.util.ArrayList;
+
 import org.jbpm.task.assigning.TaskAssigningRuntimeException;
 import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
@@ -34,16 +36,24 @@ import org.optaplanner.core.impl.solver.ProblemFactChange;
  * Additionally since the "direct" assignment comes from an "external" system it'll remain pinned.
  * <p>
  * Both the task and user to work with are looked up by using their corresponding id's. If the task is not found it'll
- * be created and added to the working solution, while if the user is not found and exception will be thrown.
+ * be created and added to the working solution, while if the user is not found it'll be added to the solution
+ * or an exception will be thrown depending on the addIfNotExists value.
  */
 public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssigningSolution> {
 
     private Task task;
     private User user;
+    private boolean addIfNotExists = false;
 
     public AssignTaskProblemFactChange(Task task, User user) {
         this.task = task;
         this.user = user;
+    }
+
+    public AssignTaskProblemFactChange(Task task, User user, boolean addIfNotExists) {
+        this.task = task;
+        this.user = user;
+        this.addIfNotExists = addIfNotExists;
     }
 
     public Task getTask() {
@@ -60,7 +70,17 @@ public class AssignTaskProblemFactChange implements ProblemFactChange<TaskAssign
 
         User workingUser = scoreDirector.lookUpWorkingObjectOrReturnNull(user);
         if (workingUser == null) {
-            throw new TaskAssigningRuntimeException(String.format("Expected user: %s was not found in current working solution", user));
+            if (!addIfNotExists) {
+                throw new TaskAssigningRuntimeException(String.format("Expected user: %s was not found in current working solution", user));
+            } else {
+                // Shallow clone the user list so only workingSolution is affected, not bestSolution
+                solution.setUserList(new ArrayList<>(solution.getUserList()));
+                // Add the problem fact itself
+                scoreDirector.beforeProblemFactAdded(user);
+                solution.getUserList().add(user);
+                scoreDirector.afterProblemFactAdded(user);
+                workingUser = user;
+            }
         }
 
         Task workingTask = scoreDirector.lookUpWorkingObjectOrReturnNull(task);

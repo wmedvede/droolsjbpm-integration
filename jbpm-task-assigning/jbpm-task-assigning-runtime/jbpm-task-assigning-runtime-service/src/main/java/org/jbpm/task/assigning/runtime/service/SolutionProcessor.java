@@ -143,6 +143,7 @@ public class SolutionProcessor extends RunnableBase {
                 LOGGER.error("Solution Processor was interrupted", e);
             }
         }
+        LOGGER.debug("Solution Processor finished");
     }
 
     private void doProcess(final TaskAssigningSolution solution) {
@@ -196,8 +197,8 @@ public class SolutionProcessor extends RunnableBase {
             result = new Result(e);
         }
 
+        LOGGER.debug("Solution processing finished: " + solution);
         processing.set(false);
         resultConsumer.accept(result);
-        LOGGER.debug("Solution processing finished: " + solution);
     }
 }

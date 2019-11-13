@@ -45,4 +45,10 @@ public class TaskAssigningConstants {
      * Property for configuring the solution synchronization period in milliseconds.
      */
     public static final String JBPM_TASK_ASSIGNING_SYNC_PERIOD = "org.jbpm.server.taskAssigning.solutionSyncPeriod";
+
+    /**
+     * Property for configuring the resource with the solver configuration.
+     */
+    public static final String TASK_ASSIGNING_SOLVER_CONFIG_RESOURCE = "org.jbpm.services.task.assigning.solverConfigResource";
+
 }

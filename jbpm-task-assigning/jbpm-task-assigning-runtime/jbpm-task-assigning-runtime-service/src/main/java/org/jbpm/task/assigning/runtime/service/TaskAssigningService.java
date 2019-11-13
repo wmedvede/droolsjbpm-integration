@@ -20,33 +20,27 @@ import java.util.concurrent.ExecutorService;
 
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.user.system.integration.UserSystemService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TaskAssigningService {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(TaskAssigningService.class);
-
-    private SolverDefRegistry solverDefRegistry;
-    private ProcessRuntimeIntegrationClient runtimeClient;
-    private UserSystemService userSystemService;
-    private ExecutorService executorService;
+    private final SolverDef solverDef;
+    private final ProcessRuntimeIntegrationClient runtimeClient;
+    private final UserSystemService userSystemService;
+    private final ExecutorService executorService;
 
     private SolverHandler solverHandler;
 
-    public TaskAssigningService(SolverDefRegistry solverDefRegistry,
-                                ProcessRuntimeIntegrationClient runtimeClient,
-                                UserSystemService userSystemService,
-                                ExecutorService executorService) {
-        this.solverDefRegistry = solverDefRegistry;
+    public TaskAssigningService(final SolverDef solverDef,
+                                final ProcessRuntimeIntegrationClient runtimeClient,
+                                final UserSystemService userSystemService,
+                                final ExecutorService executorService) {
+        this.solverDef = solverDef;
         this.runtimeClient = runtimeClient;
         this.userSystemService = userSystemService;
         this.executorService = executorService;
-        solverDefRegistry.init();
     }
 
     public void init() {
-        SolverDef solverDef = solverDefRegistry.getSolverDef();
         solverHandler = new SolverHandler(solverDef, runtimeClient, userSystemService, executorService);
         solverHandler.init();
         solverHandler.start();

@@ -22,7 +22,6 @@ import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
-import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.jbpm.task.assigning.user.system.integration.UserSystemService;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public class SolutionSynchronizer extends RunnableBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(SolutionSynchronizer.class);
 
     private final SolverExecutor solverExecutor;
-    private final ProcessRuntimeIntegrationClient runtimeClient;
+    private final ProcessRuntimeIntegrationDelegate runtimeClientDelegate;
     private final UserSystemService userSystemService;
     private final long period;
     private final Consumer<Result> resultConsumer;
@@ -74,18 +73,18 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     public SolutionSynchronizer(final SolverExecutor solverExecutor,
-                                final ProcessRuntimeIntegrationClient runtimeClient,
+                                final ProcessRuntimeIntegrationDelegate runtimeClientDelegate,
                                 final UserSystemService userSystem,
                                 final long period,
                                 final Consumer<Result> resultConsumer) {
         checkNotNull("solverExecutor", solverExecutor);
-        checkNotNull("runtimeClient", runtimeClient);
+        checkNotNull("runtimeClientDelegate", runtimeClientDelegate);
         checkNotNull("userSystem", userSystem);
         checkCondition("period", period > 0);
         checkNotNull("resultConsumer", resultConsumer);
 
         this.solverExecutor = solverExecutor;
-        this.runtimeClient = runtimeClient;
+        this.runtimeClientDelegate = runtimeClientDelegate;
         this.userSystemService = userSystem;
         this.period = period;
         this.resultConsumer = resultConsumer;
@@ -166,9 +165,7 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     private TaskAssigningSolution recoverSolution() {
-        final List<TaskInfo> taskInfos = runtimeClient.findTasks(Arrays.asList(Ready, Reserved, InProgress, Suspended),
-                                                                 0,
-                                                                 100000);
+        final List<TaskInfo> taskInfos = loadTaskInfos();
         final List<org.jbpm.task.assigning.user.system.integration.User> externalUsers = userSystemService.findAllUsers();
         return new SolutionBuilder()
                 .withTasks(taskInfos)
@@ -177,6 +174,6 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     private List<TaskInfo> loadTaskInfos() {
-        return runtimeClient.findTasks(Arrays.asList(Ready, Reserved, InProgress, Suspended), 0, 100000);
+        return runtimeClientDelegate.findTasks(Arrays.asList(Ready, Reserved, InProgress, Suspended));
     }
 }

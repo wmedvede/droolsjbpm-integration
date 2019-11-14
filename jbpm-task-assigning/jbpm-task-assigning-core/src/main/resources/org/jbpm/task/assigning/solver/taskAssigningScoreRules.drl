@@ -52,7 +52,7 @@ end
 // to a different jBPM user by using the jBPM tasks lists administration, etc.
 rule "PlanningUser assignment"
     when
-        Task(user != null && User.PLANNING_USER.getEntityId().equals(user.getEntityId()))
+        Task(user != null && User.IS_PLANNING_USER.test(user.getEntityId()))
     then
         // a penalization is added each time the PLANNING_USER is assigned.
         scoreHolder.addSoftConstraintMatch(kcontext, 0, -1);

@@ -81,12 +81,12 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
         }
 
         initDataService(registry.getConfig());
-        initRuntimeClient(getDataService());
+        initRuntimeClient();
         initUserSystemService();
 
         final ExecutorService executorService = Executors.newFixedThreadPool(3);
         this.taskAssigningService = new TaskAssigningService(getSolverDef(),
-                                                             getRuntimeClient(),
+                                                             new ProcessRuntimeIntegrationDelegate(getRuntimeClient(), getDataService()),
                                                              getUserSystemService(),
                                                              executorService);
         taskAssigningService.init();
@@ -102,11 +102,30 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
 
     @Override
     public void createContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
+        // TODO future iteration:
+        // no-op or make sure the TaskAssigning TaskLifeCycleEventListener is properly registered in the cases where
+        // the deployment unit has configured persistence.
         LOGGER.debug("Create container: " + id + " at " + EXTENSION_NAME + " extension.");
     }
 
     @Override
+    public void activateContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
+        // TODO future iteration:
+        // see what jBPM runtime extension really does here, and depending on this analyze the impact on the solution.
+        LOGGER.debug("Activate container: " + id + " at " + EXTENSION_NAME + " extension.");
+    }
+
+    @Override
+    public void deactivateContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
+        // TODO future iteration:
+        // see what jBPM runtime extension really does here, and depending on this analyze the impact on the solution.
+        LOGGER.debug("Deactivate container: " + id + " at " + EXTENSION_NAME + " extension.");
+    }
+
+    @Override
     public void updateContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
+        // TODO future iteration:
+        // see what jBPM runtime extension really does here, and depending on this analyze the impact on the solution.
         LOGGER.debug("Update container: " + id + " at " + EXTENSION_NAME + " extension.");
     }
 
@@ -117,6 +136,8 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
 
     @Override
     public void disposeContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
+        // TODO future iteration: Analyze the treatment of start/stop/dispose operation on containers.
+        // see what jBPM runtime extension really does here, and depending on this analyze the impact on the solution.
         LOGGER.debug("Dispose container: " + id + " at " + EXTENSION_NAME + " extension.");
     }
 
@@ -177,9 +198,8 @@ public class TaskAssigningKieServerExtension implements KieServerExtension {
         return dataService;
     }
 
-    private void initRuntimeClient(PlanningDataService dataService) {
-        ProcessRuntimeIntegrationClient directClient = createRuntimeIntegrationClient();
-        runtimeClient = new ProcessRuntimeIntegrationDelegate(directClient, dataService);
+    private void initRuntimeClient() {
+        this.runtimeClient = createRuntimeIntegrationClient();
     }
 
     private ProcessRuntimeIntegrationClient getRuntimeClient() {

@@ -16,11 +16,6 @@
 
 package org.jbpm.task.assigning.runtime.service;
 
-import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
-import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClientFactory;
-import org.jbpm.task.assigning.runtime.service.SolverDefRegistryImpl;
-import org.jbpm.task.assigning.runtime.service.SolverHandler;
-import org.jbpm.task.assigning.user.system.integration.impl.WildflyUserSystemService;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -29,6 +24,7 @@ public class SolverHandlerTest {
     @Ignore
     @Test
     public void loadSolutionTest() {
+        /*
         SolverDefRegistryImpl solverDefRegistry = new SolverDefRegistryImpl();
         solverDefRegistry.init();
         WildflyUserSystemService userSystemService = new WildflyUserSystemService();
@@ -42,6 +38,7 @@ public class SolverHandlerTest {
 
         solverHandler.init();
         solverHandler.start();
+        */
         int i = 0;
     }
 }

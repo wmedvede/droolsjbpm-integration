@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jbpm.task.assigning.runtime.service;
 
 import java.util.Objects;
@@ -7,11 +23,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
+import org.jbpm.task.assigning.process.runtime.integration.client.PlanningTask;
 
 @Entity
-@Table(name = "PlanningData")
-public class PlanningDataImpl implements PlanningData {
+@Table(name = "PlanningTask")
+public class PlanningTaskImpl implements PlanningTask {
 
     @Id
     @Column(name = "taskId")
@@ -21,14 +37,14 @@ public class PlanningDataImpl implements PlanningData {
     private short published = 0;
     private short detached = 0;
 
-    public PlanningDataImpl() {
+    public PlanningTaskImpl() {
     }
 
-    public PlanningDataImpl(long taskId) {
+    public PlanningTaskImpl(long taskId) {
         this.taskId = taskId;
     }
 
-    public PlanningDataImpl(long taskId, String assignedUser, int index, boolean published, boolean detached) {
+    public PlanningTaskImpl(long taskId, String assignedUser, int index, boolean published, boolean detached) {
         this.taskId = taskId;
         this.assignedUser = assignedUser;
         this.index = index;
@@ -91,10 +107,10 @@ public class PlanningDataImpl implements PlanningData {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof PlanningDataImpl)) {
+        if (!(o instanceof PlanningTaskImpl)) {
             return false;
         }
-        PlanningDataImpl that = (PlanningDataImpl) o;
+        PlanningTaskImpl that = (PlanningTaskImpl) o;
         return taskId == that.taskId &&
                 Objects.equals(assignedUser, that.assignedUser) &&
                 index == that.index &&

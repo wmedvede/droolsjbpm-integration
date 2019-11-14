@@ -28,13 +28,12 @@ import java.util.function.Consumer;
 import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.model.User;
-import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskPlanningInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
-import static org.jbpm.task.assigning.model.Task.DUMMY_TASK_PLANNER_241;
+import static org.jbpm.task.assigning.model.Task.IS_NOT_DUMMY;
+import static org.jbpm.task.assigning.model.User.IS_PLANNING_USER;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkCondition;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
@@ -46,7 +45,7 @@ public class SolutionProcessor extends RunnableBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SolutionProcessor.class);
 
-    private final ProcessRuntimeIntegrationClient runtimeClient;
+    private final ProcessRuntimeIntegrationDelegate runtimeClientDelegate;
     private final Consumer<Result> resultConsumer;
     private final String targetUserId;
     private final int publishWindowSize;
@@ -78,20 +77,20 @@ public class SolutionProcessor extends RunnableBase {
     }
 
     /**
-     * @param runtimeClient a ProcessRuntimeClient instance for executing methods into the jBPM runtime.
+     * @param runtimeClientDelegate a ProcessRuntimeIntegrationDelegate instance for executing methods into the jBPM runtime.
      * @param resultConsumer a consumer for processing the results.
      * @param targetUserId a user identifier for using as the "on behalf of" user when interacting with the jBPM runtime.
      * @param publishWindowSize Integer value > 0 that indicates the number of tasks to be published.
      */
-    public SolutionProcessor(final ProcessRuntimeIntegrationClient runtimeClient,
+    public SolutionProcessor(final ProcessRuntimeIntegrationDelegate runtimeClientDelegate,
                              final Consumer<Result> resultConsumer,
                              final String targetUserId,
                              final int publishWindowSize) {
-        checkNotNull("runtimeClient", runtimeClient);
+        checkNotNull("runtimeClientDelegate", runtimeClientDelegate);
         checkNotNull("resultConsumer", resultConsumer);
         checkNotNull("targetUserId", targetUserId);
         checkCondition("publishWindowSize", publishWindowSize > 0);
-        this.runtimeClient = runtimeClient;
+        this.runtimeClientDelegate = runtimeClientDelegate;
         this.resultConsumer = resultConsumer;
         this.targetUserId = targetUserId;
         this.publishWindowSize = publishWindowSize;
@@ -161,28 +160,30 @@ public class SolutionProcessor extends RunnableBase {
             publishedCount = 0;
             Task nextTask = user.getNextTask();
             while (nextTask != null) {
-                if (!DUMMY_TASK.getId().equals(nextTask.getId()) && !DUMMY_TASK_PLANNER_241.getId().equals(nextTask.getId())) {
+                if (IS_NOT_DUMMY.test(nextTask)) {
                     //dummy tasks has nothing to with the jBPM runtime, don't process them
                     tasksById.put(nextTask.getId(), nextTask);
                     taskPlanningInfo = new TaskPlanningInfo(nextTask.getContainerId(),
                                                             nextTask.getId(),
                                                             nextTask.getProcessInstanceId(),
-                                                            new PlanningDataImpl(nextTask.getId()));
+                                                            new PlanningTaskImpl(nextTask.getId()));
 
-                    taskPlanningInfo.getPlanningData().setPublished(nextTask.isPinned());
-                    taskPlanningInfo.getPlanningData().setAssignedUser(user.getUser().getEntityId());
-                    taskPlanningInfo.getPlanningData().setIndex(index++);
+                    taskPlanningInfo.getPlanningTask().setPublished(nextTask.isPinned());
+                    taskPlanningInfo.getPlanningTask().setAssignedUser(user.getUser().getEntityId());
+                    taskPlanningInfo.getPlanningTask().setIndex(index++);
                     userTaskPlanningInfos.add(taskPlanningInfo);
-                    publishedCount += taskPlanningInfo.getPlanningData().isPublished() ? 1 : 0;
+                    publishedCount += taskPlanningInfo.getPlanningTask().isPublished() ? 1 : 0;
                 }
                 nextTask = nextTask.getNextTask();
             }
-            userTaskPlanningInfosIt = userTaskPlanningInfos.iterator();
-            while (userTaskPlanningInfosIt.hasNext() && publishedCount < publishWindowSize) {
-                taskPlanningInfo = userTaskPlanningInfosIt.next();
-                if (!taskPlanningInfo.getPlanningData().isPublished()) {
-                    taskPlanningInfo.getPlanningData().setPublished(true);
-                    publishedCount++;
+            if (!IS_PLANNING_USER.test(user.getEntityId())) {
+                userTaskPlanningInfosIt = userTaskPlanningInfos.iterator();
+                while (userTaskPlanningInfosIt.hasNext() && publishedCount < publishWindowSize) {
+                    taskPlanningInfo = userTaskPlanningInfosIt.next();
+                    if (!taskPlanningInfo.getPlanningTask().isPublished()) {
+                        taskPlanningInfo.getPlanningTask().setPublished(true);
+                        publishedCount++;
+                    }
                 }
             }
             taskPlanningInfos.addAll(userTaskPlanningInfos);
@@ -190,7 +191,7 @@ public class SolutionProcessor extends RunnableBase {
 
         Result result;
         try {
-            runtimeClient.applyPlanning(taskPlanningInfos, targetUserId);
+            runtimeClientDelegate.applyPlanning(taskPlanningInfos, targetUserId);
             result = new Result();
         } catch (Exception e) {
             LOGGER.error("An error was produced during solution processing, applyPlanning execution failed.", e);

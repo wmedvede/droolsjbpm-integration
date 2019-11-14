@@ -18,30 +18,29 @@ package org.jbpm.task.assigning.runtime.service;
 
 import java.util.concurrent.ExecutorService;
 
-import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.user.system.integration.UserSystemService;
 
 public class TaskAssigningService {
 
     private final SolverDef solverDef;
-    private final ProcessRuntimeIntegrationClient runtimeClient;
+    private final ProcessRuntimeIntegrationDelegate runtimeClientDelegate;
     private final UserSystemService userSystemService;
     private final ExecutorService executorService;
 
     private SolverHandler solverHandler;
 
     public TaskAssigningService(final SolverDef solverDef,
-                                final ProcessRuntimeIntegrationClient runtimeClient,
+                                final ProcessRuntimeIntegrationDelegate runtimeClientDelegate,
                                 final UserSystemService userSystemService,
                                 final ExecutorService executorService) {
         this.solverDef = solverDef;
-        this.runtimeClient = runtimeClient;
+        this.runtimeClientDelegate = runtimeClientDelegate;
         this.userSystemService = userSystemService;
         this.executorService = executorService;
     }
 
     public void init() {
-        solverHandler = new SolverHandler(solverDef, runtimeClient, userSystemService, executorService);
+        solverHandler = new SolverHandler(solverDef, runtimeClientDelegate, userSystemService, executorService);
         solverHandler.init();
         solverHandler.start();
     }

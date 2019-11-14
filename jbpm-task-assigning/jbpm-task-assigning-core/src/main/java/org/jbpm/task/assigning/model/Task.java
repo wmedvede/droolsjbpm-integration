@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.jbpm.task.assigning.model.solver.StartAndEndTimeUpdatingVariableListener;
@@ -133,6 +134,8 @@ public class Task extends TaskOrUser {
                                                                         false,
                                                                         Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(PLANNING_USER))),
                                                                         Collections.unmodifiableSet(new HashSet<>()));
+
+    public static final Predicate<Task> IS_NOT_DUMMY = task -> !DUMMY_TASK.getId().equals(task.getId()) && !DUMMY_TASK_PLANNER_241.getId().equals(task.getId());
 
     private long processInstanceId;
     private String processId;

@@ -29,7 +29,8 @@ import org.kie.server.client.UserTaskServicesClient;
 public class ProcessRuntimeIntegrationClientFactory {
 
     static {
-        //Ensure user bypass is on to be able to e.g. let the client "admin" user to claim tasks on behalf of other users
+        // Ensure user bypass is on to be able to e.g. let the client "admin" user to claim/delegate tasks on behalf
+        // of other users
         System.setProperty("org.kie.server.bypass.auth.user", Boolean.TRUE.toString());
     }
 

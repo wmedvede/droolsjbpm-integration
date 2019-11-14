@@ -48,7 +48,7 @@ public class SolverHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(SolverHandler.class);
 
     private final SolverDef solverDef;
-    private final ProcessRuntimeIntegrationClient runtimeClient;
+    private final ProcessRuntimeIntegrationDelegate runtimeClientDelegate;
     private final UserSystemService userSystemService;
     private final ExecutorService executorService;
 
@@ -70,15 +70,15 @@ public class SolverHandler {
     private static final long syncPeriod = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_PERIOD, 5000L, Long::parseLong);
 
     public SolverHandler(final SolverDef solverDef,
-                         final ProcessRuntimeIntegrationClient runtimeClient,
+                         final ProcessRuntimeIntegrationDelegate runtimeClientDelegate,
                          final UserSystemService userSystemService,
                          final ExecutorService executorService) {
         checkNotNull("solverDef", solverDef);
-        checkNotNull("runtimeClient", runtimeClient);
+        checkNotNull("runtimeClientDelegate", runtimeClientDelegate);
         checkNotNull("userSystemService", userSystemService);
         checkNotNull("executorService", executorService);
         this.solverDef = solverDef;
-        this.runtimeClient = runtimeClient;
+        this.runtimeClientDelegate = runtimeClientDelegate;
         this.userSystemService = userSystemService;
         this.executorService = executorService;
     }
@@ -92,10 +92,10 @@ public class SolverHandler {
     public void start() {
         disableUpdates();
         solverExecutor = new SolverExecutor(solver, this::onBestSolutionChange);
-        solutionSynchronizer = new SolutionSynchronizer(solverExecutor, runtimeClient, userSystemService,
+        solutionSynchronizer = new SolutionSynchronizer(solverExecutor, runtimeClientDelegate, userSystemService,
                                                         syncPeriod, this::onUpdateSolution);
 
-        solutionProcessor = new SolutionProcessor(runtimeClient, this::onSolutionProcessed, targetUserId,
+        solutionProcessor = new SolutionProcessor(runtimeClientDelegate, this::onSolutionProcessed, targetUserId,
                                                   publishWindowSize);
         executorService.execute(solverExecutor); //is started/stopped by the SolutionSynchronizer.
         executorService.execute(solutionSynchronizer);
@@ -110,7 +110,7 @@ public class SolverHandler {
 
         executorService.shutdown();
         try {
-            executorService.awaitTermination(30, TimeUnit.SECONDS);
+            executorService.awaitTermination(10, TimeUnit.SECONDS);
             LOGGER.debug("ExecutorService was successfully shutted down.");
         } catch (InterruptedException e) {
             LOGGER.debug("An exception was thrown during executionService graceful termination.", e);

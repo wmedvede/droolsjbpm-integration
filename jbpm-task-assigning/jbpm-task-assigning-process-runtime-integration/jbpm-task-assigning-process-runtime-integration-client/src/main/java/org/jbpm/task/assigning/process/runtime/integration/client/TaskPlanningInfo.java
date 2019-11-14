@@ -17,23 +17,23 @@
 package org.jbpm.task.assigning.process.runtime.integration.client;
 
 /**
- * Keeps the information for executing a planning into the jBPM engine.
+ * Defines the information for executing a planning into the jBPM engine.
  */
 public class TaskPlanningInfo {
 
     private String containerId;
     private long taskId;
     private long processInstanceId;
-    private PlanningData planningData;
+    private PlanningTask planningTask;
 
     public TaskPlanningInfo() {
     }
 
-    public TaskPlanningInfo(String containerId, long taskId, long processInstanceId, PlanningData planningData) {
+    public TaskPlanningInfo(String containerId, long taskId, long processInstanceId, PlanningTask planningTask) {
         this.containerId = containerId;
         this.taskId = taskId;
         this.processInstanceId = processInstanceId;
-        this.planningData = planningData;
+        this.planningTask = planningTask;
     }
 
     public String getContainerId() {
@@ -60,7 +60,7 @@ public class TaskPlanningInfo {
         this.processInstanceId = processInstanceId;
     }
 
-    public PlanningData getPlanningData() {
-        return planningData;
+    public PlanningTask getPlanningTask() {
+        return planningTask;
     }
 }

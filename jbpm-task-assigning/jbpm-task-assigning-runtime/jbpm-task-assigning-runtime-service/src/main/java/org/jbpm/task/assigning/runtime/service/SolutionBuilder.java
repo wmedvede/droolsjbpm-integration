@@ -29,18 +29,21 @@ import org.jbpm.task.assigning.model.Task;
 import org.jbpm.task.assigning.model.TaskAssigningSolution;
 import org.jbpm.task.assigning.model.TaskOrUser;
 import org.jbpm.task.assigning.model.User;
-import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
+import org.jbpm.task.assigning.process.runtime.integration.client.PlanningTask;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.jbpm.task.assigning.runtime.service.util.UserUtil;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
+import static org.jbpm.task.assigning.model.User.IS_PLANNING_USER;
+import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.InProgress;
+import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Reserved;
 import static org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus.Suspended;
 
 /**
  * This class is intended for the restoring of a TaskAssigningSolution given a set TaskInfo, a set of User and the
- * corresponding PlanningData for each task. I'ts typically used when the solver needs to be started during the
+ * corresponding PlanningTask for each task. I'ts typically used when the solver needs to be started during the
  * application startup procedure.
  */
 public class SolutionBuilder {
@@ -92,7 +95,7 @@ public class SolutionBuilder {
         final Map<String, User> usersById = externalUsers.stream()
                 .map(UserUtil::fromExternalUser)
                 .collect(Collectors.toMap(User::getEntityId, Function.identity()));
-        usersById.put(User.PLANNING_USER.getEntityId(), User.PLANNING_USER);
+        usersById.put(PLANNING_USER.getEntityId(), PLANNING_USER);
 
         taskInfos.forEach(taskInfo -> {
             final Task task = fromTaskInfo(taskInfo);
@@ -109,13 +112,15 @@ public class SolutionBuilder {
                         // Finally tasks with no actualOwner but (Suspended) are skipped, since they'll be properly added to
                         // the solution when they change to Ready status and the proper jBPM event is raised.
                         tasks.add(task);
-                        final PlanningData planningData = taskInfo.getPlanningData();
-                        if (planningData != null && taskInfo.getActualOwner().equals(planningData.getAssignedUser())) {
+                        final PlanningTask planningTask = taskInfo.getPlanningTask();
+                        if (planningTask != null && taskInfo.getActualOwner().equals(planningTask.getAssignedUser())) {
                             boolean pinned = InProgress == taskInfo.getStatus() || Suspended == taskInfo.getStatus() ||
-                                    planningData.isPublished() || !usersById.containsKey(taskInfo.getActualOwner());
-                            addTaskToUser(assignedTasksByUserId, task, planningData.getAssignedUser(), planningData.getIndex(), pinned);
+                                    planningTask.isPublished() || !usersById.containsKey(taskInfo.getActualOwner());
+                            addTaskToUser(assignedTasksByUserId, task, planningTask.getAssignedUser(), planningTask.getIndex(), pinned);
                         } else {
-                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, true);
+                            boolean pinned = (Reserved == taskInfo.getStatus() && !IS_PLANNING_USER.test(taskInfo.getActualOwner())) ||
+                                    InProgress == taskInfo.getStatus() || Suspended == taskInfo.getStatus();
+                            addTaskToUser(assignedTasksByUserId, task, taskInfo.getActualOwner(), -1, pinned);
                         }
                     }
                     break;

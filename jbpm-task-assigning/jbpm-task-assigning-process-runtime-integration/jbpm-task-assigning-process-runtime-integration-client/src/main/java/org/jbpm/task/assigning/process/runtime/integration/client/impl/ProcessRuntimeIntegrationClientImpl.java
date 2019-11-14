@@ -21,14 +21,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
@@ -36,7 +31,6 @@ import org.jbpm.task.assigning.process.runtime.integration.client.PotentialOwner
 import org.jbpm.task.assigning.process.runtime.integration.client.ProcessRuntimeIntegrationClient;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskInfo;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskPlanningInfo;
-import org.jbpm.task.assigning.process.runtime.integration.client.TaskPlanningResult;
 import org.jbpm.task.assigning.process.runtime.integration.client.TaskStatus;
 import org.kie.server.api.marshalling.Marshaller;
 import org.kie.server.api.marshalling.MarshallerFactory;
@@ -186,30 +180,7 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
     @Override
     public void delegateTask(TaskPlanningInfo planningInfo, String userId) {
-        userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningData().getAssignedUser());
-    }
-
-    @Override
-    public List<TaskPlanningResult> applyPlanning(List<TaskPlanningInfo> planningInfos, String userId) {
-        long minTaskId = planningInfos.stream().mapToLong(TaskPlanningInfo::getTaskId).min().orElse(0);
-        long maxTaskId = planningInfos.stream().mapToLong(TaskPlanningInfo::getTaskId).max().orElse(0);
-
-        final Map<Long, TaskPlanningInfo> taskToPlanningInfo = planningInfos.stream()
-                .collect(Collectors.toMap(TaskPlanningInfo::getTaskId, Function.identity()));
-
-        final List<TaskInfo> taskInfos = findTasks(minTaskId,
-                                                   maxTaskId,
-                                                   Arrays.asList(TaskStatus.Ready, TaskStatus.Reserved),
-                                                   0,
-                                                   100000);
-        TaskPlanningInfo planningInfo;
-        for (TaskInfo taskInfo : taskInfos) {
-            planningInfo = taskToPlanningInfo.get(taskInfo.getTaskId());
-            if (planningInfo != null) {
-                userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningData().getAssignedUser());
-            }
-        }
-        return Collections.emptyList();
+        userTaskServicesClient.delegateTask(planningInfo.getContainerId(), planningInfo.getTaskId(), userId, planningInfo.getPlanningTask().getAssignedUser());
     }
 
     private void init() {
@@ -343,13 +314,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
         Stream.of(queries).forEach(query -> queryServicesClient.replaceQuery(query));
     }
 
-    private boolean toBoolean(Object value) {
-        if (value instanceof Boolean) {
-            return (boolean) value;
-        }
-        return Boolean.parseBoolean(value != null ? value.toString() : null);
-    }
-
     private static long toLong(Object value) {
         if (value instanceof Long) {
             return (long) value;
@@ -368,10 +332,6 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
             return ((Number) value).intValue();
         }
         return Integer.valueOf(value.toString());
-    }
-
-    private static int toInt(Object value, int defaultValue) {
-        return value != null ? toInt(value) : defaultValue;
     }
 
     private static LocalDateTime toLocalDateTime(Object value) {

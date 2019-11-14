@@ -1,9 +1,24 @@
+/*
+ * Copyright 2019 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.jbpm.task.assigning.runtime.service;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +32,7 @@ import javax.persistence.spi.PersistenceProviderResolverHolder;
 import javax.persistence.spi.PersistenceUnitInfo;
 import javax.transaction.UserTransaction;
 
-import org.jbpm.task.assigning.process.runtime.integration.client.PlanningData;
+import org.jbpm.task.assigning.process.runtime.integration.client.PlanningTask;
 import org.kie.server.api.KieServerConstants;
 import org.kie.server.api.model.KieServerConfig;
 import org.kie.server.services.jbpm.jpa.PersistenceUnitInfoImpl;
@@ -48,46 +63,19 @@ public class PlanningDataService {
         }
     }
 
-    public void applyPlanning(List<PlanningData> planningDataList) {
+    public void saveOrUpdate(PlanningTask planningTask) {
         try {
             tx.begin();
-            final Set<Long> newPlanningDataIds = new HashSet<>();
-            final List<PlanningDataImpl> oldPlanningDataList = em.createQuery("select pd from PlanningDataImpl pd", PlanningDataImpl.class).getResultList();
-            planningDataList.forEach(newData -> {
-                em.merge(new PlanningDataImpl(newData.getTaskId(), newData.getAssignedUser(), newData.getIndex(), newData.isPublished(), false));
-                newPlanningDataIds.add(newData.getTaskId());
-            });
-            oldPlanningDataList.stream()
-                    .filter(oldData -> !newPlanningDataIds.contains(oldData.getTaskId()))
-                    .forEach(oldData -> {
-                        oldData.setDetached(true);
-                        em.merge(oldData);
-                    });
+            em.merge(new PlanningTaskImpl(planningTask.getTaskId(), planningTask.getAssignedUser(),
+                                          planningTask.getIndex(), planningTask.isPublished(), planningTask.isDetached()));
             tx.commit();
         } catch (Exception e) {
-            LOGGER.error("An error was produced during applyPlanning processing.", e);
-            try {
-                tx.rollback();
-            } catch (Exception re) {
-                LOGGER.error("An error was produced during applyPlanning processing rollback.", re);
-            }
-            throw new RuntimeException("An error was produced during applyPlanning: " + e.getMessage(), e);
+            throw new RuntimeException("An error was produced during planningTask addOrUpdate: " + e.getMessage(), e);
         }
     }
 
-    public void saveOrUpdate(PlanningData planningData) {
-        try {
-            tx.begin();
-            em.merge(new PlanningDataImpl(planningData.getTaskId(), planningData.getAssignedUser(),
-                                          planningData.getIndex(), planningData.isPublished(), planningData.isDetached()));
-            tx.commit();
-        } catch (Exception e) {
-            throw new RuntimeException("An error was produced during planningData addOrUpdate: " + e.getMessage(), e);
-        }
-    }
-
-    public PlanningData read(long taskId) {
-        return em.find(PlanningDataImpl.class, taskId);
+    public PlanningTask read(long taskId) {
+        return em.find(PlanningTaskImpl.class, taskId);
     }
 
     protected EntityManagerFactory build(InitialContext ctx, Map<String, String> properties) {
@@ -138,14 +126,14 @@ public class PlanningDataService {
         return persistenceProperties;
     }
 
-    public void detachOldPanningData(List<PlanningData> planningDataList) {
-        final Set<Long> newPlanningDataIds = planningDataList.stream()
-                .map(PlanningData::getTaskId)
+    public void detachOldPanningData(List<PlanningTask> planningTaskList) {
+        final Set<Long> newPlanningDataIds = planningTaskList.stream()
+                .map(PlanningTask::getTaskId)
                 .collect(Collectors.toSet());
         try {
             tx.begin();
-            final List<PlanningDataImpl> oldPlanningDataList = em.createQuery("select pd from PlanningDataImpl pd where pd.detached = 0",
-                                                                              PlanningDataImpl.class).getResultList();
+            final List<PlanningTaskImpl> oldPlanningDataList = em.createQuery("select pd from PlanningTaskImpl pd where pd.detached = 0",
+                                                                              PlanningTaskImpl.class).getResultList();
             oldPlanningDataList.stream()
                     .filter(oldData -> !newPlanningDataIds.contains(oldData.getTaskId()))
                     .forEach(oldData -> oldData.setDetached(true));

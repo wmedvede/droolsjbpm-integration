@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import org.jbpm.task.assigning.model.solver.StartAndEndTimeUpdatingVariableListener;
@@ -34,6 +35,7 @@ import org.optaplanner.core.api.domain.variable.PlanningVariable;
 import org.optaplanner.core.api.domain.variable.PlanningVariableGraphType;
 import org.optaplanner.core.api.domain.variable.PlanningVariableReference;
 
+import static org.jbpm.task.assigning.model.User.IS_PLANNING_USER;
 import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 
 /**
@@ -129,6 +131,8 @@ public class Task extends TaskOrUser {
                                                                         false,
                                                                         Collections.unmodifiableSet(new HashSet<>(Collections.singletonList(PLANNING_USER))),
                                                                         Collections.unmodifiableSet(new HashSet<>()));
+
+    public static final Predicate<Task> IS_NOT_DUMMY = task -> !DUMMY_TASK.getId().equals(task.getId()) && !DUMMY_TASK_PLANNER_241.getId().equals(task.getId());
 
     private long processInstanceId;
     private String processId;
@@ -373,7 +377,7 @@ public class Task extends TaskOrUser {
      * @return 0 if the assigned user can execute this task, -1 in any other case.
      */
     public int acceptsAssignedUser() {
-        if (PLANNING_USER.getEntityId().equals(getUser().getEntityId())) {
+        if (IS_PLANNING_USER.test(getUser().getEntityId())) {
             //planning user belongs to all the groups by definition.
             return 0;
         }

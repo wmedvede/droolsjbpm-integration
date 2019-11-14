@@ -18,13 +18,14 @@ package org.jbpm.task.assigning.process.runtime.integration.client;
 
 import java.util.List;
 
+/**
+ * Contract for interacting with the target jBPM runtime.
+ */
 public interface ProcessRuntimeIntegrationClient {
 
     List<TaskInfo> findTasks(List<TaskStatus> status, Integer page, Integer pageSize);
 
     List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize);
-
-    List<TaskPlanningResult> applyPlanning(List<TaskPlanningInfo> planningInfos, String userId);
 
     void delegateTask(TaskPlanningInfo planningInfo, String userId);
 }

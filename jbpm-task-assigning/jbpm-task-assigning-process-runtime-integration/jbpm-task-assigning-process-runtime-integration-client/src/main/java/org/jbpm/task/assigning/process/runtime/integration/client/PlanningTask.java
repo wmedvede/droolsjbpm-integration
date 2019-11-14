@@ -17,10 +17,10 @@
 package org.jbpm.task.assigning.process.runtime.integration.client;
 
 /**
- * Keeps the information configured/assigned by OptaPlanner when a solution is planned into the jBPM runtime.
- * This information is good enough for restoring a solution and start the solver from the last planned solution.
+ * Defines the information configured/assigned by OptaPlanner when a solution is planned into the jBPM runtime.
+ * This information is good enough for restoring the solution and start the solver.
  */
-public interface PlanningData {
+public interface PlanningTask {
 
     long getTaskId();
 

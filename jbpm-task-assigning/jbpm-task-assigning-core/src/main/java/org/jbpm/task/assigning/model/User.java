@@ -18,6 +18,7 @@ package org.jbpm.task.assigning.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
@@ -36,6 +37,8 @@ public class User extends TaskOrUser implements OrganizationalEntity {
      * potential owners set, or the required skills set, etc, the PLANNING_USER is assigned.
      */
     public static final User PLANNING_USER = new ImmutableUser(PLANNING_USER_ID.hashCode(), PLANNING_USER_ID);
+
+    public static final Predicate<String> IS_PLANNING_USER = entityId -> PLANNING_USER.getEntityId().equals(entityId);
 
     private String entityId;
     private Set<Group> groups = new HashSet<>();

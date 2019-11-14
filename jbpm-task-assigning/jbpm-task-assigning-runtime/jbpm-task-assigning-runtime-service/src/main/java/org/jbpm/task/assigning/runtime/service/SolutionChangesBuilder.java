@@ -35,8 +35,8 @@ import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.jbpm.task.assigning.model.Task.DUMMY_TASK;
 import static org.jbpm.task.assigning.model.Task.DUMMY_TASK_PLANNER_241;
+import static org.jbpm.task.assigning.model.Task.IS_NOT_DUMMY;
 import static org.jbpm.task.assigning.model.User.PLANNING_USER;
 import static org.jbpm.task.assigning.runtime.service.SolutionBuilder.fromTaskInfo;
 import static org.jbpm.task.assigning.runtime.service.util.UserUtil.fromExternalUser;
@@ -77,8 +77,7 @@ public class SolutionChangesBuilder {
         final List<ProblemFactChange<TaskAssigningSolution>> changes = new ArrayList<>();
         final Map<Long, Task> taskById = solution.getTaskList()
                 .stream()
-                .filter(task -> !DUMMY_TASK.getId().equals(task.getId()))
-                .filter(task -> !DUMMY_TASK_PLANNER_241.getId().equals(task.getId()))
+                .filter(IS_NOT_DUMMY)
                 .collect(Collectors.toMap(Task::getId, Function.identity()));
         final Map<String, User> usersById = solution.getUserList()
                 .stream()
@@ -116,7 +115,7 @@ public class SolutionChangesBuilder {
                         // assign and ensure the task is published since the task was already seen by the public audience.
                         changes.add(new AssignTaskProblemFactChange(newTask, user, true));
                     } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
-                            (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
+                            (taskInfo.getPlanningTask().isPublished() && !task.isPinned())) {
                         // if Reserved:
                         //       the task was probably manually re-assigned from the task list to another user. We must respect
                         //       this assignment.
@@ -147,7 +146,7 @@ public class SolutionChangesBuilder {
                             changes.add(new AssignTaskProblemFactChange(newTask, user, true));
                         }
                     } else if (!taskInfo.getActualOwner().equals(task.getUser().getEntityId()) ||
-                            (taskInfo.getPlanningData().isPublished() && !task.isPinned())) {
+                            (taskInfo.getPlanningTask().isPublished() && !task.isPinned())) {
                         // the task was assigned to someone else from the task list prior to the suspension, we must
                         // reflect that change in the plan.
                         // Or the task was published and not yet pinned.
@@ -190,8 +189,8 @@ public class SolutionChangesBuilder {
      * the dummy task is added only once and to the planning user.
      */
     private void applyWorkaroundForPLANNER_241(TaskAssigningSolution solution, List<ProblemFactChange<TaskAssigningSolution>> changes) {
-        boolean hasDummyTask2 = solution.getTaskList().stream().anyMatch(task -> DUMMY_TASK_PLANNER_241.getId().equals(task.getId()));
-        if (!hasDummyTask2) {
+        boolean hasDummyTask241 = solution.getTaskList().stream().anyMatch(task -> DUMMY_TASK_PLANNER_241.getId().equals(task.getId()));
+        if (!hasDummyTask241) {
             changes.add(new AssignTaskProblemFactChange(DUMMY_TASK_PLANNER_241, PLANNING_USER));
         }
     }

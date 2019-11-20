@@ -22,6 +22,8 @@ import org.jbpm.task.assigning.model.TaskOrUser;
 import org.optaplanner.core.impl.score.director.ScoreDirector;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
 
+import static org.jbpm.task.assigning.model.Task.PREVIOUS_TASK_OR_USER;
+
 public class ReleaseTaskProblemFactChange implements ProblemFactChange<TaskAssigningSolution> {
 
     private Task task;
@@ -44,13 +46,13 @@ public class ReleaseTaskProblemFactChange implements ProblemFactChange<TaskAssig
         Task nextTask = workingTask.getNextTask();
         if (nextTask != null) {
             //re-link the chain where the workingTask belonged if any
-            scoreDirector.beforeVariableChanged(nextTask, "previousTaskOrUser");
+            scoreDirector.beforeVariableChanged(nextTask, PREVIOUS_TASK_OR_USER);
             nextTask.setPreviousTaskOrUser(previousTaskOrUser);
-            scoreDirector.afterVariableChanged(nextTask, "previousTaskOrUser");
+            scoreDirector.afterVariableChanged(nextTask, PREVIOUS_TASK_OR_USER);
         }
-        scoreDirector.beforeVariableChanged(workingTask, "previousTaskOrUser");
+        scoreDirector.beforeVariableChanged(workingTask, PREVIOUS_TASK_OR_USER);
         workingTask.setPreviousTaskOrUser(null);
-        scoreDirector.afterVariableChanged(workingTask, "previousTaskOrUser");
+        scoreDirector.afterVariableChanged(workingTask, PREVIOUS_TASK_OR_USER);
         if (workingTask.isPinned()) {
             scoreDirector.beforeProblemPropertyChanged(workingTask);
             workingTask.setPinned(false);

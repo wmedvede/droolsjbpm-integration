@@ -19,7 +19,6 @@ package org.jbpm.task.assigning.runtime.service;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -109,10 +108,6 @@ public class ProcessRuntimeIntegrationDelegate {
                 }
             }
         }
-        dataService.detachOldPanningData(planningInfos.stream()
-                                                 .map(TaskPlanningInfo::getPlanningTask)
-                                                 .filter(Objects::nonNull)
-                                                 .collect(Collectors.toList()));
     }
 
     private void delegateTask(TaskPlanningInfo planningInfo, String userId) {

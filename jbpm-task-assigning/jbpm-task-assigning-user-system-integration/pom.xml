@@ -8,7 +8,7 @@
   <parent>
     <artifactId>jbpm-task-assigning</artifactId>
     <groupId>org.jbpm</groupId>
-    <version>7.29.0-SNAPSHOT</version>
+    <version>7.31.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>jbpm-task-assigning-user-system-integration</artifactId>

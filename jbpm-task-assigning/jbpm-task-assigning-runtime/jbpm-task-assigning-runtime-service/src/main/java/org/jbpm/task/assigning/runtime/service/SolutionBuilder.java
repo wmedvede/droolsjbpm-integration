@@ -157,8 +157,8 @@ public class SolutionBuilder {
         for (Task nextTask : tasks) {
             previousTask.setNextTask(nextTask);
 
-            nextTask.setStartTime(previousTask.getEndTime());
-            nextTask.setEndTime(nextTask.getStartTime() + nextTask.getDuration());
+            nextTask.setStartTimeInMinutes(previousTask.getEndTimeInMinutes());
+            nextTask.setEndTime(nextTask.getStartTimeInMinutes() + nextTask.getDurationInMinutes());
             nextTask.setPreviousTaskOrUser(previousTask);
             nextTask.setUser(user);
 

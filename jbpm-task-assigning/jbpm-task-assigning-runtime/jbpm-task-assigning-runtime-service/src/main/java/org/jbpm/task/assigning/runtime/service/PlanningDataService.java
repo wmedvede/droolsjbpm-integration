@@ -21,8 +21,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.naming.InitialContext;
 import javax.persistence.EntityManager;
@@ -67,7 +65,7 @@ public class PlanningDataService {
         try {
             tx.begin();
             em.merge(new PlanningTaskImpl(planningTask.getTaskId(), planningTask.getAssignedUser(),
-                                          planningTask.getIndex(), planningTask.isPublished(), planningTask.isDetached()));
+                                          planningTask.getIndex(), planningTask.isPublished()));
             tx.commit();
         } catch (Exception e) {
             throw new RuntimeException("An error was produced during planningTask addOrUpdate: " + e.getMessage(), e);
@@ -124,28 +122,5 @@ public class PlanningDataService {
                 .forEach(name -> persistenceProperties.put(name, System.getProperty(name)));
 
         return persistenceProperties;
-    }
-
-    public void detachOldPanningData(List<PlanningTask> planningTaskList) {
-        final Set<Long> newPlanningDataIds = planningTaskList.stream()
-                .map(PlanningTask::getTaskId)
-                .collect(Collectors.toSet());
-        try {
-            tx.begin();
-            final List<PlanningTaskImpl> oldPlanningDataList = em.createQuery("select pd from PlanningTaskImpl pd where pd.detached = 0",
-                                                                              PlanningTaskImpl.class).getResultList();
-            oldPlanningDataList.stream()
-                    .filter(oldData -> !newPlanningDataIds.contains(oldData.getTaskId()))
-                    .forEach(oldData -> oldData.setDetached(true));
-            tx.commit();
-        } catch (Exception e) {
-            LOGGER.error("An error was produced during detachOldPanningData processing.", e);
-            try {
-                tx.rollback();
-            } catch (Exception re) {
-                LOGGER.error("An error was produced during detachOldPanningData processing rollback.", re);
-            }
-            throw new RuntimeException("An error was produced during detachOldPanningData: " + e.getMessage(), e);
-        }
     }
 }

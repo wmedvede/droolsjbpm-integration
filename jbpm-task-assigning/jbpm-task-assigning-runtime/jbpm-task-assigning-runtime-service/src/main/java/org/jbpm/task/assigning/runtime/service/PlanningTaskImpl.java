@@ -35,7 +35,6 @@ public class PlanningTaskImpl implements PlanningTask {
     private String assignedUser;
     private int index;
     private short published = 0;
-    private short detached = 0;
 
     public PlanningTaskImpl() {
     }
@@ -44,12 +43,11 @@ public class PlanningTaskImpl implements PlanningTask {
         this.taskId = taskId;
     }
 
-    public PlanningTaskImpl(long taskId, String assignedUser, int index, boolean published, boolean detached) {
+    public PlanningTaskImpl(long taskId, String assignedUser, int index, boolean published) {
         this.taskId = taskId;
         this.assignedUser = assignedUser;
         this.index = index;
         setPublished(published);
-        setDetached(detached);
     }
 
     @Override
@@ -93,16 +91,6 @@ public class PlanningTaskImpl implements PlanningTask {
     }
 
     @Override
-    public boolean isDetached() {
-        return detached == 1;
-    }
-
-    @Override
-    public void setDetached(boolean detached) {
-        this.detached = (short) (detached ? 1 : 0);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -114,12 +102,11 @@ public class PlanningTaskImpl implements PlanningTask {
         return taskId == that.taskId &&
                 Objects.equals(assignedUser, that.assignedUser) &&
                 index == that.index &&
-                published == that.published &&
-                detached == that.detached;
+                published == that.published;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(taskId, assignedUser, index, published, detached);
+        return Objects.hash(taskId, assignedUser, index, published);
     }
 }

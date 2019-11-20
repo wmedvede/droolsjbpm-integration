@@ -37,8 +37,4 @@ public interface PlanningTask {
     void setAssignedUser(String assignedUser);
 
     String getAssignedUser();
-
-    boolean isDetached();
-
-    void setDetached(boolean detached);
 }

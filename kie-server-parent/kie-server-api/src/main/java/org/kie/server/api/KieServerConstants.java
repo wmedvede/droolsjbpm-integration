@@ -99,6 +99,9 @@ public class KieServerConstants {
     public static final String CFG_JBPM_TASK_CLEANUP_LISTENER = "org.jbpm.task.cleanup.enabled";
     public static final String CFG_JBPM_TASK_BAM_LISTENER = "org.jbpm.task.bam.enabled";
     public static final String CFG_JBPM_PROCESS_IDENTITY_LISTENER = "org.jbpm.process.identity.enabled";
+    public static final String CFG_JBPM_TASK_ASSIGNING_LISTENER = "org.jbpm.task.taskAssigning.enabled";
+
+
 
     public static final String CFG_DEFAULT_QUERY_DEFS_LOCATION = "org.jbpm.query.definitions.location";
 

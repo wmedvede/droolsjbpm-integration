@@ -18,10 +18,14 @@ package org.jbpm.task.assigning.process.runtime.integration.client.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.jbpm.task.assigning.process.runtime.integration.client.PotentialOwner;
@@ -44,8 +48,27 @@ public class ProcessRuntimeIntegrationClientImplTest {
                                                                                                              "wbadmin",
                                                                                                              "wbadmin");
 
-        List<TaskInfo> result = client.findTasks(Arrays.asList(TaskStatus.Ready, TaskStatus.Reserved), 0, 10000);
+        //"2019-11-25 16:18:29.452"
+        int year = 2019;
+        int month = Calendar.NOVEMBER;
+        int day = 25;
+        int hour = 16;
+        int minutes = 18;
+        int seconds = 29;
+        int milliseconds = 452;
+        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getDefault());
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, month);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        calendar.set(Calendar.HOUR_OF_DAY, hour);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, seconds);
+        calendar.set(Calendar.MILLISECOND, milliseconds);
 
+        List<TaskInfo> result = client.findTasks(1L, calendar.getTime(), Arrays.asList(TaskStatus.Ready, TaskStatus.Reserved), 0, 10000);
+        int i = 0;
+
+        /*
         TaskPlanningInfo planningInfo1 = new TaskPlanningInfo();
         planningInfo1.setTaskId(63);
         planningInfo1.setProcessInstanceId(43);
@@ -61,6 +84,7 @@ public class ProcessRuntimeIntegrationClientImplTest {
         planningInfo2.getPlanningTask().setAssignedUser("mary");
         planningInfo2.getPlanningTask().setIndex(456);
         planningInfo2.getPlanningTask().setPublished(false);
+        */
 
         //client.applyPlanning(Arrays.asList(planningInfo1, planningInfo2), "planning_user");
     }
@@ -83,7 +107,7 @@ public class ProcessRuntimeIntegrationClientImplTest {
     private static String CONTAINER_ID = "task-assignments_24.0.0-SNAPSHOT";
     private static String PROCESS_ID = "task-assignments.EmulatePlanningParams";
 
-    @Test
+    //@Test
     public void createProcessInstances() {
         /*
         int processInstancesSize = 10;
@@ -101,7 +125,7 @@ public class ProcessRuntimeIntegrationClientImplTest {
         */
     }
 
-    @Test
+    //@Test
     public void destroyProcessInstances() {
         List<Long> processInstanceIds = new ArrayList<>();
 
@@ -119,12 +143,12 @@ public class ProcessRuntimeIntegrationClientImplTest {
         System.out.println("Destroyed process instances: [" + ids + "]");
     }
 
-    @Test
+    //@Test
     public void doRandomAssignment() {
         Random random = new Random();
         ProcessRuntimeIntegrationClient client = newClient();
 
-        List<TaskInfo> tasks = client.findTasks(Arrays.asList(TaskStatus.Ready, TaskStatus.Reserved), 0, 1000);
+        List<TaskInfo> tasks = client.findTasks(1L, 1L, Arrays.asList(TaskStatus.Ready, TaskStatus.Reserved), 0, 1000);
         Set<String> potentialOwnersSet = new HashSet<>();
         tasks.forEach(taskInfo -> {
             taskInfo.getPotentialOwners().stream().filter(PotentialOwner::isUser).forEach(user -> potentialOwnersSet.add(user.getEntityId()));

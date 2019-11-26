@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package org.jbpm.task.assigning.process.runtime.integration.client;
+package org.kie.server.services.taskassigning.runtime;
 
-import java.util.Date;
-import java.util.List;
+public class SolverDef {
 
-/**
- * Contract for interacting with the target jBPM runtime.
- */
-public interface ProcessRuntimeIntegrationClient {
+    private String solverConfigResource;
 
-    List<TaskInfo> findTasks(Long fromTaskId, Date lastModificationDate, List<TaskStatus> status, Integer page, Integer pageSize);
+    public SolverDef(String solverConfigResource) {
+        this.solverConfigResource = solverConfigResource;
+    }
 
-    List<TaskInfo> findTasks(Long fromTaskId, Long toTaskId, List<TaskStatus> status, Integer page, Integer pageSize);
-
-    void delegateTask(TaskPlanningInfo planningInfo, String userId);
+    public String getSolverConfigResource() {
+        return solverConfigResource;
+    }
 }

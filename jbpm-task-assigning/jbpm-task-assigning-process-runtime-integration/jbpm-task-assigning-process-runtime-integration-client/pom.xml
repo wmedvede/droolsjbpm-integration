@@ -16,8 +16,24 @@
   <name>jBPM Task Assigning - Process - Runtime - Integration - Client</name>
   <description>jBPM Task Assigning - Process - Runtime - Integration - Client</description>
 
-  <dependencies>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- This is far from ideal, as it is not designed as BOM. However,
+        there is nothing like wildfly-bom, so this is the closest thing I could find.
+        Important: this overrides lots of the versions coming from kie-p-w-d -->
+      <dependency>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-parent</artifactId>
+        <version>${version.org.wildfly}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+
+  <dependencies>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -34,6 +50,13 @@
     </dependency>
 
     <!-- test dependencies -->
+
+    <dependency>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-jms-client-bom</artifactId>
+      <type>pom</type>
+      <scope>test</scope>
+    </dependency>
 
   </dependencies>
 </project>

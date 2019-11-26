@@ -17,7 +17,10 @@
 package org.jbpm.task.assigning.process.runtime.integration.client;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.jbpm.task.assigning.process.runtime.integration.client.impl.LocalDateTimeParam;
 import org.jbpm.task.assigning.process.runtime.integration.client.impl.ProcessRuntimeIntegrationClientImpl;
 import org.kie.server.api.KieServerConstants;
 import org.kie.server.client.KieServicesClient;
@@ -41,6 +44,9 @@ public class ProcessRuntimeIntegrationClientFactory {
         final KieServicesConfiguration configuration = KieServicesFactory.newRestConfiguration(endpoint, login, password);
         configuration.setTimeout(60000);
         configuration.setCapabilities(Collections.singletonList(KieServerConstants.CAPABILITY_BPM));
+        Set<Class<?>> extraClasses = new HashSet<>();
+        extraClasses.add(LocalDateTimeParam.class);
+        configuration.setExtraClasses(extraClasses);
         return KieServicesFactory.newKieServicesClient(configuration);
     }
 

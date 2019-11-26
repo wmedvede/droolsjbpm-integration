@@ -170,8 +170,10 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
     }
 
     @Override
-    public List<TaskInfo> findTasks(List<TaskStatus> status, Integer page, Integer pageSize) {
+    public List<TaskInfo> findTasks(Long fromTaskId, Date lastModificationDate, List<TaskStatus> status, Integer page, Integer pageSize) {
         return findTasks(new FindTasksQueryFilterSpecBuilder()
+                                 .fromTaskId(fromTaskId)
+                                 .fromLastModificationDate(lastModificationDate)
                                  .withStatusIn(status)
                                  .build(),
                          page,
@@ -200,9 +202,11 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
         private Long fromTaskId;
         private Long toTaskId;
+        private Date lastModificationDate;
         private List<TaskStatus> statusIn;
         private static final String TASK_ID_COLUMN = "taskId";
         private static final String STATUS_COLUMN = "status";
+        private static final String LAST_MODIFICATION_DATE_COLUMN = "lastModificationDate";
 
         private FindTasksQueryFilterSpecBuilder() {
         }
@@ -214,6 +218,11 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
         private FindTasksQueryFilterSpecBuilder toTaskId(Long taskId) {
             this.toTaskId = taskId;
+            return this;
+        }
+
+        private FindTasksQueryFilterSpecBuilder fromLastModificationDate(Date lastModificationDate) {
+            this.lastModificationDate = lastModificationDate;
             return this;
         }
 
@@ -234,6 +243,12 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
             } else if (toTaskId != null) {
                 builder.lowerOrEqualTo(TASK_ID_COLUMN, toTaskId);
             }
+            if (lastModificationDate != null) {
+                //builder.greaterOrEqualTo(LAST_MODIFICATION_DATE_COLUMN, lastModificationDate);
+                builder.greaterOrEqualTo(LAST_MODIFICATION_DATE_COLUMN, new LocalDateTimeParam(LocalDateTime.now()));
+                //builder.greaterOrEqualTo(LAST_MODIFICATION_DATE_COLUMN, LocalDateTime.now());
+            }
+
             builder.oderBy(TASK_ID_COLUMN, true);
             return builder.get();
         }
@@ -241,7 +256,8 @@ public class ProcessRuntimeIntegrationClientImpl implements ProcessRuntimeIntegr
 
     private List<TaskInfo> findTasks(QueryFilterSpec queryFilter, Integer page, Integer pageSize) {
         final List rawList = queryServicesClient.query("jbpm-task-assigning-human-task-with-user",
-                                                       "RawList",
+                                                       //"RawList",
+                                                       "TaskAssigningMapper",
                                                        queryFilter,
                                                        page,
                                                        pageSize,

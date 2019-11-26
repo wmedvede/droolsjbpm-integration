@@ -430,6 +430,11 @@ public class JbpmKieServerExtension implements KieServerExtension {
                 addProcessIdentityProcessListener(unit, kieContainer);
             }
 
+            if (System.getProperty(KieServerConstants.CFG_JBPM_TASK_ASSIGNING_LISTENER, "false").equalsIgnoreCase("true")) {
+                logger.debug("Registering TaskAssigningTaskEventListener");
+                addTaskAssigningTaskEventListener(unit, kieContainer);
+            }
+
             deploymentService.deploy(unit);
             // in case it was deployed successfully pass all known classes to marshallers (jaxb, json etc)
             DeployedUnit deployedUnit = deploymentService.getDeployedUnit(unit.getIdentifier());
@@ -696,6 +701,20 @@ public class JbpmKieServerExtension implements KieServerExtension {
             unit.setDeploymentDescriptor(descriptor);
         }
     }
+
+    protected void addTaskAssigningTaskEventListener(final KModuleDeploymentUnit unit, final InternalKieContainer kieContainer) {
+        final DeploymentDescriptor descriptor = getDeploymentDescriptor(unit, kieContainer);
+        if (descriptor.getAuditMode() != AuditMode.NONE) {
+            descriptor.getBuilder().addTaskEventListener(
+                    new ObjectModel(
+                            "mvel",
+                            "new org.jbpm.services.task.lifecycle.listeners.TaskAssigningTaskEventListener()"
+                    )
+            );
+            unit.setDeploymentDescriptor(descriptor);
+        }
+    }
+
 
     protected void addTaskCleanUpProcessListener(final KModuleDeploymentUnit unit, final InternalKieContainer kieContainer) {
         final DeploymentDescriptor descriptor = getDeploymentDescriptor(unit, kieContainer);

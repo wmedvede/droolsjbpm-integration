@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jbpm.task.assigning.runtime.service;
+package org.kie.server.services.taskassigning.runtime;
 
 import java.util.Arrays;
 import java.util.Date;

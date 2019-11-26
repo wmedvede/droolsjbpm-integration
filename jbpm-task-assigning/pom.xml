@@ -66,5 +66,9 @@
     <module>jbpm-task-assigning-runtime</module>
     <module>jbpm-task-assigning-process-runtime-integration</module>
     <module>jbpm-task-assigning-user-system-integration</module>
+    <module>kie-server-api-task-assigning</module>
+    <module>kie-server-client-task-assigning</module>
+    <module>kie-server-rest-task-assigning</module>
+    <module>kie-server-services-task-assigning</module>
   </modules>
 </project>

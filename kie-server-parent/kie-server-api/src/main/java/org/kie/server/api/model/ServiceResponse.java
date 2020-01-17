@@ -106,6 +106,13 @@ import org.kie.server.api.model.instance.VariableInstance;
 import org.kie.server.api.model.instance.VariableInstanceList;
 import org.kie.server.api.model.instance.WorkItemInstance;
 import org.kie.server.api.model.instance.WorkItemInstanceList;
+import org.kie.server.api.model.taskassigning.ExecutePlanningResult;
+import org.kie.server.api.model.taskassigning.OrganizationalEntity;
+import org.kie.server.api.model.taskassigning.PlanningItem;
+import org.kie.server.api.model.taskassigning.PlanningItemList;
+import org.kie.server.api.model.taskassigning.PlanningTask;
+import org.kie.server.api.model.taskassigning.TaskData;
+import org.kie.server.api.model.taskassigning.TaskDataList;
 import org.kie.server.api.model.type.JaxbBoolean;
 import org.kie.server.api.model.type.JaxbByte;
 import org.kie.server.api.model.type.JaxbCharacter;
@@ -244,7 +251,16 @@ public class ServiceResponse<T> implements KieServiceResponse<T> {
             @XmlElement(name = "dmn-model-info-list", type = DMNModelInfoList.class),
 
             // PMML
-            @XmlElement(name = "pmml-result", type = PMML4Result.class)
+            @XmlElement(name = "pmml-result", type = PMML4Result.class),
+
+            //TaskAssigning
+            @XmlElement(name = "tsk-assig-task-data", type = TaskData.class),
+            @XmlElement(name = "tsk-assig-task-data-list", type = TaskDataList.class),
+            @XmlElement(name = "tsk-assig-planning-task", type = PlanningTask.class),
+            @XmlElement(name = "tsk-assig-planning-item", type = PlanningItem.class),
+            @XmlElement(name = "tsk-assig-planning-item-list", type = PlanningItemList.class),
+            @XmlElement(name = "tsk-assig-oe", type = OrganizationalEntity.class),
+            @XmlElement(name = "tsk-assig-ex-planning-result", type = ExecutePlanningResult.class)
     })
     @JsonProperty
     private T result;

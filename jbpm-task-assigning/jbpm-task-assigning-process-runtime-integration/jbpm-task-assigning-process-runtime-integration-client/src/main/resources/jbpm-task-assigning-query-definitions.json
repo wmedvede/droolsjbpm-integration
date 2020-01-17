@@ -1,8 +1,0 @@
-[
-  {
-    "query-name": "jbpm-task-assigning-human-task-with-user",
-    "query-source": "${org.kie.server.persistence.ds}",
-    "query-expression": "select t.taskId, t.createdOn, t.activationTime, t.actualOwner, t.deploymentId, t.dueDate, t.name as taskName, t.priority, t.processId, t.processInstanceId, t.status, t.lastModificationDate, pil.processInstanceDescription, oe.id as potentialOwner, oe.dtype as potentialOwnerType from AuditTaskImpl t left join PeopleAssignments_PotOwners po on t.taskId=po.task_id left join OrganizationalEntity oe on po.entity_id=oe.id left join ProcessInstanceLog pil on pil.processInstanceId=t.processInstanceId",
-    "query-target": "CUSTOM"
-  }
-]

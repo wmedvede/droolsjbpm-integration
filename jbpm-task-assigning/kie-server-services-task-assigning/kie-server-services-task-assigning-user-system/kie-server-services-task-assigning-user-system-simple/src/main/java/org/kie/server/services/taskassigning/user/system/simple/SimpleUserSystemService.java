@@ -16,8 +16,13 @@
 
 package org.kie.server.services.taskassigning.user.system.simple;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.kie.server.services.taskassigning.user.system.api.Group;
 import org.kie.server.services.taskassigning.user.system.api.User;
@@ -25,21 +30,39 @@ import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 public class SimpleUserSystemService implements UserSystemService {
 
-    private static final String WF_ROLES_FILE = "/roles.properties";
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUserSystemService.class);
 
-    private WildflyUtil.UserGroupInfo userGroupInfo;
+    private static final String USERS_FILE = "org.kie.server.services.taskassigning.user.system.simple.users";
+    private static final String AFFINITIES_FILE = "org.kie.server.services.taskassigning.user.system.simple.affinities";
+    private static final String SKILLS_FILE = "org.kie.server.services.taskassigning.user.system.simple.skills";
+
+    private WildflyUtil.UserGroupInfo userGroupInfo = new WildflyUtil.UserGroupInfo(new ArrayList<>(), new ArrayList<>());
+    private Map<String, User> userById = new HashMap<>();
     private Exception error = null;
 
     private static final String NAME = "SimpleUserSystemService";
 
     public SimpleUserSystemService() {
+        //SPI constructor
+    }
+
+    @Override
+    public void start() {
+        final String usersFile = System.getProperty(USERS_FILE);
         try {
-            userGroupInfo = WildflyUtil.buildWildflyUsers(getClass(), WF_ROLES_FILE);
+            if (isEmpty(usersFile)) {
+                LOGGER.warn("No users file configuration was provided. Please configure the property:" + USERS_FILE);
+                return;
+            }
+            this.userGroupInfo = WildflyUtil.buildInfo(URI.create(usersFile));
+            this.userById = userGroupInfo.getUsers().stream().collect(Collectors.toMap(User::getId,
+                                                                                       Function.identity()));
         } catch (Exception e) {
-            LOGGER.error("An error was produced during users file loading from resource: " + WF_ROLES_FILE, e);
+            LOGGER.error("An error was produced during users file loading from file: " + usersFile, e);
             error = e;
             userGroupInfo = new WildflyUtil.UserGroupInfo(new ArrayList<>(), new ArrayList<>());
         }
@@ -57,7 +80,7 @@ public class SimpleUserSystemService implements UserSystemService {
 
     @Override
     public List<Group> findAllGroups() {
-        return null;
+        return userGroupInfo.getGroups();
     }
 
     @Override
@@ -69,8 +92,6 @@ public class SimpleUserSystemService implements UserSystemService {
 
     @Override
     public User findUser(String id) {
-        return userGroupInfo.getUsers().stream()
-                .filter(user -> user.getId().equals(id))
-                .findFirst().orElse(null);
+        return userById.get(id);
     }
 }

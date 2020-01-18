@@ -20,6 +20,8 @@ import java.util.List;
 
 public interface UserSystemService {
 
+    void start();
+
     String getName();
 
     List<User> findAllUsers();

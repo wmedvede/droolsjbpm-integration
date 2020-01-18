@@ -51,13 +51,24 @@ public class TaskAssigningConstants {
     /**
      * Property for configuring the resource with the solver configuration.
      */
-    public static final String TASK_ASSIGNING_SOLVER_CONFIG_RESOURCE = "org.kie.server.taskAssigning.planning.solver.configResource";
+    public static final String TASK_ASSIGNING_SOLVER_CONFIG_RESOURCE = "org.kie.server.taskAssigning.solver.configResource";
 
-    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_ID = "org.kie.server.taskAssigning.planning.solver.container.id";
+    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_ID = "org.kie.server.taskAssigning.solver.container.id";
 
-    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_RELEASE_ID_GROUP_ID = "org.kie.server.taskAssigning.planning.solver.container.groupId";
+    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_GROUP_ID = "org.kie.server.taskAssigning.solver.container.groupId";
 
-    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_RELEASE_ID_ARTIFACT_ID = "org.kie.server.taskAssigning.planning.solver.container.artifactId";
+    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_ARTIFACT_ID = "org.kie.server.taskAssigning.solver.container.artifactId";
 
-    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_RELEASE_ID_VERSION = "org.kie.server.taskAssigning.planning.solver.container.version";
+    public static final String TASK_ASSIGNING_SOLVER_CONTAINER_VERSION = "org.kie.server.taskAssigning.solver.container.version";
+
+    public static final String TASK_ASSIGNING_USER_SYSTEM_NAME = "org.kie.server.taskAssigning.userSystem.name";
+
+    public static final String TASK_ASSIGNING_USER_SYSTEM_CONTAINER_ID = "org.kie.server.taskAssigning.userSystem.container.id";
+
+    public static final String TASK_ASSIGNING_USER_SYSTEM_CONTAINER_GROUP_ID = "org.kie.server.taskAssigning.userSystem.container.groupId";
+
+    public static final String TASK_ASSIGNING_USER_SYSTEM_CONTAINER_ARTIFACT_ID = "org.kie.server.taskAssigning.userSystem.container.artifactId";
+
+    public static final String TASK_ASSIGNING_USER_SYSTEM_CONTAINER_VERSION = "org.kie.server.taskAssigning.userSystem.container.version";
+
 }

@@ -18,7 +18,10 @@ package org.kie.server.services.taskassigning.user.system.simple;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,55 +29,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-
 import org.kie.server.services.taskassigning.user.system.api.Group;
 import org.kie.server.services.taskassigning.user.system.api.User;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 public class WildflyUtil {
 
-    public static UserGroupInfo buildWildflyUsers(Class clazz, String resource) throws IOException {
-        try (InputStream input = clazz.getResourceAsStream(resource)) {
-            return buildWildflyUsers(input);
+    public static UserGroupInfo buildInfo(URI uri) throws IOException {
+        try (InputStream in = Files.newInputStream(Paths.get(uri))) {
+            return buildInfo(in);
         }
     }
 
     /**
-     * Reads a Wildfly roles.properties configuration file and extracts the user definitions and the corresponding
-     * groups. Can be useful when we start processing jBPM runtime tasks and we want to build the users configuration.
+     * Reads a Wildfly roles.properties configuration format file and extracts the user definitions and the corresponding
+     * groups.
      * @param input InputStream with the user + roles file in the WF format.
      * @return a UserGroupInfo instance with the Users and Groups loaded.
-     * @throws IOException
+     * @throws IOException if an I/O error occurs
      */
-    public static UserGroupInfo buildWildflyUsers(InputStream input) throws IOException {
-        final int[] userIds = {0};
-        final int[] groupIds = {0};
+    public static UserGroupInfo buildInfo(InputStream input) throws IOException {
         final List<User> users = new ArrayList<>();
         final List<Group> groups = new ArrayList<>();
         final Map<String, Group> groupMap = new HashMap<>();
 
-        List<String> lines = IOUtils.readLines(input, StandardCharsets.UTF_8).stream()
-                .filter(line -> !line.startsWith("#"))
+        final List<String> lines = IOUtils.readLines(input, StandardCharsets.UTF_8).stream()
+                .map(String::trim)
+                .filter(line -> !line.isEmpty() && !line.startsWith("#"))
                 .collect(Collectors.toList());
-        lines.forEach(line -> {
+        for (String line : lines) {
             String[] lineSplit = line.split("=");
-            String userLogin = lineSplit[0];
+            if (lineSplit.length == 0) {
+                continue;
+            }
+            String userLogin = lineSplit[0].trim();
+            if (isEmpty(userLogin)) {
+                continue;
+            }
             Set<Group> userGroups = new HashSet<>();
-            String encodedGroups = lineSplit[1];
-            Stream.of(encodedGroups.split(",")).forEach(groupName -> {
-                Group group = groupMap.get(groupName);
-                if (group == null) {
-                    group = new GroupImpl(groupName);
-                    groupMap.put(groupName, group);
-                    groups.add(group);
+            if (lineSplit.length > 1) {
+                String encodedGroups = lineSplit[1].trim();
+                String[] userGroupsSplit = encodedGroups.split(",");
+                for (String groupNameRaw : userGroupsSplit) {
+                    String groupName = groupNameRaw.trim();
+                    if (isEmpty(groupName)) {
+                        continue;
+                    }
+                    Group group = groupMap.get(groupName);
+                    if (group == null) {
+                        group = new GroupImpl(groupName);
+                        groupMap.put(groupName, group);
+                        groups.add(group);
+                    }
+                    userGroups.add(group);
                 }
-                userGroups.add(group);
-            });
+            }
             User user = new UserImpl(userLogin, userGroups);
             users.add(user);
-        });
+        }
         return new UserGroupInfo(users, groups);
     }
 

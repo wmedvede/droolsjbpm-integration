@@ -36,13 +36,13 @@ public class SimpleUserSystemService implements UserSystemService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleUserSystemService.class);
 
-    private static final String USERS_FILE = "org.kie.server.services.taskassigning.user.system.simple.users";
-    private static final String AFFINITIES_FILE = "org.kie.server.services.taskassigning.user.system.simple.affinities";
-    private static final String SKILLS_FILE = "org.kie.server.services.taskassigning.user.system.simple.skills";
+    protected static final String USERS_FILE = "org.kie.server.services.taskassigning.user.system.simple.users";
+    protected static final String AFFINITIES_FILE = "org.kie.server.services.taskassigning.user.system.simple.affinities";
+    protected static final String SKILLS_FILE = "org.kie.server.services.taskassigning.user.system.simple.skills";
 
-    private WildflyUtil.UserGroupInfo userGroupInfo = new WildflyUtil.UserGroupInfo(new ArrayList<>(), new ArrayList<>());
-    private Map<String, User> userById = new HashMap<>();
-    private Exception error = null;
+    protected WildflyUtil.UserGroupInfo userGroupInfo = new WildflyUtil.UserGroupInfo(new ArrayList<>(), new ArrayList<>());
+    protected Map<String, User> userById = new HashMap<>();
+    protected Exception error = null;
 
     private static final String NAME = "SimpleUserSystemService";
 
@@ -84,7 +84,7 @@ public class SimpleUserSystemService implements UserSystemService {
     }
 
     @Override
-    public void testConnection() throws Exception {
+    public void test() throws Exception {
         if (error != null) {
             throw error;
         }

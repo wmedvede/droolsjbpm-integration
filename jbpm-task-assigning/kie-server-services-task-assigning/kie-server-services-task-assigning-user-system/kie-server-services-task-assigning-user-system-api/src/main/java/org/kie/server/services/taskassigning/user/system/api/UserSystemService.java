@@ -22,6 +22,8 @@ public interface UserSystemService {
 
     void start();
 
+    void test() throws Exception;
+
     String getName();
 
     List<User> findAllUsers();
@@ -30,5 +32,4 @@ public interface UserSystemService {
 
     User findUser(String id);
 
-    void testConnection() throws Exception;
 }

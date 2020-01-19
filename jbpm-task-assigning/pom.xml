@@ -84,5 +84,6 @@
     <module>kie-server-rest-task-assigning-runtime</module>
     <module>kie-server-services-task-assigning</module>
     <module>kie-server-task-assigning-default-planner-kjar</module>
+    <module>kie-server-task-assigning-user-system-simple-kjar</module>
   </modules>
 </project>

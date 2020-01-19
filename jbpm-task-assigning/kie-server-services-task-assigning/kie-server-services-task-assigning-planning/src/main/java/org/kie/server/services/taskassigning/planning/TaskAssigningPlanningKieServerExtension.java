@@ -91,6 +91,9 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
             " It was not possible to create a solver for the provided configuration, error: %s." +
             " " + EXTENSION_NAME + " won't operate properly.";
 
+    private static final String PLANNER_CONTAINER_NOT_AVAILABLE = "Planner container %s is not available." +
+            " " + EXTENSION_NAME + " won't operate properly";
+
     private static final String UNDESIRED_EXTENSIONS_RUNNING_ERROR = "It's was detected that the following extensions %s" +
             " are running in current server, but it's not recommended to run them on the same server instance as the " + EXTENSION_NAME;
 
@@ -98,6 +101,9 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
             " " + EXTENSION_NAME + " won't operate properly. Please use the property %s to configure it";
 
     private static final String USER_SYSTEM_CONTAINER_CONFIGURATION_ERROR = "User system service container is not properly configured, error: %s" +
+            " " + EXTENSION_NAME + " won't operate properly";
+
+    private static final String USER_SYSTEM_CONTAINER_NOT_AVAILABLE = "User system service container %s is not available." +
             " " + EXTENSION_NAME + " won't operate properly";
 
     private static final String USER_SYSTEM_SERVICE_NOT_FOUND = "User system service %s was not found." +
@@ -321,6 +327,9 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
                                                                                    solverDef.getVersion()));
             KieContainerInstanceImpl container = prepareContainer(resource);
             if (container == null) {
+                String msg = String.format(PLANNER_CONTAINER_NOT_AVAILABLE, solverDef.getContainerId());
+                LOGGER.error(msg);
+                kieServer.addServerMessage(new Message(Severity.ERROR, msg));
                 return false;
             }
         }
@@ -368,11 +377,14 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
     private boolean initUserSystemService() {
         ClassLoader classLoader;
         if (userSystemContainer != null) {
+            LOGGER.debug("User system service {} will be loaded from container {} class loader", userSystemName, userSystemContainer.getContainerId());
             KieContainerInstanceImpl container = prepareContainer(userSystemContainer);
             if (container == null) {
+                String msg = String.format(USER_SYSTEM_CONTAINER_NOT_AVAILABLE, userSystemContainer.getContainerId());
+                LOGGER.error(msg);
+                kieServer.addServerMessage(new Message(Severity.ERROR, msg));
                 return false;
             }
-            LOGGER.debug("User system service {} will be loaded from container {} class loader", userSystemName, userSystemContainer.getContainerId());
             classLoader = container.getKieContainer().getClassLoader();
         } else {
             LOGGER.debug("User system service {} will be loaded from application class loader", userSystemName);
@@ -390,10 +402,10 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
         userSystemService.start();
         try {
-            userSystemService.testConnection();
-            LOGGER.debug("User system service {} connection check was successful.", userSystemName);
+            userSystemService.test();
+            LOGGER.debug("User system service {} test check was successful.", userSystemName);
         } catch (Exception e) {
-            LOGGER.warn("User system service {} connection check failed, but " + EXTENSION_NAME + " startup procedure will continue. error: ", e.getMessage());
+            LOGGER.warn("User system service {} test check failed, but " + EXTENSION_NAME + " startup procedure will continue. error: ", e.getMessage());
         }
         return true;
     }

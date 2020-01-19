@@ -104,7 +104,6 @@ public class SolverExecutor extends RunnableBase {
 
     /**
      * Stops the solver.
-     * @return
      */
     public void stop() {
         if (!isDestroyed()) {

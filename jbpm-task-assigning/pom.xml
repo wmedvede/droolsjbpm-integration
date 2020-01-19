@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-  <!-- Temporary pom file, will probalby be removed as long with the jbpm-task-assigning module as soon all this
-        structure is moved to the kie-server-parent structure -->
+  <!-- TODO all this project pom.xml setup is temporal until the definitive location (must probably in the kie-server-parent
+        module) is defined -->
 
   <modelVersion>4.0.0</modelVersion>
   <parent>
@@ -44,7 +44,7 @@
         <scope>import</scope>
       </dependency>
 
-      <!-- TODO remove this dependencies from here, they should go in kie-server bom file when the final structure is determined .-->
+      <!-- TODO same here, this modules declaration will finally go in the proper kie-server-bom etc. -->
       <dependency>
         <groupId>org.kie.server</groupId>
         <artifactId>kie-server-services-task-assigning-core</artifactId>

@@ -33,6 +33,7 @@ import org.kie.server.services.taskassigning.core.model.solver.realtime.AssignTa
 import org.kie.server.services.taskassigning.core.model.solver.realtime.ReleaseTaskProblemFactChange;
 import org.kie.server.services.taskassigning.core.model.solver.realtime.RemoveTaskProblemFactChange;
 import org.kie.server.services.taskassigning.core.model.solver.realtime.TaskPropertyChangeProblemFactChange;
+import org.kie.server.services.taskassigning.planning.util.IndexedElement;
 import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
@@ -51,9 +52,9 @@ import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK_PLANNER_241;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_NOT_DUMMY;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
-import static org.kie.server.services.taskassigning.planning.SolutionBuilder.addInOrder;
-import static org.kie.server.services.taskassigning.planning.SolutionBuilder.fromTaskData;
+import static org.kie.server.services.taskassigning.planning.util.IndexedElement.addInOrder;
 import static org.kie.server.services.taskassigning.planning.TraceHelper.traceProgrammedChanges;
+import static org.kie.server.services.taskassigning.planning.util.TaskUtil.fromTaskData;
 import static org.kie.server.services.taskassigning.planning.util.UserUtil.fromExternalUser;
 
 /**
@@ -114,7 +115,7 @@ public class SolutionChangesBuilder {
         final List<RemoveTaskProblemFactChange> removedTaskChanges = new ArrayList<>();
         final Set<Task> removedTasksSet = new HashSet<>();
         final List<TaskPropertyChangeProblemFactChange> propertyChanges = new ArrayList<>();
-        final Map<String, List<SolutionBuilder.IndexedElement<AssignTaskProblemFactChange>>> changesByUserId = new HashMap<>();
+        final Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId = new HashMap<>();
 
         Task task;
         for (TaskData taskData : taskDataList) {
@@ -243,13 +244,13 @@ public class SolutionChangesBuilder {
         return totalChanges;
     }
 
-    static void addChangeToUser(Map<String, List<SolutionBuilder.IndexedElement<AssignTaskProblemFactChange>>> changesByUserId,
+    static void addChangeToUser(Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId,
                                 AssignTaskProblemFactChange change,
                                 User user,
                                 int index,
                                 boolean pinned) {
-        final List<SolutionBuilder.IndexedElement<AssignTaskProblemFactChange>> userChanges = changesByUserId.computeIfAbsent(user.getEntityId(), key -> new ArrayList<>());
-        addInOrder(userChanges, new SolutionBuilder.IndexedElement<>(change, index, pinned));
+        final List<IndexedElement<AssignTaskProblemFactChange>> userChanges = changesByUserId.computeIfAbsent(user.getEntityId(), key -> new ArrayList<>());
+        addInOrder(userChanges, new IndexedElement<>(change, index, pinned));
     }
 
     private User getUser(Map<String, User> usersById, String userId) {

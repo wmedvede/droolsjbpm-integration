@@ -336,7 +336,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
         try {
             //early check that solver can be properly started.
-            SolverBuilder.builder()
+            SolverBuilder.create()
                     .registry(registry)
                     .solverDef(solverDef)
                     .build();

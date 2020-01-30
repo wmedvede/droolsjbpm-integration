@@ -25,9 +25,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.services.taskassigning.core.model.Task;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
@@ -37,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
 
@@ -51,10 +48,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SolutionSynchronizerTest {
+public class SolutionSynchronizerTest extends RunnableBaseTest<SolutionSynchronizer> {
 
-    private static final long TEST_TIMEOUT = 5000;
     private static final long SYNCH_INTERVAL = 2;
 
     @Mock
@@ -68,8 +63,6 @@ public class SolutionSynchronizerTest {
 
     @Mock
     private Consumer<SolutionSynchronizer.Result> resultConsumer;
-
-    private SolutionSynchronizer synchronizer;
 
     @Captor
     private ArgumentCaptor<TaskAssigningSolution> solutionCaptor;
@@ -89,16 +82,16 @@ public class SolutionSynchronizerTest {
     @Mock
     private List<ProblemFactChange<TaskAssigningSolution>> emptyChanges;
 
-    @Before
-    public void setUp() {
-        synchronizer = new SolutionSynchronizerMock(solverExecutor, delegate, userSystemService,
-                                                    SYNCH_INTERVAL, new SolverHandlerContext(), resultConsumer);
+    @Override
+    protected SolutionSynchronizer createRunnableBase() {
+        return new SolutionSynchronizerMock(solverExecutor, delegate, userSystemService,
+                                            SYNCH_INTERVAL, new SolverHandlerContext(), resultConsumer);
     }
 
     @Test(timeout = TEST_TIMEOUT)
     @SuppressWarnings("unchecked")
     public void initSolverExecutor() throws Exception {
-        CompletableFuture future = startSynchronizer();
+        CompletableFuture future = startRunnableBase();
 
         List<User> userList = mockUserList();
         List<TaskAssigningRuntimeDelegate.FindTasksResult> results = mockQueryExecutions(LocalDateTime.now());
@@ -109,23 +102,24 @@ public class SolutionSynchronizerTest {
         when(solverExecutor.isStopped()).thenReturn(true);
         when(userSystemService.findAllUsers()).thenReturn(userList);
 
-        synchronizer.initSolverExecutor();
+        runnableBase.initSolverExecutor();
 
+        // give some time for the executions to happen.
         Thread.sleep(1000);
 
         verify(delegate, times(results.size())).findTasks(anyList(), eq(null), anyObject());
         verify(solverExecutor).start(solutionCaptor.capture());
         assertEquals(generatedSolution, solutionCaptor.getValue());
 
-        synchronizer.destroy();
-        assertTrue(synchronizer.isDestroyed());
+        runnableBase.destroy();
+        assertTrue(runnableBase.isDestroyed());
         future.get();
     }
 
     @Test(timeout = TEST_TIMEOUT)
     @SuppressWarnings("unchecked")
     public void synchronizeSolution() throws Exception {
-        CompletableFuture future = startSynchronizer();
+        CompletableFuture future = startRunnableBase();
 
         TaskAssigningSolution solution = new TaskAssigningSolution(1, new ArrayList<>(), new ArrayList<>());
         List<User> userList = mockUserList();
@@ -138,7 +132,7 @@ public class SolutionSynchronizerTest {
         when(solverExecutor.isStarted()).thenReturn(true);
         when(userSystemService.findAllUsers()).thenReturn(userList);
 
-        synchronizer.synchronizeSolution(solution, startTime);
+        runnableBase.synchronizeSolution(solution, startTime);
 
         Thread.sleep(1000);
 
@@ -158,20 +152,10 @@ public class SolutionSynchronizerTest {
         verify(resultConsumer).accept(resultCaptor.capture());
         assertEquals(generatedChanges, resultCaptor.getValue().getChanges());
 
-        synchronizer.destroy();
-        assertTrue(synchronizer.isDestroyed());
+        runnableBase.destroy();
+        assertTrue(runnableBase.isDestroyed());
 
         future.get();
-    }
-
-    @Test(timeout = TEST_TIMEOUT)
-    public void gracefulDie() throws Exception {
-        Thread t = new Thread(synchronizer);
-        t.start();
-        Thread.sleep(500);
-        t.interrupt();
-        Thread.sleep(500);
-        assertTrue(synchronizer.isDestroyed());
     }
 
     /**
@@ -210,10 +194,6 @@ public class SolutionSynchronizerTest {
                 return result;
             }
         }).when(delegate).findTasks(anyList(), anyObject(), anyObject());
-    }
-
-    private CompletableFuture<Void> startSynchronizer() {
-        return CompletableFuture.runAsync(synchronizer);
     }
 
     private List<TaskData> mockTaskDataList() {

@@ -18,21 +18,18 @@ package org.kie.server.services.taskassigning.planning;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.kie.server.services.taskassigning.core.model.Group;
+import org.kie.server.api.model.taskassigning.PlanningTask;
+import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.services.taskassigning.core.model.Task;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.kie.server.services.taskassigning.core.model.TaskOrUser;
-import org.kie.server.services.taskassigning.core.model.TypedLabel;
 import org.kie.server.services.taskassigning.core.model.User;
-import org.kie.server.api.model.taskassigning.PlanningTask;
-import org.kie.server.api.model.taskassigning.TaskData;
-import org.kie.server.api.model.taskassigning.UserType;
+import org.kie.server.services.taskassigning.planning.util.IndexedElement;
 import org.kie.server.services.taskassigning.planning.util.UserUtil;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
@@ -43,6 +40,8 @@ import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_PLANNING_USER;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
+import static org.kie.server.services.taskassigning.planning.util.IndexedElement.addInOrder;
+import static org.kie.server.services.taskassigning.planning.util.TaskUtil.fromTaskData;
 
 /**
  * This class is intended for the restoring of a TaskAssigningSolution given a set of TaskData, a set of User and the
@@ -50,31 +49,6 @@ import static org.kie.server.services.taskassigning.core.model.ModelConstants.PL
  * application startup procedure.
  */
 public class SolutionBuilder {
-
-    static class IndexedElement<T> {
-
-        private T element;
-        private int index;
-        private boolean pinned;
-
-        IndexedElement(T element, int index, boolean pinned) {
-            this.element = element;
-            this.index = index;
-            this.pinned = pinned;
-        }
-
-        T getElement() {
-            return element;
-        }
-
-        int getIndex() {
-            return index;
-        }
-
-        boolean isPinned() {
-            return pinned;
-        }
-    }
 
     private List<TaskData> taskDataList;
     private List<org.kie.server.services.taskassigning.user.system.api.User> externalUsers;
@@ -134,7 +108,7 @@ public class SolutionBuilder {
                     break;
                 default:
                     //no other cases exists, sonar required.
-                    break;
+                    throw new IndexOutOfBoundsException("Value: " + taskData.getStatus() + " is out of range in current switch");
             }
         });
 
@@ -160,7 +134,7 @@ public class SolutionBuilder {
      * @param user the user that will "own" the tasks in the chained graph.
      * @param tasks the tasks to link.
      */
-    static void addTasksToUser(User user, List<Task> tasks) {
+    private static void addTasksToUser(User user, List<Task> tasks) {
         TaskOrUser previousTask = user;
         // startTime, endTime, nextTask and user are shadow variables that should be calculated by the solver at
         // start time. However this is not yet implemented see: https://issues.jboss.org/browse/PLANNER-1316 so by now
@@ -177,67 +151,14 @@ public class SolutionBuilder {
         }
     }
 
-    static void addTaskToUser(Map<String, List<IndexedElement<Task>>> tasksByUser,
-                              Task task,
-                              String actualOwner,
-                              int index,
-                              boolean pinned) {
+    private static void addTaskToUser(Map<String, List<IndexedElement<Task>>> tasksByUser,
+                                      Task task,
+                                      String actualOwner,
+                                      int index,
+                                      boolean pinned) {
         task.setPinned(pinned);
         final List<IndexedElement<Task>> userAssignedTasks = tasksByUser.computeIfAbsent(actualOwner, key -> new ArrayList<>());
         addInOrder(userAssignedTasks, new IndexedElement<>(task, index, task.isPinned()));
-    }
-
-    static <T> void addInOrder(List<IndexedElement<T>> indexedElements, IndexedElement<T> element) {
-        boolean pinned = element.isPinned();
-        int index = element.getIndex();
-        int insertIndex = 0;
-        IndexedElement currentElement;
-        final Iterator<IndexedElement<T>> it = indexedElements.iterator();
-        boolean found = false;
-        while (!found && it.hasNext()) {
-            currentElement = it.next();
-            if (pinned && currentElement.isPinned()) {
-                found = (index >= 0) && (currentElement.getIndex() < 0 || index < currentElement.getIndex());
-            } else if (pinned && !currentElement.isPinned()) {
-                found = true;
-            } else if (!pinned && !currentElement.isPinned()) {
-                found = (index >= 0) && (currentElement.getIndex() < 0 || index < currentElement.getIndex());
-            }
-            insertIndex = !found ? insertIndex + 1 : insertIndex;
-        }
-        indexedElements.add(insertIndex, element);
-    }
-
-    static Task fromTaskData(TaskData taskData) {
-        final Task task = new Task(taskData.getTaskId(),
-                                   taskData.getProcessInstanceId(),
-                                   taskData.getProcessId(),
-                                   taskData.getContainerId(),
-                                   taskData.getName(),
-                                   taskData.getPriority(),
-                                   taskData.getStatus(),
-                                   taskData.getInputData());
-        if (taskData.getPotentialOwners() != null) {
-            taskData.getPotentialOwners().forEach(potentialOwner -> {
-                if (isUser(potentialOwner.getType())) {
-                    task.getPotentialOwners().add(new User(potentialOwner.getName().hashCode(), potentialOwner.getName()));
-                } else {
-                    task.getPotentialOwners().add(new Group(potentialOwner.getName().hashCode(), potentialOwner.getName()));
-                }
-            });
-        }
-        //TODO expermiental for the demo
-        if (taskData.getInputData() != null) {
-            Object skill = taskData.getInputData().get("skills");
-            if (skill != null) {
-                task.getTypedLabels().add(TypedLabel.newSkill(skill.toString()));
-            }
-        }
-        return task;
-    }
-
-    private static boolean isUser(String userType) {
-        return UserType.User.equals(userType);
     }
 }
 

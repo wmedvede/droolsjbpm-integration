@@ -63,8 +63,8 @@ public class SolverHandler {
     private SolutionSynchronizer solutionSynchronizer;
     private SolutionProcessor solutionProcessor;
     private final String targetUserId = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_TARGET_USER, null, value -> value);
-    private static final int publishWindowSize = readSystemProperty(JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE, 2, Integer::parseInt);
-    private static final long syncInterval = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_INTERVAL, 5000L, Long::parseLong);
+    private static final int PUBLISH_WINDOW_SIZE = readSystemProperty(JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE, 2, Integer::parseInt);
+    private static final long SYNC_INTERVAL = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_INTERVAL, 5000L, Long::parseLong);
 
     public SolverHandler(final SolverDef solverDef,
                          final KieServerRegistry registry,
@@ -87,10 +87,10 @@ public class SolverHandler {
     public void start() {
         solverExecutor = new SolverExecutor(solverDef, registry, this::onBestSolutionChange);
         solutionSynchronizer = new SolutionSynchronizer(solverExecutor, delegate, userSystemService,
-                                                        syncInterval, context, this::onUpdateSolution);
+                                                        SYNC_INTERVAL, context, this::onUpdateSolution);
 
         solutionProcessor = new SolutionProcessor(delegate, this::onSolutionProcessed, targetUserId,
-                                                  publishWindowSize);
+                                                  PUBLISH_WINDOW_SIZE);
         executorService.execute(solverExecutor); //is started/stopped on demand by the SolutionSynchronizer.
         executorService.execute(solutionSynchronizer);
         executorService.execute(solutionProcessor);

@@ -44,7 +44,7 @@ public class SimpleUserSystemService implements UserSystemService {
     protected Map<String, User> userById = new HashMap<>();
     protected Exception error = null;
 
-    private static final String NAME = "SimpleUserSystemService";
+    public static final String NAME = "SimpleUserSystemService";
 
     public SimpleUserSystemService() {
         //SPI constructor

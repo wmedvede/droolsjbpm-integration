@@ -60,7 +60,7 @@ public class SolutionProcessor extends RunnableBase {
 
         }
 
-        private Result(Exception exception) {
+        public Result(Exception exception) {
             this.exception = exception;
         }
 

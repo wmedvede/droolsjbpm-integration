@@ -17,8 +17,12 @@
 package org.kie.server.services.taskassigning.planning;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
+import org.kie.api.task.model.Status;
 import org.kie.server.api.model.taskassigning.ExecutePlanningResult;
 import org.kie.server.api.model.taskassigning.PlanningItem;
 import org.kie.server.api.model.taskassigning.PlanningItemList;
@@ -58,8 +62,11 @@ public class TaskAssigningRuntimeDelegate {
         this.runtimeClient = runtimeClient;
     }
 
-    public FindTasksResult findTasks(List<String> status, LocalDateTime fromLastModificationDate, TaskInputVariablesReadMode inputVariablesReadMode) {
-        TaskDataReader.Result result = TaskDataReader.from(runtimeClient).readTasks(0, status, fromLastModificationDate, PAGE_SIZE, inputVariablesReadMode);
+    public FindTasksResult findTasks(List<Status> status, LocalDateTime fromLastModificationDate, TaskInputVariablesReadMode inputVariablesReadMode) {
+        final List<String> statusParam = Optional.ofNullable(status)
+                .orElse(Collections.emptyList()).stream()
+                .map(Status::name).collect(Collectors.toList());
+        TaskDataReader.Result result = TaskDataReader.from(runtimeClient).readTasks(0, statusParam, fromLastModificationDate, PAGE_SIZE, inputVariablesReadMode);
         return new FindTasksResult(result.getQueryTime(), result.getTasks());
     }
 

@@ -23,6 +23,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.api.task.model.Status;
 import org.kie.server.api.model.taskassigning.PlanningItem;
 import org.kie.server.api.model.taskassigning.PlanningItemList;
 import org.kie.server.api.model.taskassigning.TaskDataList;
@@ -58,7 +59,8 @@ public class TaskAssigningRuntimeDelegateTest {
 
     @Test
     public void findTasks() {
-        List<String> status = Collections.singletonList("AnyForTesting");
+        List<String> status = Collections.singletonList(Status.Ready.name());
+        List<Status> internalStatus = Collections.singletonList(Status.Ready);
         LocalDateTime lastModificationDate = LocalDateTime.now();
         TaskInputVariablesReadMode mode = TaskInputVariablesReadMode.READ_FOR_ALL;
         TaskDataList taskDataList = new TaskDataList();
@@ -66,7 +68,7 @@ public class TaskAssigningRuntimeDelegateTest {
         taskDataList.setQueryTime(queryTime);
 
         when(runtimeClient.findTasks(eq(0L), eq(status), eq(lastModificationDate), anyInt(), anyInt(), eq(mode))).thenReturn(taskDataList);
-        TaskAssigningRuntimeDelegate.FindTasksResult result = delegate.findTasks(status, lastModificationDate, mode);
+        TaskAssigningRuntimeDelegate.FindTasksResult result = delegate.findTasks(internalStatus, lastModificationDate, mode);
         verify(runtimeClient).findTasks(eq(0L), eq(status), eq(lastModificationDate), anyInt(), anyInt(), eq(mode));
         assertTrue(result.getTasks().isEmpty());
         assertEquals(queryTime, result.getQueryTime());

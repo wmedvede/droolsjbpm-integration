@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+import org.kie.api.task.model.Status;
 import org.kie.server.api.model.taskassigning.PlanningTask;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.services.taskassigning.core.model.Task;
@@ -30,10 +31,11 @@ import org.kie.server.services.taskassigning.core.model.User;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.kie.server.api.model.taskassigning.TaskStatus.InProgress;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Ready;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Reserved;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
+
+import static org.kie.api.task.model.Status.InProgress;
+import static org.kie.api.task.model.Status.Ready;
+import static org.kie.api.task.model.Status.Reserved;
+import static org.kie.api.task.model.Status.Suspended;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER_ID;
 import static org.kie.server.services.taskassigning.planning.TestUtil.assertContains;
@@ -371,15 +373,15 @@ public class SolutionBuilderTest {
         return Arrays.asList(externalUser1, externalUser2, externalUser3);
     }
 
-    private TaskData mockTaskData(Long taskId, String status) {
+    private TaskData mockTaskData(Long taskId, Status status) {
         return mockTaskData(taskId, status, null);
     }
 
-    private TaskData mockTaskData(Long taskId, String status, String actualOwner) {
+    private TaskData mockTaskData(Long taskId, Status status, String actualOwner) {
         TaskData taskData = new TaskData();
         taskData.setTaskId(taskId);
         taskData.setActualOwner(actualOwner);
-        taskData.setStatus(status);
+        taskData.setStatus(status.name());
         taskData.setPriority(0);
         taskData.setProcessInstanceId(1L);
         return taskData;

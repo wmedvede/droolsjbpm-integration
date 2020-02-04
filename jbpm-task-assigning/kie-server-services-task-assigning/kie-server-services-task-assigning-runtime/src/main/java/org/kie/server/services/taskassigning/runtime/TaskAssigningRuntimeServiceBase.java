@@ -34,6 +34,7 @@ import org.jbpm.services.task.commands.TaskCommand;
 import org.jbpm.services.task.commands.TaskContext;
 import org.kie.api.runtime.Context;
 import org.kie.api.task.model.OrganizationalEntity;
+import org.kie.api.task.model.Status;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.User;
 import org.kie.internal.task.api.TaskPersistenceContext;
@@ -47,14 +48,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.kie.server.api.model.taskassigning.TaskStatus.InProgress;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Ready;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Reserved;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
+import static org.kie.api.task.model.Status.InProgress;
+import static org.kie.api.task.model.Status.Ready;
+import static org.kie.api.task.model.Status.Reserved;
+import static org.kie.api.task.model.Status.Suspended;
 
 public class TaskAssigningRuntimeServiceBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAssigningRuntimeServiceBase.class);
+
+    private static final int INTERNAL_QUERY_PAGE_SIZE = 3000;
 
     private static final String TASK_MODIFIED_ERROR_MSG_1 = "Task: %s was modified by an external action since the last executed plan," +
             " actualOwner is %s but the last assignedUser is %s";
@@ -100,14 +103,14 @@ public class TaskAssigningRuntimeServiceBase {
                     // and a new plan will arrive soon.
                     throw new PlanningException(String.format(TASK_MODIFIED_ERROR_MSG_3,
                                                               planningItem.getPlanningTask().getTaskId(),
-                                                              Arrays.toString(new String[]{Ready, Reserved, InProgress, Suspended})),
+                                                              Arrays.toString(new String[]{Ready.name(), Reserved.name(), InProgress.name(), Suspended.name()})),
                                                 planningItem.getContainerId(),
                                                 ExecutePlanningResult.ErrorCode.TASK_MODIFIED_SINCE_PLAN_CALCULATION_ERROR);
                 }
 
                 final String actualOwner = taskData.getActualOwner();
                 final PlanningTask actualPlanningTask = taskData.getPlanningTask();
-                final String taskStatus = taskData.getStatus();
+                final Status taskStatus = Status.valueOf(taskData.getStatus());
                 boolean delegateAndSave = false;
 
                 if (isNotEmpty(actualOwner) &&
@@ -172,7 +175,8 @@ public class TaskAssigningRuntimeServiceBase {
             }
 
             for (TaskData taskData : taskDataById.values()) {
-                if ((taskData.getStatus().equals(Ready) || taskData.getStatus().equals(Reserved) || taskData.getStatus().equals(Suspended)) && taskData.getPlanningTask() != null) {
+                final Status status = Status.valueOf(taskData.getStatus());
+                if ((status == Ready || status == Reserved || status == Suspended) && taskData.getPlanningTask() != null) {
                     commandsByContainer.computeIfAbsent(taskData.getContainerId(), k -> new ArrayList<>()).add(new DeletePlanningItemCommand(taskData.getTaskId()));
                 }
             }
@@ -244,8 +248,8 @@ public class TaskAssigningRuntimeServiceBase {
     private Map<Long, TaskData> prepareTaskDataForExecutePlanning() {
         //optimized reading, only taskId, taskStatus, actualOwner, deploymentId, and the PlanningTask is needed.
         List<TaskData> result = queryHelper.readTasksDataSummary(0,
-                                                                 Arrays.asList(Ready, Reserved, InProgress, Suspended),
-                                                                 3);
+                                                                 Arrays.asList(Ready.name(), Reserved.name(), InProgress.name(), Suspended.name()),
+                                                                 INTERNAL_QUERY_PAGE_SIZE);
         return result.stream().collect(Collectors.toMap(TaskData::getTaskId, Function.identity()));
     }
 
@@ -360,7 +364,7 @@ public class TaskAssigningRuntimeServiceBase {
                 throw new PlanningException(String.format(TASK_MODIFIED_ERROR_MSG_4,
                                                           planningItem.getTaskId(),
                                                           status,
-                                                          Arrays.toString(new String[]{Ready, Reserved})),
+                                                          Arrays.toString(new String[]{Ready.name(), Reserved.name()})),
                                             planningItem.getContainerId(),
                                             ExecutePlanningResult.ErrorCode.TASK_MODIFIED_SINCE_PLAN_CALCULATION_ERROR);
             }

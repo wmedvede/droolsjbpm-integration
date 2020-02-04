@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.kie.api.task.model.Status;
 import org.kie.server.api.model.taskassigning.PlanningTask;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.services.taskassigning.core.model.Task;
@@ -33,10 +34,9 @@ import org.kie.server.services.taskassigning.planning.util.IndexedElement;
 import org.kie.server.services.taskassigning.planning.util.UserUtil;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
-import static org.kie.server.api.model.taskassigning.TaskStatus.InProgress;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Ready;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Reserved;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
+import static org.kie.api.task.model.Status.InProgress;
+import static org.kie.api.task.model.Status.Reserved;
+import static org.kie.api.task.model.Status.Suspended;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_PLANNING_USER;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
@@ -81,7 +81,8 @@ public class SolutionBuilder {
 
         taskDataList.forEach(taskData -> {
             final Task task = fromTaskData(taskData);
-            switch (taskData.getStatus()) {
+            final Status status = Status.valueOf(task.getStatus());
+            switch (status) {
                 case Ready:
                     tasks.add(task);
                     break;
@@ -96,12 +97,12 @@ public class SolutionBuilder {
                         tasks.add(task);
                         final PlanningTask planningTask = taskData.getPlanningTask();
                         if (planningTask != null && taskData.getActualOwner().equals(planningTask.getAssignedUser())) {
-                            boolean pinned = InProgress.equals(taskData.getStatus()) || Suspended.equals(taskData.getStatus()) ||
+                            boolean pinned = InProgress == status || Suspended == status ||
                                     planningTask.getPublished() || !usersById.containsKey(taskData.getActualOwner());
                             addTaskToUser(assignedTasksByUserId, task, planningTask.getAssignedUser(), planningTask.getIndex(), pinned);
                         } else {
-                            boolean pinned = (Reserved.equals(taskData.getStatus()) && !IS_PLANNING_USER.test(taskData.getActualOwner())) ||
-                                    InProgress.equals(taskData.getStatus()) || Suspended.equals(taskData.getStatus());
+                            boolean pinned = (Reserved == status && !IS_PLANNING_USER.test(taskData.getActualOwner())) ||
+                                    InProgress == status || Suspended == status;
                             addTaskToUser(assignedTasksByUserId, task, taskData.getActualOwner(), -1, pinned);
                         }
                     }

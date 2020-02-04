@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.kie.api.task.model.Status;
 import org.kie.server.services.taskassigning.core.model.Task;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.kie.server.services.taskassigning.core.model.User;
@@ -40,15 +41,6 @@ import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.kie.server.api.model.taskassigning.TaskStatus.Completed;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Error;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Exited;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Failed;
-import static org.kie.server.api.model.taskassigning.TaskStatus.InProgress;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Obsolete;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Ready;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Reserved;
-import static org.kie.server.api.model.taskassigning.TaskStatus.Suspended;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK_PLANNER_241;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_NOT_DUMMY;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
@@ -118,11 +110,13 @@ public class SolutionChangesBuilder {
         final Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId = new HashMap<>();
 
         Task task;
+        Status taskDataStatus;
         for (TaskData taskData : taskDataList) {
             task = taskById.remove(taskData.getTaskId());
+            taskDataStatus = Status.valueOf(taskData.getStatus());
             if (task == null) {
                 Task newTask;
-                switch (taskData.getStatus()) {
+                switch (taskDataStatus) {
                     case Ready:
                         newTask = fromTaskData(taskData);
                         newTaskChanges.add(new AddTaskProblemFactChange(newTask));
@@ -154,11 +148,15 @@ public class SolutionChangesBuilder {
                             addChangeToUser(changesByUserId, change, user, -1, true);
                         }
                         break;
+                    default:
+                        // sonar required. Tasks in cases were typically crated and moved into a sink status completely
+                        // out of the refresh interval, so there's nothing to do with them.
+                        break;
                 }
             } else {
-                switch (taskData.getStatus()) {
+                switch (taskDataStatus) {
                     case Ready:
-                        if (!Ready.equals(task.getStatus())) {
+                        if (!Status.Ready.name().equals(task.getStatus())) {
                             // task was probably assigned to someone else in the past and released from the task
                             // list administration
                             releasedTasksChanges.add(new ReleaseTaskProblemFactChange(task));

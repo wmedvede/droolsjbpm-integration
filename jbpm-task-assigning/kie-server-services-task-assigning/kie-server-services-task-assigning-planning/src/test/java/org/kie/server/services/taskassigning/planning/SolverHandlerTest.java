@@ -49,6 +49,7 @@ import static org.kie.server.services.taskassigning.planning.TaskAssigningConsta
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -106,7 +107,10 @@ public class SolverHandlerTest {
 
     @Before
     public void setUp() {
-        this.handler = spy(new SolverHandlerMock(solverDef, registry, delegate, userSystemService, executorService));
+        this.handler = spy(new SolverHandler(solverDef, registry, delegate, userSystemService, executorService));
+        doReturn(solverExecutor).when(handler).createSolverExecutor(eq(solverDef), eq(registry), any());
+        doReturn(solutionSynchronizer).when(handler).createSolutionSynchronizer(eq(solverExecutor), eq(delegate), eq(userSystemService), anyInt(), any(), any());
+        doReturn(solutionProcessor).when(handler).createSolutionProcessor(eq(delegate), any(), eq(TARGET_USER), anyInt());
     }
 
     @Test
@@ -302,36 +306,5 @@ public class SolverHandlerTest {
         verify(solutionProcessor).destroy();
         verify(executorService).shutdown();
         verify(executorService).awaitTermination(5, TimeUnit.SECONDS);
-    }
-
-    private class SolverHandlerMock extends SolverHandler {
-
-        public SolverHandlerMock(SolverDef solverDef, KieServerRegistry registry, TaskAssigningRuntimeDelegate delegate,
-                                 UserSystemService userSystemService, ExecutorService executorService) {
-            super(solverDef, registry, delegate, userSystemService, executorService);
-        }
-
-        @Override
-        protected SolverExecutor createSolverExecutor(SolverDef solverDef, KieServerRegistry registry,
-                                                      SolverEventListener<TaskAssigningSolution> listener) {
-            return solverExecutor;
-        }
-
-        @Override
-        protected SolutionSynchronizer createSolutionSynchronizer(SolverExecutor solverExecutor,
-                                                                  TaskAssigningRuntimeDelegate delegate,
-                                                                  UserSystemService userSystemService,
-                                                                  long synchInterval,
-                                                                  SolverHandlerContext context,
-                                                                  Consumer<SolutionSynchronizer.Result> resultConsumer) {
-            return solutionSynchronizer;
-        }
-
-        @Override
-        protected SolutionProcessor createSolutionProcessor(TaskAssigningRuntimeDelegate delegate,
-                                                            Consumer<SolutionProcessor.Result> resultConsumer,
-                                                            String targetUserId, int publishWindowSize) {
-            return solutionProcessor;
-        }
     }
 }

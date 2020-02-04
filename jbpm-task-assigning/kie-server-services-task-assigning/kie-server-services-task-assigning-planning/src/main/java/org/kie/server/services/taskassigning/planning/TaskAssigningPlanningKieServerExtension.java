@@ -40,7 +40,9 @@ import org.kie.server.services.api.SupportedTransports;
 import org.kie.server.services.impl.KieContainerInstanceImpl;
 import org.kie.server.services.impl.KieServerImpl;
 import org.kie.server.services.jbpm.JbpmKieServerExtension;
+import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
+import org.optaplanner.core.api.solver.Solver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,49 +67,59 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskAssigningPlanningKieServerExtension.class);
 
-    private static final String CAPABILITY_TASK_ASSIGNING_PLANNING = "TaskAssigningPlanning";
+    static final String CAPABILITY_TASK_ASSIGNING_PLANNING = "TaskAssigningPlanning";
 
-    private static final boolean DISABLED = readSystemProperty(KIE_TASK_ASSIGNING_PLANNING_EXT_DISABLED, true, value -> !Boolean.FALSE.toString().equals(value));
+    static final String EXTENSION_NAME = "TaskAssigningPlanning";
 
-    public static final String EXTENSION_NAME = "TaskAssigningPlanning";
+    static final int EXTENSION_START_ORDER = 1001;
 
     private static final String DEFAULT_SOLVER_CONFIG = "org/kie/server/services/taskassigning/solver/taskAssigningDefaultSolverConfig.xml";
 
-    private static final String CREATE_CONTAINER_ERROR = "Container creation failed for containerId: %s, error: %s";
-    private static final String ACTIVATE_CONTAINER_ERROR = "Container activation failed for containerId: %s, error: %s";
-    private static final String EXTENSION_CONTAINER_NOT_IN_EXPECTED_STATUS_ERROR = "Container %s must be in %s status but is currently %s." +
-            " " + EXTENSION_NAME + " won't operate properly.";
+    static final String EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART = EXTENSION_NAME + " won't operate properly";
 
-    private static final String CONTAINER_NOT_ACCESSIBLE_ERROR = "It was not possible get access to containerId: %s" +
-            " " + EXTENSION_NAME + " won't operate properly.";
+    static final String CREATE_CONTAINER_ERROR = "Container creation failed for containerId: %s, error: %s";
 
-    private static final String PLANNER_CONTAINER_CONFIGURATION_ERROR = "Planner container is not properly configured, error: %s" +
-            " " + EXTENSION_NAME + " won't operate properly";
+    static final String ACTIVATE_CONTAINER_ERROR = "Container activation failed for containerId: %s, error: %s";
 
-    private static final String PLANNER_SOLVER_NOT_CONFIGURED_ERROR = "No solverConfigResource has been configured for starting the task assigning solver." +
-            " " + EXTENSION_NAME + " won't operate properly.";
+    static final String EXTENSION_CONTAINER_NOT_IN_EXPECTED_STATUS_ERROR = "Container %s must be in %s status but is currently %s." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
-    private static final String PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR = "An error was produced during solver instantiation check." +
+    static final String CONTAINER_NOT_ACCESSIBLE_ERROR = "It was not possible get access to containerId: %s" +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
+
+    static final String PLANNER_CONTAINER_CONFIGURATION_ERROR = "Planner container is not properly configured, error: %s" +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
+
+    static final String PLANNER_SOLVER_NOT_CONFIGURED_ERROR = "No solverConfigResource has been configured for starting the task assigning solver." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
+
+    static final String PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR = "An error was produced during solver instantiation check." +
             " It was not possible to create a solver for the provided configuration, error: %s." +
-            " " + EXTENSION_NAME + " won't operate properly.";
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
-    private static final String PLANNER_CONTAINER_NOT_AVAILABLE = "Planner container %s is not available." +
-            " " + EXTENSION_NAME + " won't operate properly";
+    static final String PLANNER_CONTAINER_NOT_AVAILABLE = "Planner container %s is not available." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
-    private static final String UNDESIRED_EXTENSIONS_RUNNING_ERROR = "It's was detected that the following extensions %s" +
+    static final String UNDESIRED_EXTENSIONS_RUNNING_ERROR = "It's was detected that the following extensions %s" +
             " are running in current server, but it's not recommended to run them on the same server instance as the " + EXTENSION_NAME;
 
-    private static final String USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR = "No user system service name has been configured." +
-            " " + EXTENSION_NAME + " won't operate properly. Please use the property %s to configure it";
+    static final String USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR = "No user system service name has been configured." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART + ". Please use the property %s to configure it";
 
-    private static final String USER_SYSTEM_CONTAINER_CONFIGURATION_ERROR = "User system service container is not properly configured, error: %s" +
-            " " + EXTENSION_NAME + " won't operate properly";
+    static final String USER_SYSTEM_CONTAINER_CONFIGURATION_ERROR = "User system service container is not properly configured, error: %s" +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
-    private static final String USER_SYSTEM_CONTAINER_NOT_AVAILABLE = "User system service container %s is not available." +
-            " " + EXTENSION_NAME + " won't operate properly";
+    static final String USER_SYSTEM_CONTAINER_NOT_AVAILABLE = "User system service container %s is not available." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
-    private static final String USER_SYSTEM_SERVICE_NOT_FOUND = "User system service %s was not found." +
-            " " + EXTENSION_NAME + " won't operate properly";
+    static final String USER_SYSTEM_SERVICE_NOT_FOUND = "User system service %s was not found." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
+
+    static final String USER_SYSTEM_SERVICE_START_ERROR = "User system service %s initialization failed, error: %s." +
+            " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
+
+    static final String REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING = "Required parameters for container configuration are missing." +
+            " containerId: %s, groupId: %s, artifactId: %s, version: %s";
 
     private KieServer kieServer;
     private KieServerRegistry registry;
@@ -128,7 +140,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
      */
     @Override
     public boolean isActive() {
-        return !DISABLED;
+        return !isDisabled();
     }
 
     /**
@@ -139,7 +151,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
         LOGGER.debug("Initializing " + EXTENSION_NAME + " extension.");
         this.kieServer = kieServer;
         this.registry = registry;
-        if (DISABLED) {
+        if (isDisabled()) {
             LOGGER.debug(EXTENSION_NAME + " is currently disabled. Use the " + KIE_TASK_ASSIGNING_PLANNING_EXT_DISABLED + " to enable it if needed.");
             return;
         }
@@ -161,7 +173,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
         }
 
         this.executorService = Executors.newFixedThreadPool(3);
-        this.taskAssigningService = new TaskAssigningService();
+        this.taskAssigningService = createTaskAssigningService();
         this.services.add(taskAssigningService);
 
         this.initialized = true;
@@ -237,7 +249,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
     @Override
     public Integer getStartOrder() {
-        return 1001;
+        return EXTENSION_START_ORDER;
     }
 
     @Override
@@ -271,10 +283,14 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
     @Override
     public void destroy(KieServerImpl kieServer, KieServerRegistry registry) {
         LOGGER.debug("Destroying " + EXTENSION_NAME + " extension.");
-        if (DISABLED || !initialized) {
+        if (isDisabled() || !initialized) {
             return;
         }
         taskAssigningService.destroy();
+    }
+
+    private boolean isDisabled() {
+        return readSystemProperty(KIE_TASK_ASSIGNING_PLANNING_EXT_DISABLED, true, value -> !Boolean.FALSE.toString().equals(value));
     }
 
     private SolverDef getSolverDef() {
@@ -289,6 +305,10 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
                              artifactId,
                              version,
                              solverConfigResource);
+    }
+
+    TaskAssigningService createTaskAssigningService() {
+        return new TaskAssigningService();
     }
 
     private UserSystemService getUserSystemService() {
@@ -336,10 +356,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
         try {
             //early check that solver can be properly started.
-            SolverBuilder.create()
-                    .registry(registry)
-                    .solverDef(solverDef)
-                    .build();
+            createSolver(registry, solverDef);
         } catch (Exception e) {
             String msg = String.format(PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR, e.getMessage());
             LOGGER.error(msg, e);
@@ -347,6 +364,13 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
             return false;
         }
         return true;
+    }
+
+    Solver<TaskAssigningSolution> createSolver(KieServerRegistry registry, SolverDef solverDef) {
+        return SolverBuilder.create()
+                .registry(registry)
+                .solverDef(solverDef)
+                .build();
     }
 
     private boolean validateAndSetUserSystemServiceConfiguration() {
@@ -390,9 +414,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
             LOGGER.debug("User system service {} will be loaded from application class loader", userSystemName);
             classLoader = this.getClass().getClassLoader();
         }
-
-        final Map<String, UserSystemService> userServices = UserSystemServiceLoader.loadServices(classLoader);
-        userSystemService = userServices.get(userSystemName);
+        userSystemService = lookupUserSystem(userSystemName, classLoader);
         if (userSystemService == null) {
             final String msg = String.format(USER_SYSTEM_SERVICE_NOT_FOUND, userSystemName);
             LOGGER.error(msg);
@@ -400,7 +422,15 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
             return false;
         }
 
-        userSystemService.start();
+        try {
+            userSystemService.start();
+        } catch (Exception e) {
+            final String msg = String.format(USER_SYSTEM_SERVICE_START_ERROR, userSystemName, e.getMessage());
+            LOGGER.error(msg, e);
+            kieServer.addServerMessage(new Message(Severity.ERROR, msg));
+            return false;
+        }
+
         try {
             userSystemService.test();
             LOGGER.debug("User system service {} test check was successful.", userSystemName);
@@ -410,11 +440,20 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
         return true;
     }
 
+    UserSystemService lookupUserSystem(String userSystemName, ClassLoader classLoader) {
+        final Map<String, UserSystemService> userServices = UserSystemServiceLoader.loadServices(classLoader);
+        return userServices.get(userSystemName);
+    }
+
     private void initRuntimeClient() {
         String url = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_URL, "http://localhost:8080/kie-server/services/rest/server", value -> value);
         String user = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER, "wbadmin", value -> value);
         String pwd = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD, null, value -> value);
-        this.runtimeClient = TaskAssigningRuntimeClientFactory.newRuntimeClient(url, user, pwd);
+        this.runtimeClient = createRuntimeClient(url, user, pwd);
+    }
+
+    TaskAssigningRuntimeClient createRuntimeClient(String url, String user, String pwd) {
+        return TaskAssigningRuntimeClientFactory.newRuntimeClient(url, user, pwd);
     }
 
     private boolean validateContainerConfiguration(KieContainerResource resource, Function<Exception, String> printableErrorMessage) {
@@ -435,9 +474,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
         final String artifactId = resource.getReleaseId().getArtifactId();
         final String version = resource.getReleaseId().getVersion();
         if (isEmpty(containerId) || isEmpty(artifactId) || isEmpty(groupId) || isEmpty(version)) {
-            throw new Exception("Required parameters for container configuration are missing." +
-                                        " containerId: " + containerId +
-                                        ", groupId: " + groupId + ", artifactId: " + artifactId + ", version: " + version + ".");
+            throw new Exception(String.format(REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING, containerId, groupId, artifactId, version));
         }
     }
 

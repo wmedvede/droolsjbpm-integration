@@ -52,9 +52,9 @@ public class TaskAssigningService {
         }
     }
 
-    protected SolverHandler createSolverHandler(SolverDef solverDef, KieServerRegistry registry,
-                                                TaskAssigningRuntimeDelegate delegate, UserSystemService userSystemService,
-                                                ExecutorService executorService) {
+    SolverHandler createSolverHandler(SolverDef solverDef, KieServerRegistry registry,
+                                      TaskAssigningRuntimeDelegate delegate, UserSystemService userSystemService,
+                                      ExecutorService executorService) {
         return new SolverHandler(solverDef, registry, delegate, userSystemService, executorService);
     }
 }

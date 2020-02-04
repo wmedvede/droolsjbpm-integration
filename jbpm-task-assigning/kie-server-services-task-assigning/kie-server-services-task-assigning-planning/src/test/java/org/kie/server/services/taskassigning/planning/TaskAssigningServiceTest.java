@@ -26,6 +26,9 @@ import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -53,7 +56,10 @@ public class TaskAssigningServiceTest {
 
     @Before
     public void setUp() {
-        taskAssigningService = new TaskAssigningServiceMock();
+        taskAssigningService = spy(new TaskAssigningService());
+        doReturn(solverHandler)
+                .when(taskAssigningService)
+                .createSolverHandler(eq(solverDef), eq(registry), eq(delegate), eq(userSystemService), eq(executorService));
         taskAssigningService.setUserSystemService(userSystemService);
         taskAssigningService.setDelegate(delegate);
         taskAssigningService.setExecutorService(executorService);
@@ -65,20 +71,10 @@ public class TaskAssigningServiceTest {
         verify(solverHandler).start();
     }
 
+    @Test
     public void destroy() {
+        taskAssigningService.start(solverDef, registry);
         taskAssigningService.destroy();
         verify(solverHandler).destroy();
-    }
-
-    private class TaskAssigningServiceMock extends TaskAssigningService {
-
-        @Override
-        protected SolverHandler createSolverHandler(SolverDef solverDef,
-                                                    KieServerRegistry registry,
-                                                    TaskAssigningRuntimeDelegate delegate,
-                                                    UserSystemService userSystemService,
-                                                    ExecutorService executorService) {
-            return solverHandler;
-        }
     }
 }

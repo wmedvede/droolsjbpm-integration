@@ -26,12 +26,14 @@ import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.api.model.taskassigning.TaskInputVariablesReadMode;
 import org.kie.server.client.TaskAssigningRuntimeClient;
 import org.kie.server.client.util.TaskDataReader;
+import org.kie.server.services.taskassigning.planning.util.PropertyUtil;
+
+import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_RUNTIME_DELEGATE_PAGE_SIZE;
 
 public class TaskAssigningRuntimeDelegate {
 
     private final TaskAssigningRuntimeClient runtimeClient;
-    //TODO configure the page size via System property.
-    private static final int PAGE_SIZE = 3000;
+    private static final int PAGE_SIZE = PropertyUtil.readSystemProperty(TASK_ASSIGNING_RUNTIME_DELEGATE_PAGE_SIZE, 3000, Integer::parseInt);
 
     static class FindTasksResult {
 

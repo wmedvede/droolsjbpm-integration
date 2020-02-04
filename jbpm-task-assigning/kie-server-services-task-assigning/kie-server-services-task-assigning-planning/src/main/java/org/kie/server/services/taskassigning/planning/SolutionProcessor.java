@@ -178,7 +178,7 @@ public class SolutionProcessor extends RunnableBase {
         }
     }
 
-    protected List<PlanningItem> buildPlanning(TaskAssigningSolution solution, int publishWindowSize) {
+    List<PlanningItem> buildPlanning(TaskAssigningSolution solution, int publishWindowSize) {
         return PlanningBuilder.create()
                 .withSolution(solution)
                 .withPublishWindowSize(publishWindowSize)

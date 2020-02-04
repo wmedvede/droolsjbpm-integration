@@ -116,25 +116,25 @@ public class SolverHandler {
         }
     }
 
-    protected SolverExecutor createSolverExecutor(SolverDef solverDef,
-                                                  KieServerRegistry registry,
-                                                  SolverEventListener<TaskAssigningSolution> listener) {
+    SolverExecutor createSolverExecutor(SolverDef solverDef,
+                                        KieServerRegistry registry,
+                                        SolverEventListener<TaskAssigningSolution> listener) {
         return new SolverExecutor(solverDef, registry, listener);
     }
 
-    protected SolutionSynchronizer createSolutionSynchronizer(SolverExecutor solverExecutor,
-                                                              TaskAssigningRuntimeDelegate delegate,
-                                                              UserSystemService userSystemService,
-                                                              long synchInterval,
-                                                              SolverHandlerContext context,
-                                                              Consumer<SolutionSynchronizer.Result> resultConsumer) {
+    SolutionSynchronizer createSolutionSynchronizer(SolverExecutor solverExecutor,
+                                                    TaskAssigningRuntimeDelegate delegate,
+                                                    UserSystemService userSystemService,
+                                                    long synchInterval,
+                                                    SolverHandlerContext context,
+                                                    Consumer<SolutionSynchronizer.Result> resultConsumer) {
         return new SolutionSynchronizer(solverExecutor, delegate, userSystemService, synchInterval, context, resultConsumer);
     }
 
-    protected SolutionProcessor createSolutionProcessor(TaskAssigningRuntimeDelegate delegate,
-                                                        Consumer<SolutionProcessor.Result> resultConsumer,
-                                                        String targetUserId,
-                                                        int publishWindowSize) {
+    SolutionProcessor createSolutionProcessor(TaskAssigningRuntimeDelegate delegate,
+                                              Consumer<SolutionProcessor.Result> resultConsumer,
+                                              String targetUserId,
+                                              int publishWindowSize) {
         return new SolutionProcessor(delegate, resultConsumer, targetUserId, publishWindowSize);
     }
 

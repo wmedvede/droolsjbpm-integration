@@ -33,6 +33,9 @@ import org.mockito.Mock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +65,9 @@ public class SolutionProcessorTest extends RunnableBaseTest<SolutionProcessor> {
     @Override
     protected SolutionProcessor createRunnableBase() {
         delegate = spy(new TaskAssigningRuntimeDelegateMock(runtimeClient));
-        return new SolutionProcessorMock(delegate, resultConsumer, TARGET_USER_ID, PUBLISH_WINDOW_SIZE);
+        SolutionProcessor processor = spy(new SolutionProcessor(delegate, resultConsumer, TARGET_USER_ID, PUBLISH_WINDOW_SIZE));
+        doReturn(generatedPlan).when(processor).buildPlanning(any(), anyInt());
+        return processor;
     }
 
     @Test(timeout = TEST_TIMEOUT)
@@ -121,21 +126,6 @@ public class SolutionProcessorTest extends RunnableBaseTest<SolutionProcessor> {
         runnableBase.destroy();
         assertTrue(runnableBase.isDestroyed());
         future.get();
-    }
-
-    private class SolutionProcessorMock extends SolutionProcessor {
-
-        public SolutionProcessorMock(TaskAssigningRuntimeDelegate delegate,
-                                     Consumer<Result> resultConsumer,
-                                     String targetUserId,
-                                     int publishWindowSize) {
-            super(delegate, resultConsumer, targetUserId, publishWindowSize);
-        }
-
-        @Override
-        protected List<PlanningItem> buildPlanning(TaskAssigningSolution solution, int publishWindowSize) {
-            return generatedPlan;
-        }
     }
 
     private class TaskAssigningRuntimeDelegateMock extends TaskAssigningRuntimeDelegate {

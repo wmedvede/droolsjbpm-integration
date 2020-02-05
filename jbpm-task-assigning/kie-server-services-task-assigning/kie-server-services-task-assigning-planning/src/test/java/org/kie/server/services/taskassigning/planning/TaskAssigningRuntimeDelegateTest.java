@@ -36,6 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToString;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -59,7 +60,7 @@ public class TaskAssigningRuntimeDelegateTest {
 
     @Test
     public void findTasks() {
-        List<String> status = Collections.singletonList(Status.Ready.name());
+        List<String> status = Collections.singletonList(convertToString(Status.Ready));
         List<Status> internalStatus = Collections.singletonList(Status.Ready);
         LocalDateTime lastModificationDate = LocalDateTime.now();
         TaskInputVariablesReadMode mode = TaskInputVariablesReadMode.READ_FOR_ALL;

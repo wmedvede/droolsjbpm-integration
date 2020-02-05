@@ -72,6 +72,10 @@
     </dependency>
     <dependency>
       <groupId>org.kie.server</groupId>
+      <artifactId>kie-server-api-task-assigning</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.kie.server</groupId>
       <artifactId>kie-server-client-task-assigning</artifactId>
     </dependency>
     <dependency>

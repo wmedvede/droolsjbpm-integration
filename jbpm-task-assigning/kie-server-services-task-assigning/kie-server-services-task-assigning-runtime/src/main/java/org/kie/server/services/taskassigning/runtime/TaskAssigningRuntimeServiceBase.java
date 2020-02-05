@@ -52,6 +52,8 @@ import static org.kie.api.task.model.Status.InProgress;
 import static org.kie.api.task.model.Status.Ready;
 import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertFromString;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToStringList;
 
 public class TaskAssigningRuntimeServiceBase {
 
@@ -103,14 +105,14 @@ public class TaskAssigningRuntimeServiceBase {
                     // and a new plan will arrive soon.
                     throw new PlanningException(String.format(TASK_MODIFIED_ERROR_MSG_3,
                                                               planningItem.getPlanningTask().getTaskId(),
-                                                              Arrays.toString(new String[]{Ready.name(), Reserved.name(), InProgress.name(), Suspended.name()})),
+                                                              Arrays.toString(new Status[]{Ready, Reserved, InProgress, Suspended})),
                                                 planningItem.getContainerId(),
                                                 ExecutePlanningResult.ErrorCode.TASK_MODIFIED_SINCE_PLAN_CALCULATION_ERROR);
                 }
 
                 final String actualOwner = taskData.getActualOwner();
                 final PlanningTask actualPlanningTask = taskData.getPlanningTask();
-                final Status taskStatus = Status.valueOf(taskData.getStatus());
+                final Status taskStatus = convertFromString(taskData.getStatus());
                 boolean delegateAndSave = false;
 
                 if (isNotEmpty(actualOwner) &&
@@ -175,7 +177,7 @@ public class TaskAssigningRuntimeServiceBase {
             }
 
             for (TaskData taskData : taskDataById.values()) {
-                final Status status = Status.valueOf(taskData.getStatus());
+                final Status status = convertFromString(taskData.getStatus());
                 if ((status == Ready || status == Reserved || status == Suspended) && taskData.getPlanningTask() != null) {
                     commandsByContainer.computeIfAbsent(taskData.getContainerId(), k -> new ArrayList<>()).add(new DeletePlanningItemCommand(taskData.getTaskId()));
                 }
@@ -248,7 +250,7 @@ public class TaskAssigningRuntimeServiceBase {
     private Map<Long, TaskData> prepareTaskDataForExecutePlanning() {
         //optimized reading, only taskId, taskStatus, actualOwner, deploymentId, and the PlanningTask is needed.
         List<TaskData> result = queryHelper.readTasksDataSummary(0,
-                                                                 Arrays.asList(Ready.name(), Reserved.name(), InProgress.name(), Suspended.name()),
+                                                                 convertToStringList(Ready, Reserved, InProgress, Suspended),
                                                                  INTERNAL_QUERY_PAGE_SIZE);
         return result.stream().collect(Collectors.toMap(TaskData::getTaskId, Function.identity()));
     }
@@ -359,12 +361,12 @@ public class TaskAssigningRuntimeServiceBase {
             final TaskContext taskContext = (TaskContext) context;
             final Task task = taskContext.getPersistenceContext().findTask(planningItem.getTaskId());
             final org.kie.api.task.model.TaskData taskData = task.getTaskData();
-            String status = taskData.getStatus().name();
-            if (!(Ready.equals(status) || Reserved.equals(status))) {
+            final Status status = taskData.getStatus();
+            if (!(Ready == status || Reserved == status)) {
                 throw new PlanningException(String.format(TASK_MODIFIED_ERROR_MSG_4,
                                                           planningItem.getTaskId(),
                                                           status,
-                                                          Arrays.toString(new String[]{Ready.name(), Reserved.name()})),
+                                                          Arrays.toString(new Status[]{Ready, Reserved})),
                                             planningItem.getContainerId(),
                                             ExecutePlanningResult.ErrorCode.TASK_MODIFIED_SINCE_PLAN_CALCULATION_ERROR);
             }

@@ -41,6 +41,8 @@ import org.optaplanner.core.impl.solver.ProblemFactChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertFromString;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToString;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK_PLANNER_241;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_NOT_DUMMY;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
@@ -110,108 +112,12 @@ public class SolutionChangesBuilder {
         final Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId = new HashMap<>();
 
         Task task;
-        Status taskDataStatus;
         for (TaskData taskData : taskDataList) {
             task = taskById.remove(taskData.getTaskId());
-            taskDataStatus = Status.valueOf(taskData.getStatus());
             if (task == null) {
-                Task newTask;
-                switch (taskDataStatus) {
-                    case Ready:
-                        newTask = fromTaskData(taskData);
-                        newTaskChanges.add(new AddTaskProblemFactChange(newTask));
-                        break;
-                    case Reserved:
-                    case InProgress:
-                    case Suspended:
-
-                        // if Reserved:
-                        //        the task was created and reserved completely outside of the planner. We add it to the
-                        //        solution.
-                        // if InProgress:
-                        //        the task was created, reserved and started completely outside of the planner.
-                        //        We add it to the solution since this assignment might affect the workload, etc., of the plan.
-                        // if Suspended:
-                        //        the task was created, eventually assigned and started, suspended etc. completely outside of
-                        //        the planner.
-                        //        if (taskData.getActualOwner() == null) {
-                        //            do nothing, the task was assigned to nobody. So it was necessary in Ready status
-                        //            prior Suspension.
-                        //            It'll be added to the solution if it comes into Ready or Reserved status in a later moment.
-                        //        }
-
-                        if (taskData.getActualOwner() != null) {
-                            newTask = fromTaskData(taskData);
-                            final User user = getUser(usersById, taskData.getActualOwner());
-                            // assign and ensure the task is published since the task was already seen by the public audience.
-                            AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(newTask, user, true);
-                            addChangeToUser(changesByUserId, change, user, -1, true);
-                        }
-                        break;
-                    default:
-                        // sonar required. Tasks in cases were typically crated and moved into a sink status completely
-                        // out of the refresh interval, so there's nothing to do with them.
-                        break;
-                }
+                addNewTaskChanges(taskData, usersById, newTaskChanges, changesByUserId);
             } else {
-                switch (taskDataStatus) {
-                    case Ready:
-                        if (!Status.Ready.name().equals(task.getStatus())) {
-                            // task was probably assigned to someone else in the past and released from the task
-                            // list administration
-                            releasedTasksChanges.add(new ReleaseTaskProblemFactChange(task));
-                        }
-                        break;
-                    case Reserved:
-                    case InProgress:
-                    case Suspended:
-                        if (taskData.getActualOwner() == null) {
-                            // Task was necessary in Ready status prior going into Suspension. Remove it from solution
-                            // and let it be added again if it comes into Ready or Reserved status in a later moment.
-                            removedTasksSet.add(task);
-                        } else if (!taskData.getActualOwner().equals(task.getUser().getEntityId())) {
-                            // if Reserved:
-                            //       the task was probably manually re-assigned from the task list to another user.
-                            //       We must respect this assignment.
-                            // if InProgress:
-                            //       the task was probably re-assigned to another user from the task list prior to start.
-                            //       We must correct this assignment so it's reflected in the plan and also respect it.
-                            // if Suspended:
-                            //       the task was assigned to someone else from the task list prior to the suspension,
-                            //       we must reflect that change in the plan.
-
-                            final User user = getUser(usersById, taskData.getActualOwner());
-
-                            // assign and ensure the task is published since the task was already seen by the public audience.
-                            AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(task, user, true);
-                            addChangeToUser(changesByUserId, change, user, -1, true);
-                        } else if ((taskData.getPlanningTask() == null || taskData.getPlanningTask().getPublished()) && !task.isPinned()) {
-                            // The task was published and not yet pinned
-                            final User user = getUser(usersById, taskData.getActualOwner());
-                            AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(task, user, true);
-                            int index = taskData.getPlanningTask() != null ? taskData.getPlanningTask().getIndex() : -1;
-                            addChangeToUser(changesByUserId, change, user, index, true);
-                        }
-                        break;
-                    case Completed:
-                    case Exited:
-                    case Failed:
-                    case Error:
-                    case Obsolete:
-                        removedTasksSet.add(task);
-                        break;
-                }
-
-                if (!removedTasksSet.contains(task) && (taskData.getPriority() != task.getPriority() || !taskData.getStatus().equals(task.getStatus()))) {
-                    TaskPropertyChangeProblemFactChange propertyChange = new TaskPropertyChangeProblemFactChange(task);
-                    if (taskData.getPriority() != task.getPriority()) {
-                        propertyChange.setPriority(taskData.getPriority());
-                    }
-                    if (!taskData.getStatus().equals(task.getStatus())) {
-                        propertyChange.setStatus(taskData.getStatus());
-                    }
-                    propertyChanges.add(propertyChange);
-                }
+                addTaskChanges(task, taskData, usersById, releasedTasksChanges, removedTasksSet, propertyChanges, changesByUserId);
             }
         }
 
@@ -242,11 +148,127 @@ public class SolutionChangesBuilder {
         return totalChanges;
     }
 
-    static void addChangeToUser(Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId,
-                                AssignTaskProblemFactChange change,
-                                User user,
-                                int index,
-                                boolean pinned) {
+    private void addNewTaskChanges(final TaskData taskData,
+                                   final Map<String, User> usersById,
+                                   final List<AddTaskProblemFactChange> newTaskChanges,
+                                   final Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId) {
+        Task newTask;
+        final Status taskDataStatus = convertFromString(taskData.getStatus());
+        switch (taskDataStatus) {
+            case Ready:
+                newTask = fromTaskData(taskData);
+                newTaskChanges.add(new AddTaskProblemFactChange(newTask));
+                break;
+            case Reserved:
+            case InProgress:
+            case Suspended:
+
+                // if Reserved:
+                //        the task was created and reserved completely outside of the planner. We add it to the
+                //        solution.
+                // if InProgress:
+                //        the task was created, reserved and started completely outside of the planner.
+                //        We add it to the solution since this assignment might affect the workload, etc., of the plan.
+                // if Suspended:
+                //        the task was created, eventually assigned and started, suspended etc. completely outside of
+                //        the planner.
+                //        if (taskData.getActualOwner() == null) {
+                //            do nothing, the task was assigned to nobody. So it was necessary in Ready status
+                //            prior Suspension.
+                //            It'll be added to the solution if it comes into Ready or Reserved status in a later moment.
+                //        }
+
+                if (taskData.getActualOwner() != null) {
+                    newTask = fromTaskData(taskData);
+                    final User user = getUser(usersById, taskData.getActualOwner());
+                    // assign and ensure the task is published since the task was already seen by the public audience.
+                    AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(newTask, user, true);
+                    addChangeToUser(changesByUserId, change, user, -1, true);
+                }
+                break;
+            default:
+                // sonar required. Tasks in cases were typically crated and moved into a sink status completely
+                // out of the refresh interval, so there's nothing to do with them.
+                break;
+        }
+    }
+
+    private void addTaskChanges(final Task task,
+                                final TaskData taskData,
+                                final Map<String, User> usersById,
+                                final List<ReleaseTaskProblemFactChange> releasedTasksChanges,
+                                final Set<Task> removedTasksSet,
+                                final List<TaskPropertyChangeProblemFactChange> propertyChanges,
+                                final Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId) {
+        final Status taskDataStatus = convertFromString(taskData.getStatus());
+        switch (taskDataStatus) {
+            case Ready:
+                if (!convertToString(Status.Ready).equals(task.getStatus())) {
+                    // task was probably assigned to someone else in the past and released from the task
+                    // list administration
+                    releasedTasksChanges.add(new ReleaseTaskProblemFactChange(task));
+                }
+                break;
+            case Reserved:
+            case InProgress:
+            case Suspended:
+                if (taskData.getActualOwner() == null) {
+                    // Task was necessary in Ready status prior going into Suspension. Remove it from solution
+                    // and let it be added again if it comes into Ready or Reserved status in a later moment.
+                    removedTasksSet.add(task);
+                } else if (!taskData.getActualOwner().equals(task.getUser().getEntityId())) {
+                    // if Reserved:
+                    //       the task was probably manually re-assigned from the task list to another user.
+                    //       We must respect this assignment.
+                    // if InProgress:
+                    //       the task was probably re-assigned to another user from the task list prior to start.
+                    //       We must correct this assignment so it's reflected in the plan and also respect it.
+                    // if Suspended:
+                    //       the task was assigned to someone else from the task list prior to the suspension,
+                    //       we must reflect that change in the plan.
+
+                    final User user = getUser(usersById, taskData.getActualOwner());
+
+                    // assign and ensure the task is published since the task was already seen by the public audience.
+                    AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(task, user, true);
+                    addChangeToUser(changesByUserId, change, user, -1, true);
+                } else if ((taskData.getPlanningTask() == null || taskData.getPlanningTask().getPublished()) && !task.isPinned()) {
+                    // The task was published and not yet pinned
+                    final User user = getUser(usersById, taskData.getActualOwner());
+                    AssignTaskProblemFactChange change = new AssignTaskProblemFactChange(task, user, true);
+                    int index = taskData.getPlanningTask() != null ? taskData.getPlanningTask().getIndex() : -1;
+                    addChangeToUser(changesByUserId, change, user, index, true);
+                }
+                break;
+            case Completed:
+            case Exited:
+            case Failed:
+            case Error:
+            case Obsolete:
+                removedTasksSet.add(task);
+                break;
+            default:
+                // sonar required. No other cases exist.
+                break;
+        }
+
+        if (!removedTasksSet.contains(task) && (taskData.getPriority() != task.getPriority() || !taskData.getStatus().equals(task.getStatus()))) {
+            TaskPropertyChangeProblemFactChange propertyChange = new TaskPropertyChangeProblemFactChange(task);
+            if (taskData.getPriority() != task.getPriority()) {
+                propertyChange.setPriority(taskData.getPriority());
+            }
+            if (!taskData.getStatus().equals(task.getStatus())) {
+                propertyChange.setStatus(taskData.getStatus());
+            }
+            propertyChanges.add(propertyChange);
+        }
+    }
+
+    private static void addChangeToUser(Map<String, List<IndexedElement<AssignTaskProblemFactChange>>> changesByUserId,
+                                        AssignTaskProblemFactChange change,
+                                        User user,
+                                        int index,
+                                        boolean pinned) {
         final List<IndexedElement<AssignTaskProblemFactChange>> userChanges = changesByUserId.computeIfAbsent(user.getEntityId(), key -> new ArrayList<>());
         addInOrder(userChanges, new IndexedElement<>(change, index, pinned));
     }

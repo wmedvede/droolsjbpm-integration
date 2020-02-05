@@ -36,6 +36,7 @@ import static org.kie.api.task.model.Status.InProgress;
 import static org.kie.api.task.model.Status.Ready;
 import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToString;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER_ID;
 import static org.kie.server.services.taskassigning.planning.TestUtil.assertContains;
@@ -381,7 +382,7 @@ public class SolutionBuilderTest {
         TaskData taskData = new TaskData();
         taskData.setTaskId(taskId);
         taskData.setActualOwner(actualOwner);
-        taskData.setStatus(status.name());
+        taskData.setStatus(convertToString(status));
         taskData.setPriority(0);
         taskData.setProcessInstanceId(1L);
         return taskData;

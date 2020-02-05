@@ -37,6 +37,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.kie.api.task.model.Status.InProgress;
 import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertFromString;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.IS_PLANNING_USER;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
@@ -81,7 +82,7 @@ public class SolutionBuilder {
 
         taskDataList.forEach(taskData -> {
             final Task task = fromTaskData(taskData);
-            final Status status = Status.valueOf(task.getStatus());
+            final Status status = convertFromString(task.getStatus());
             switch (status) {
                 case Ready:
                     tasks.add(task);

@@ -17,10 +17,7 @@
 package org.kie.server.services.taskassigning.planning;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.kie.api.task.model.Status;
 import org.kie.server.api.model.taskassigning.ExecutePlanningResult;
@@ -32,6 +29,7 @@ import org.kie.server.client.TaskAssigningRuntimeClient;
 import org.kie.server.client.util.TaskDataReader;
 import org.kie.server.services.taskassigning.planning.util.PropertyUtil;
 
+import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToStringList;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_RUNTIME_DELEGATE_PAGE_SIZE;
 
 public class TaskAssigningRuntimeDelegate {
@@ -63,10 +61,8 @@ public class TaskAssigningRuntimeDelegate {
     }
 
     public FindTasksResult findTasks(List<Status> status, LocalDateTime fromLastModificationDate, TaskInputVariablesReadMode inputVariablesReadMode) {
-        final List<String> statusParam = Optional.ofNullable(status)
-                .orElse(Collections.emptyList()).stream()
-                .map(Status::name).collect(Collectors.toList());
-        TaskDataReader.Result result = TaskDataReader.from(runtimeClient).readTasks(0, statusParam, fromLastModificationDate, PAGE_SIZE, inputVariablesReadMode);
+        TaskDataReader.Result result = TaskDataReader.from(runtimeClient).readTasks(0, convertToStringList(status),
+                                                                                    fromLastModificationDate, PAGE_SIZE, inputVariablesReadMode);
         return new FindTasksResult(result.getQueryTime(), result.getTasks());
     }
 

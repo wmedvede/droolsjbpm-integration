@@ -82,6 +82,10 @@ public class TestUtil {
         };
     }
 
+    public static org.kie.server.services.taskassigning.user.system.api.User mockExternalUser(String userId, boolean isActive) {
+        return mockExternalUser(userId, isActive, Collections.emptySet());
+    }
+
     public static <T extends AbstractPersistable & OrganizationalEntity> void assertContains(String entityId, Collection<T> entities) {
         assertNotNull("entityId: " + entityId + " is missing in collection: " + entities,
                       entities.stream()

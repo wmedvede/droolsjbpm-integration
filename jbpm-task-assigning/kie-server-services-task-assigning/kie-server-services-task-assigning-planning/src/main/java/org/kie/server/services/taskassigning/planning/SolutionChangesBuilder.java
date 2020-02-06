@@ -63,7 +63,7 @@ public class SolutionChangesBuilder {
 
     private List<TaskData> taskDataList;
 
-    private UserSystemService systemService;
+    private UserSystemService userSystemService;
 
     private SolverHandlerContext context;
 
@@ -85,7 +85,7 @@ public class SolutionChangesBuilder {
     }
 
     public SolutionChangesBuilder withUserSystem(UserSystemService userSystemService) {
-        this.systemService = userSystemService;
+        this.userSystemService = userSystemService;
         return this;
     }
 
@@ -277,7 +277,7 @@ public class SolutionChangesBuilder {
         User user = usersById.get(userId);
         if (user == null) {
             LOGGER.debug("User {} was not found in current solution, it'll we looked up in the external user system .", userId);
-            org.kie.server.services.taskassigning.user.system.api.User externalUser = systemService.findUser(userId);
+            org.kie.server.services.taskassigning.user.system.api.User externalUser = userSystemService.findUser(userId);
             if (externalUser != null) {
                 user = fromExternalUser(externalUser);
             } else {

@@ -36,6 +36,8 @@ import static org.kie.api.task.model.Status.InProgress;
 import static org.kie.api.task.model.Status.Ready;
 import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
+import static org.kie.server.services.taskassigning.planning.RunnableBase.Status.STARTED;
+import static org.kie.server.services.taskassigning.planning.RunnableBase.Status.STOPPED;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkCondition;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
@@ -102,11 +104,17 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     public void initSolverExecutor() {
+        if (!status.compareAndSet(STOPPED, STARTED)) {
+            throw new IllegalStateException("SolutionSynchronizer initSolverExecutor method can only be invoked when the status is STOPPED");
+        }
         action.set(Action.INIT_SOLVER_EXECUTOR);
         startPermit.release();
     }
 
     public void synchronizeSolution(TaskAssigningSolution solution, LocalDateTime fromLastModificationDate) {
+        if (!status.compareAndSet(STOPPED, STARTED)) {
+            throw new IllegalStateException("SolutionSynchronizer synchronizeSolution method can only be invoked when the status is STOPPED");
+        }
         this.solution = solution;
         this.fromLastModificationDate = fromLastModificationDate;
         action.set(Action.SYNCHRONIZE_SOLUTION);
@@ -130,19 +138,20 @@ public class SolutionSynchronizer extends RunnableBase {
         Action nextAction;
         while (isAlive()) {
             try {
-                if (action.get() == null) {
-                    startPermit.acquire();
-                }
+                startPermit.acquire();
                 if (isAlive()) {
                     if (action.get() == Action.INIT_SOLVER_EXECUTOR) {
                         nextAction = doInitSolverExecutor();
                         action.set(nextAction);
-                    } else {
+                    } else if (action.get() == Action.SYNCHRONIZE_SOLUTION) {
                         nextAction = doSynchronizeSolution();
                         action.set(nextAction);
                     }
                     if (action.get() != null) {
                         Thread.sleep(syncInterval);
+                        startPermit.release();
+                    } else if (isAlive()) {
+                        status.set(STOPPED);
                     }
                 }
             } catch (InterruptedException e) {

@@ -16,6 +16,7 @@
 
 package org.kie.server.services.taskassigning.planning;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.api.task.model.Status;
+import org.kie.server.api.model.taskassigning.PlanningTask;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.services.taskassigning.core.model.Task;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
@@ -34,7 +36,7 @@ import org.kie.server.services.taskassigning.core.model.solver.realtime.AddTaskP
 import org.kie.server.services.taskassigning.core.model.solver.realtime.AssignTaskProblemFactChange;
 import org.kie.server.services.taskassigning.core.model.solver.realtime.ReleaseTaskProblemFactChange;
 import org.kie.server.services.taskassigning.core.model.solver.realtime.RemoveTaskProblemFactChange;
-import org.kie.server.services.taskassigning.planning.util.TaskUtil;
+import org.kie.server.services.taskassigning.core.model.solver.realtime.TaskPropertyChangeProblemFactChange;
 import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -42,7 +44,11 @@ import org.optaplanner.core.impl.score.director.ScoreDirector;
 import org.optaplanner.core.impl.solver.ProblemFactChange;
 
 import static org.junit.Assert.assertEquals;
+import static org.kie.api.task.model.Status.Completed;
+import static org.kie.api.task.model.Status.Exited;
+import static org.kie.api.task.model.Status.Failed;
 import static org.kie.api.task.model.Status.InProgress;
+import static org.kie.api.task.model.Status.Obsolete;
 import static org.kie.api.task.model.Status.Ready;
 import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
@@ -61,8 +67,10 @@ public class SolutionChangesBuilderTest {
     private static final String CONTAINER_ID = "CONTAINER_ID";
     private static final String NAME = "NAME";
     private static final int PRIORITY = 2;
-    private static final String ACTUAL_OWNER = "ACTUAL_OWNER";
     private static final Map<String, Object> INPUT_DATA = new HashMap<>();
+
+    private static final String ACTUAL_OWNER_ENTITY_ID = "ACTUAL_OWNER_ENTITY_ID";
+    private static final long ACTUAL_OWNER_ID = ACTUAL_OWNER_ENTITY_ID.hashCode();
 
     private static final String USER_ENTITY_ID = "USER_ENTITY_ID";
     private static final long USER_ID = USER_ENTITY_ID.hashCode();
@@ -93,9 +101,8 @@ public class SolutionChangesBuilderTest {
                 .withContext(context)
                 .build();
 
-        assertEquals(3, result.size());
-
         AddTaskProblemFactChange expected = new AddTaskProblemFactChange(fromTaskData(taskData));
+        assertChangeIsTheChangeSetId(result, 0);
         assertChange(result, 1, expected);
     }
 
@@ -158,6 +165,7 @@ public class SolutionChangesBuilderTest {
                 .withContext(context)
                 .build();
 
+        assertChangeIsTheChangeSetId(result, 0);
         assertChange(result, 1, new ReleaseTaskProblemFactChange(task));
     }
 
@@ -177,8 +185,166 @@ public class SolutionChangesBuilderTest {
     }
 
     @Test
-    public void addReassignReservedTaskChangeWhenActualItWasManuallyReassigned() {
-        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(Reserved);
+    public void addReassignReservedTaskChangeWhenItWasManuallyReassignedWithActualOwnerInSolution() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInSolution(Reserved);
+    }
+
+    @Test
+    public void addReassignInProgressTaskChangeWhenItWasManuallyReassignedWithActualOwnerInSolution() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInSolution(InProgress);
+    }
+
+    @Test
+    public void addReassignSuspendedTaskChangeWhenItWasManuallyReassignedWithActualOwnerInSolution() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInSolution(Suspended);
+    }
+
+    @Test
+    public void addReassignReservedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem(Reserved);
+    }
+
+    @Test
+    public void addReassignInProgressTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem(InProgress);
+    }
+
+    @Test
+    public void addReassignSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem(Suspended);
+    }
+
+    @Test
+    public void addReassignReservedTaskWhenItWasManuallyReassignedWithActualOwnerMissing() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerMissing(Reserved);
+    }
+
+    @Test
+    public void addReassignInProgressTaskWhenItWasManuallyReassignedWithActualOwnerMissing() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerMissing(InProgress);
+    }
+
+    @Test
+    public void addReassignSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerMissing() {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerMissing(Suspended);
+    }
+
+    @Test
+    public void addPinReservedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInSolution() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(Reserved, true);
+    }
+
+    @Test
+    public void addPinInProgressTaskWhenPublishedAndNotYetPinnedWithActualOwnerInSolution() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(InProgress, true);
+    }
+
+    @Test
+    public void addPinSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInSolution() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(Suspended, true);
+    }
+
+    @Test
+    public void addPinReservedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem(Reserved);
+    }
+
+    @Test
+    public void addPinInProgressTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem(InProgress);
+    }
+
+    @Test
+    public void addPinSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem(Suspended);
+    }
+
+    @Test
+    public void addPinReservedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing(Reserved);
+    }
+
+    @Test
+    public void addPinInProgressTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing(InProgress);
+    }
+
+    @Test
+    public void addPinSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing() {
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing(Suspended);
+    }
+
+    @Test
+    public void addStatusAndPriorityPropertyChange() {
+        TaskData taskData = mockTaskData(TASK_ID, NAME, Reserved, ACTUAL_OWNER_ENTITY_ID);
+        User actualOwner = mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID);
+        Task task = fromTaskData(taskData);
+        task.setUser(actualOwner);
+        task.setPinned(true);
+        task.setStatus(convertToString(InProgress));
+        task.setPriority(taskData.getPriority() + 1);
+
+        TaskAssigningSolution solution = mockSolution(Collections.singletonList(task), Collections.singletonList(actualOwner));
+
+        List<ProblemFactChange<TaskAssigningSolution>> result = SolutionChangesBuilder.create()
+                .withSolution(solution)
+                .withTasks(mockTaskDataList(taskData))
+                .withUserSystem(userSystemService)
+                .withContext(context)
+                .build();
+
+        TaskPropertyChangeProblemFactChange change = new TaskPropertyChangeProblemFactChange(task);
+        change.setStatus(taskData.getStatus());
+        change.setPriority(taskData.getPriority());
+
+        assertChangeIsTheChangeSetId(result, 0);
+        assertChange(result, 1, new TaskPropertyChangeProblemFactChange(task));
+    }
+
+    @Test
+    public void addRemoveTaskThatChangedToCompleted() {
+        addRemoveTaskInSinkStatus(Completed);
+    }
+
+    @Test
+    public void addRemoveTaskThatChangedToExited() {
+        addRemoveTaskInSinkStatus(Exited);
+    }
+
+    @Test
+    public void addRemoveTaskThatChangedToFailed() {
+        addRemoveTaskInSinkStatus(Failed);
+    }
+
+    @Test
+    public void addRemoveTaskThatChangedToError() {
+        addRemoveTaskInSinkStatus(Status.Error);
+    }
+
+    @Test
+    public void addRemoveTaskThatChangedToObsolete() {
+        addRemoveTaskInSinkStatus(Obsolete);
+    }
+
+    private void addRemoveTaskInSinkStatus(Status sinkStatus) {
+        TaskData taskData = mockTaskData(TASK_ID, NAME, sinkStatus, ACTUAL_OWNER_ENTITY_ID);
+        User actualOwner = mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID);
+        Task task = fromTaskData(taskData);
+        task.setUser(actualOwner);
+        task.setStatus(convertToString(Reserved));
+
+        TaskAssigningSolution solution = mockSolution(Collections.singletonList(task), Collections.singletonList(actualOwner));
+
+        List<ProblemFactChange<TaskAssigningSolution>> result = SolutionChangesBuilder.create()
+                .withSolution(solution)
+                .withTasks(mockTaskDataList(taskData))
+                .withUserSystem(userSystemService)
+                .withContext(context)
+                .build();
+
+        RemoveTaskProblemFactChange change = new RemoveTaskProblemFactChange(task);
+        assertChangeIsTheChangeSetId(result, 0);
+        assertChange(result, 1, change);
     }
 
     private void addNewReservedOrInProgressOrSuspendedTaskChangeWithActualOwnerInSolution(Status status) {
@@ -212,9 +378,8 @@ public class SolutionChangesBuilderTest {
                 .withContext(context)
                 .build();
 
-        assertEquals(3, result.size());
-
         AssignTaskProblemFactChange expected = new AssignTaskProblemFactChange(fromTaskData(taskData), mockUser(USER_ID, USER_ENTITY_ID), true);
+        assertChangeIsTheChangeSetId(result, 0);
         assertChange(result, 1, expected);
     }
 
@@ -231,25 +396,93 @@ public class SolutionChangesBuilderTest {
                 .withContext(context)
                 .build();
 
+        assertChangeIsTheChangeSetId(result, 0);
         assertChange(result, 1, new RemoveTaskProblemFactChange(task));
     }
 
-    private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(Status status) {
+    private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInSolution(Status status) {
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(status, true);
+    }
 
-        // TODO, quedé en este metodo
-//        TaskData taskData = mockTaskData(TASK_ID, NAME, status, null);
-//        Task task = fromTaskData(taskData);
-//
-//        TaskAssigningSolution solution = mockSolution(Collections.singletonList(task), Collections.emptyList());
-//
-//        List<ProblemFactChange<TaskAssigningSolution>> result = SolutionChangesBuilder.create()
-//                .withSolution(solution)
-//                .withTasks(mockTaskDataList(taskData))
-//                .withUserSystem(userSystemService)
-//                .withContext(context)
-//                .build();
-//
-//        assertChange(result, 1, new RemoveTaskProblemFactChange(task));
+    private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(Status status, boolean addActualOwnerToSolution) {
+        TaskData taskData = mockTaskData(TASK_ID, NAME, status, ACTUAL_OWNER_ENTITY_ID);
+        Task task = fromTaskData(taskData);
+        User user = mockUser(USER_ID, USER_ENTITY_ID);
+        task.setUser(user);
+
+        List<User> userList = new ArrayList<>();
+        userList.add(user);
+        if (addActualOwnerToSolution) {
+            User actualOwner = mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID);
+            userList.add(actualOwner);
+        }
+
+        TaskAssigningSolution solution = mockSolution(Collections.singletonList(task), userList);
+
+        List<ProblemFactChange<TaskAssigningSolution>> result = SolutionChangesBuilder.create()
+                .withSolution(solution)
+                .withTasks(mockTaskDataList(taskData))
+                .withUserSystem(userSystemService)
+                .withContext(context)
+                .build();
+
+        assertChangeIsTheChangeSetId(result, 0);
+        assertChange(result, 1, new AssignTaskProblemFactChange(task, mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID), true));
+    }
+
+    private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem(Status status) {
+        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID, true);
+        when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(externalUser);
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(status, false);
+        verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);
+    }
+
+    private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerMissing(Status status) {
+        when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(null);
+        addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(status, false);
+        verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);
+    }
+
+    private void addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(Status status, boolean addActualOwnerToSolution) {
+        TaskData taskData = mockTaskData(TASK_ID, NAME, status, ACTUAL_OWNER_ENTITY_ID);
+        PlanningTask planningTask = mockPlanningTask(taskData.getTaskId(), true);
+        planningTask.setIndex(0);
+        taskData.setPlanningTask(planningTask);
+
+        Task task = fromTaskData(taskData);
+        task.setPinned(false);
+        User actualOwner = mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID);
+        task.setUser(actualOwner);
+
+        List<User> userList = new ArrayList<>();
+        if (addActualOwnerToSolution) {
+            userList.add(actualOwner);
+        }
+
+        TaskAssigningSolution solution = mockSolution(Collections.singletonList(task), userList);
+
+        List<ProblemFactChange<TaskAssigningSolution>> result = SolutionChangesBuilder.create()
+                .withSolution(solution)
+                .withTasks(mockTaskDataList(taskData))
+                .withUserSystem(userSystemService)
+                .withContext(context)
+                .build();
+
+        assertChangeIsTheChangeSetId(result, 0);
+        assertChange(result, 1, new AssignTaskProblemFactChange(task, mockUser(ACTUAL_OWNER_ID, ACTUAL_OWNER_ENTITY_ID), true));
+    }
+
+    private void addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem(Status status) {
+        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID, true);
+        when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(externalUser);
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(status, false);
+        verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);
+    }
+
+    private void addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerMissing(Status status) {
+        when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(null);
+        addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(status, false);
+        verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);
     }
 
     private void assertChange(List<ProblemFactChange<TaskAssigningSolution>> result, int index, AddTaskProblemFactChange expected) {
@@ -273,6 +506,23 @@ public class SolutionChangesBuilderTest {
         assertTaskEquals(expected.getTask(), change.getTask());
     }
 
+    private void assertChangeIsTheChangeSetId(List<ProblemFactChange<TaskAssigningSolution>> result, int index) {
+        long currentChangeSetId = context.getCurrentChangeSetId();
+        result.get(index).doChange(scoreDirector);
+        assertEquals(currentChangeSetId + 1, context.getCurrentChangeSetId(), index);
+    }
+
+    private void assertChange(List<ProblemFactChange<TaskAssigningSolution>> result, int index, TaskPropertyChangeProblemFactChange expected) {
+        TaskPropertyChangeProblemFactChange change = (TaskPropertyChangeProblemFactChange) result.get(index);
+        assertTaskEquals(expected.getTask(), change.getTask());
+        if (expected.getStatus() != null) {
+            assertEquals(expected.getStatus(), change.getStatus());
+        }
+        if (expected.getPriority() != null) {
+            assertEquals(expected.getPriority(), change.getPriority(), 0);
+        }
+    }
+
     private TaskData mockTaskData(long taskId, String name, Status status, String actualOwner) {
         return TaskData.builder()
                 .taskId(taskId)
@@ -287,13 +537,17 @@ public class SolutionChangesBuilderTest {
                 .build();
     }
 
+    private PlanningTask mockPlanningTask(long taskId, boolean published) {
+        return PlanningTask.builder().taskId(taskId).published(published).build();
+    }
+
     private void assertTaskEquals(Task t1, Task t2) {
         assertEquals(t1.getId(), t2.getId(), 0);
     }
 
     private void assertUserEquals(User user1, User user2) {
-        assertEquals(user1.getId(), user2.getId(), 0);
         assertEquals(user1.getEntityId(), user2.getEntityId());
+        assertEquals(user1.getId(), user2.getId(), 0);
     }
 
     private User mockUser(long userId, String entityId) {
@@ -306,9 +560,5 @@ public class SolutionChangesBuilderTest {
 
     private List<TaskData> mockTaskDataList(TaskData... tasks) {
         return Arrays.asList(tasks);
-    }
-
-    private List<User> mockUserList(User... users) {
-        return Arrays.asList(users);
     }
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.drools.core.impl.InternalKieContainer;
 import org.junit.After;
 import org.junit.Before;
@@ -62,22 +63,24 @@ import static org.kie.server.services.taskassigning.planning.TaskAssigningConsta
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_CONTAINER_ID;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_CONTAINER_VERSION;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_NAME;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.ACTIVATE_CONTAINER_ERROR;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.CAPABILITY_TASK_ASSIGNING_PLANNING;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.CREATE_CONTAINER_ERROR;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.EXTENSION_NAME;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.EXTENSION_START_ORDER;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.PLANNER_CONTAINER_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.PLANNER_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.USER_SYSTEM_CONTAINER_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.USER_SYSTEM_SERVICE_NOT_FOUND;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.USER_SYSTEM_SERVICE_START_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.ACTIVATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.CREATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.SOLVER_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_NOT_FOUND;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_START_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.addExtensionMessagePrefix;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -147,6 +150,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
     @Before
     public void setUp() {
         extension = spy(new TaskAssigningPlanningKieServerExtension());
+        when(kieServer.healthCheck(anyBoolean())).thenReturn(new ArrayList<>());
         doReturn(taskAssigningService).when(extension).createTaskAssigningService();
     }
 
@@ -192,11 +196,13 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         JbpmKieServerExtension jbpmExtension = mock(JbpmKieServerExtension.class);
         when(registry.getServerExtension(JbpmKieServerExtension.EXTENSION_NAME)).thenReturn(jbpmExtension);
         enableExtension();
+        System.setProperty(TASK_ASSIGNING_USER_SYSTEM_NAME, USER_SYSTEM_NAME);
         extension.init(kieServer, registry);
         assertKieServerMessageWasAdded(Severity.WARN,
-                                       String.format(UNDESIRED_EXTENSIONS_RUNNING_ERROR, JbpmKieServerExtension.EXTENSION_NAME),
-                                       2,
-                                       0);
+                                       addExtensionMessagePrefix(String.format(UNDESIRED_EXTENSIONS_RUNNING_ERROR, JbpmKieServerExtension.EXTENSION_NAME)),
+                                       1,
+                                       0,
+                                       false);
     }
 
     @Test
@@ -205,6 +211,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         System.setProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_USER, RUNTIME_USER);
         System.setProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_PWD, RUNTIME_PWD);
         enableExtension();
+        System.setProperty(TASK_ASSIGNING_USER_SYSTEM_NAME, USER_SYSTEM_NAME);
         extension.init(kieServer, registry);
         verify(extension).createRuntimeClient(RUNTIME_URL, RUNTIME_USER, RUNTIME_PWD);
     }
@@ -213,9 +220,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
     public void initWithSolverContainerConfigurationError() {
         System.setProperty(TASK_ASSIGNING_SOLVER_CONTAINER_ID, SOLVER_CONTAINER_ID);
         enableExtension();
-        extension.init(kieServer, registry);
-        String error = String.format(PLANNER_CONTAINER_CONFIGURATION_ERROR, String.format(REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING, SOLVER_CONTAINER_ID, null, null, null));
-        assertKieServerMessageWasAdded(Severity.ERROR, error, 1, 0);
+        String error = String.format(SOLVER_CONFIGURATION_ERROR, String.format(REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING, SOLVER_CONTAINER_ID, null, null, null));
+        Assertions.assertThatThrownBy(() -> extension.init(kieServer, registry)).hasMessage(error);
         assertFalse(extension.isInitialized());
     }
 
@@ -231,9 +237,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
     @Test
     public void initWithUserSystemMissingError() {
         enableExtension();
-        extension.init(kieServer, registry);
-        String error = String.format(USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR, TASK_ASSIGNING_USER_SYSTEM_NAME);
-        assertKieServerMessageWasAdded(Severity.ERROR, error, 1, 0);
+        String error = String.format(USER_SYSTEM_CONFIGURATION_ERROR, String.format(USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR, TASK_ASSIGNING_USER_SYSTEM_NAME));
+        Assertions.assertThatThrownBy(() -> extension.init(kieServer, registry)).hasMessage(error);
         assertFalse(extension.isInitialized());
     }
 
@@ -242,9 +247,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         System.setProperty(TASK_ASSIGNING_USER_SYSTEM_NAME, USER_SYSTEM_NAME);
         System.setProperty(TASK_ASSIGNING_USER_SYSTEM_CONTAINER_ID, USER_SYSTEM_CONTAINER_ID);
         enableExtension();
-        extension.init(kieServer, registry);
-        String error = String.format(USER_SYSTEM_CONTAINER_CONFIGURATION_ERROR, String.format(REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING, USER_SYSTEM_CONTAINER_ID, null, null, null));
-        assertKieServerMessageWasAdded(Severity.ERROR, error, 1, 0);
+        String error = String.format(USER_SYSTEM_CONFIGURATION_ERROR, String.format(REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING, USER_SYSTEM_CONTAINER_ID, null, null, null));
+        Assertions.assertThatThrownBy(() -> extension.init(kieServer, registry)).hasMessage(error);
         assertFalse(extension.isInitialized());
     }
 
@@ -307,7 +311,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         doThrow(new RuntimeException(ERROR_MESSAGE)).when(extension).createSolver(eq(registry), any());
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR, ERROR_MESSAGE), 1, 0);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR, ERROR_MESSAGE)), 1, 0, true);
     }
 
     @Test
@@ -336,8 +340,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         prepareExistingContainerButNeedsActivationFailed(SOLVER_CONTAINER_ID, solverContainer);
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(ACTIVATE_CONTAINER_ERROR, SOLVER_CONTAINER_ID, ERROR_MESSAGE), 2, 0);
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(PLANNER_CONTAINER_NOT_AVAILABLE, SOLVER_CONTAINER_ID), 2, 1);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(ACTIVATE_CONTAINER_ERROR, SOLVER_CONTAINER_ID, ERROR_MESSAGE)), 2, 0, true);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(PLANNER_CONTAINER_NOT_AVAILABLE, SOLVER_CONTAINER_ID)), 2, 1, true);
     }
 
     @Test
@@ -356,8 +360,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         prepareContainerNotExistingButCreatedFailed(SOLVER_CONTAINER_ID);
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(CREATE_CONTAINER_ERROR, SOLVER_CONTAINER_ID, ERROR_MESSAGE), 2, 0);
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(PLANNER_CONTAINER_NOT_AVAILABLE, SOLVER_CONTAINER_ID), 2, 1);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(CREATE_CONTAINER_ERROR, SOLVER_CONTAINER_ID, ERROR_MESSAGE)), 2, 0, true);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(PLANNER_CONTAINER_NOT_AVAILABLE, SOLVER_CONTAINER_ID)), 2, 1, true);
     }
 
     @Test
@@ -383,8 +387,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         prepareExistingContainerButNeedsActivationFailed(USER_SYSTEM_CONTAINER_ID, userSystemContainer);
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(ACTIVATE_CONTAINER_ERROR, USER_SYSTEM_CONTAINER_ID, ERROR_MESSAGE), 2, 0);
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(USER_SYSTEM_CONTAINER_NOT_AVAILABLE, USER_SYSTEM_CONTAINER_ID), 2, 1);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(ACTIVATE_CONTAINER_ERROR, USER_SYSTEM_CONTAINER_ID, ERROR_MESSAGE)), 2, 0, true);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(USER_SYSTEM_CONTAINER_NOT_AVAILABLE, USER_SYSTEM_CONTAINER_ID)), 2, 1, true);
     }
 
     @Test
@@ -401,8 +405,8 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         prepareContainerNotExistingButCreatedFailed(USER_SYSTEM_CONTAINER_ID);
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(CREATE_CONTAINER_ERROR, USER_SYSTEM_CONTAINER_ID, ERROR_MESSAGE), 2, 0);
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(USER_SYSTEM_CONTAINER_NOT_AVAILABLE, USER_SYSTEM_CONTAINER_ID), 2, 1);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(CREATE_CONTAINER_ERROR, USER_SYSTEM_CONTAINER_ID, ERROR_MESSAGE)), 2, 0, true);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(USER_SYSTEM_CONTAINER_NOT_AVAILABLE, USER_SYSTEM_CONTAINER_ID)), 2, 1, true);
     }
 
     @Test
@@ -413,7 +417,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         enableExtension();
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(USER_SYSTEM_SERVICE_NOT_FOUND, USER_SYSTEM_NAME), 1, 0);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(USER_SYSTEM_SERVICE_NOT_FOUND, USER_SYSTEM_NAME)), 1, 0, true);
     }
 
     @Test
@@ -425,7 +429,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         enableExtension();
         extension.init(kieServer, registry);
         extension.serverStarted();
-        assertKieServerMessageWasAdded(Severity.ERROR, String.format(USER_SYSTEM_SERVICE_START_ERROR, USER_SYSTEM_NAME, ERROR_MESSAGE), 1, 0);
+        assertKieServerMessageWasAdded(Severity.ERROR, addExtensionMessagePrefix(String.format(USER_SYSTEM_SERVICE_START_ERROR, USER_SYSTEM_NAME, ERROR_MESSAGE)), 1, 0, true);
     }
 
     @Test
@@ -438,6 +442,15 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         extension.serverStarted();
         extension.destroy(kieServer, registry);
         verify(taskAssigningService).destroy();
+    }
+
+    @Test
+    public void healthCheck() {
+        System.setProperty(TASK_ASSIGNING_USER_SYSTEM_NAME, USER_SYSTEM_NAME);
+        enableExtension();
+        extension.init(kieServer, registry);
+        List<Message> messages = extension.healthCheck(true);
+        assertContainsError(messages, Severity.INFO, EXTENSION_NAME + " is alive", 0);
     }
 
     private void prepareServerStartWithSolverContainerConfig() {
@@ -525,10 +538,16 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         }).when(registryMock).getContainer(containerId);
     }
 
-    private void assertKieServerMessageWasAdded(Severity severity, String message, int times, int index) {
+    private void assertKieServerMessageWasAdded(Severity severity, String message, int times, int index, boolean includeHealthCheck) {
         verify(kieServer, times(times)).addServerMessage(messageCaptor.capture());
-        List<Message> messages = new ArrayList<>();
-        messages.addAll(messageCaptor.getAllValues());
+        assertContainsError(messageCaptor.getAllValues(), severity, message, index);
+        if (includeHealthCheck) {
+            List<Message> healthCheckMessages = extension.healthCheck(true);
+            assertContainsError(healthCheckMessages, severity, message, index);
+        }
+    }
+
+    private void assertContainsError(List<Message> messages, Severity severity, String message, int index) {
         assertEquals(severity, messages.get(index).getSeverity());
         assertEquals(message, messages.get(index).getMessages().iterator().next());
     }

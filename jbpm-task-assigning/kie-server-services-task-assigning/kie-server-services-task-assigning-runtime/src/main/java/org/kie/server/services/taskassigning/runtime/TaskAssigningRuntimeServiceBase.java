@@ -38,11 +38,15 @@ import org.kie.api.task.model.Status;
 import org.kie.api.task.model.Task;
 import org.kie.api.task.model.User;
 import org.kie.internal.task.api.TaskPersistenceContext;
+import org.kie.server.api.exception.KieServicesException;
+import org.kie.server.api.model.KieContainerStatus;
 import org.kie.server.api.model.taskassigning.ExecutePlanningResult;
 import org.kie.server.api.model.taskassigning.PlanningItem;
 import org.kie.server.api.model.taskassigning.PlanningItemList;
 import org.kie.server.api.model.taskassigning.PlanningTask;
 import org.kie.server.api.model.taskassigning.TaskData;
+import org.kie.server.services.api.KieServerRegistry;
+import org.kie.server.services.impl.KieContainerInstanceImpl;
 import org.kie.server.services.taskassigning.runtime.persistence.PlanningTaskImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,12 +77,14 @@ public class TaskAssigningRuntimeServiceBase {
     private static final String TASK_MODIFIED_ERROR_MSG_4 = "Task: %s was modified by an external action since the last executed plan," +
             " current status is %s but the expected should be in %s";
 
+    private KieServerRegistry registry;
     private UserTaskService userTaskService;
     private TaskAssigningRuntimeServiceQueryHelper queryHelper;
 
-    public TaskAssigningRuntimeServiceBase(UserTaskService userTaskService, QueryService queryService) {
+    public TaskAssigningRuntimeServiceBase(KieServerRegistry registry, UserTaskService userTaskService, QueryService queryService) {
+        this.registry = registry;
         this.userTaskService = userTaskService;
-        this.queryHelper = new TaskAssigningRuntimeServiceQueryHelper(userTaskService, queryService);
+        this.queryHelper = new TaskAssigningRuntimeServiceQueryHelper(registry, userTaskService, queryService);
     }
 
     public List<TaskData> executeFindTasksQuery(Map<String, Object> params) {
@@ -260,6 +266,7 @@ public class TaskAssigningRuntimeServiceBase {
         List<DelegateAndSaveCommand> delegations = new ArrayList<>();
         List<SavePlanningItemCommand> saves = new ArrayList<>();
         List<DeletePlanningItemCommand> deletes = new ArrayList<>();
+        validateContainer(containerId);
         for (PlanningCommand command : commands) {
             if (command instanceof DelegateAndSaveCommand) {
                 delegations.add((DelegateAndSaveCommand) command);
@@ -283,6 +290,13 @@ public class TaskAssigningRuntimeServiceBase {
             userTaskService.execute(containerId, onlyDBCommand);
         }
         LOGGER.debug("Planning commands execution for container: {} finished successfully", containerId);
+    }
+
+    private void validateContainer(String containerId) {
+        KieContainerInstanceImpl container = registry.getContainer(containerId);
+        if (container == null || (container.getStatus() != KieContainerStatus.STARTED && container.getStatus() != KieContainerStatus.DEACTIVATED)) {
+            throw new KieServicesException("Container " + containerId + " is not available to serve requests");
+        }
     }
 
     private void bulkDelegate(String containerId, List<DelegateAndSaveCommand> delegations) {

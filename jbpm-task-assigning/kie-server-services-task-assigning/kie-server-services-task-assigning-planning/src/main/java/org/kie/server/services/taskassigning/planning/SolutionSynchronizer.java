@@ -259,7 +259,7 @@ public class SolutionSynchronizer extends RunnableBase {
         LocalDateTime fromLastModificationDateRounded = fromLastModificationDate.withNano(0);
         final TaskAssigningRuntimeDelegate.FindTasksResult result = delegate.findTasks(null,
                                                                                        fromLastModificationDateRounded,
-                                                                                       TaskInputVariablesReadMode.READ_WHEN_PLANNING_TASK_IS_NULL);
+                                                                                       TaskInputVariablesReadMode.READ_FOR_ACTIVE_TASKS_WITH_NO_PLANNING_ENTITY);
         context.setLastModificationDate(result.getQueryTime());
         LOGGER.debug("Total modifications found: {} since fromLastModificationDate: {}, with result.queryTime: {}",
                      result.getTasks().size(), fromLastModificationDateRounded, result.getQueryTime());

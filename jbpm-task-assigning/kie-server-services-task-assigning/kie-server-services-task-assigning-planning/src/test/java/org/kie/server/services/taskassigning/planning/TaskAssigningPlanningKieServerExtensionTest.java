@@ -66,19 +66,20 @@ import static org.kie.server.services.taskassigning.planning.TaskAssigningConsta
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.CAPABILITY_TASK_ASSIGNING_PLANNING;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.EXTENSION_NAME;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.EXTENSION_START_ORDER;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.ACTIVATE_CONTAINER_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.CREATE_CONTAINER_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.SOLVER_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_NOT_FOUND;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_START_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.addExtensionMessagePrefix;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.ACTIVATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.CREATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.HEALTH_CHECK_IS_ALIVE_MESSAGE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.SOLVER_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.PLANNER_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_SERVICE_NOT_FOUND;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_SERVICE_START_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.addExtensionMessagePrefix;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.eq;
@@ -450,7 +451,7 @@ public class TaskAssigningPlanningKieServerExtensionTest {
         enableExtension();
         extension.init(kieServer, registry);
         List<Message> messages = extension.healthCheck(true);
-        assertContainsError(messages, Severity.INFO, EXTENSION_NAME + " is alive", 0);
+        assertContainsMesssage(messages, Severity.INFO, HEALTH_CHECK_IS_ALIVE_MESSAGE, 0);
     }
 
     private void prepareServerStartWithSolverContainerConfig() {
@@ -540,14 +541,14 @@ public class TaskAssigningPlanningKieServerExtensionTest {
 
     private void assertKieServerMessageWasAdded(Severity severity, String message, int times, int index, boolean includeHealthCheck) {
         verify(kieServer, times(times)).addServerMessage(messageCaptor.capture());
-        assertContainsError(messageCaptor.getAllValues(), severity, message, index);
+        assertContainsMesssage(messageCaptor.getAllValues(), severity, message, index);
         if (includeHealthCheck) {
             List<Message> healthCheckMessages = extension.healthCheck(true);
-            assertContainsError(healthCheckMessages, severity, message, index);
+            assertContainsMesssage(healthCheckMessages, severity, message, index);
         }
     }
 
-    private void assertContainsError(List<Message> messages, Severity severity, String message, int index) {
+    private void assertContainsMesssage(List<Message> messages, Severity severity, String message, int index) {
         assertEquals(severity, messages.get(index).getSeverity());
         assertEquals(message, messages.get(index).getMessages().iterator().next());
     }

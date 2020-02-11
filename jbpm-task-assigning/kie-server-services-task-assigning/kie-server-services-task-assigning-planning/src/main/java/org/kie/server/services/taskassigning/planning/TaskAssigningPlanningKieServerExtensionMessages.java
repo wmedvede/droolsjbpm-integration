@@ -16,14 +16,16 @@
 
 package org.kie.server.services.taskassigning.planning;
 
-public class TaskAssigningPlanningKieServerExtensionErrors {
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtension.EXTENSION_NAME;
 
-    private TaskAssigningPlanningKieServerExtensionErrors() {
+public class TaskAssigningPlanningKieServerExtensionMessages {
+
+    private TaskAssigningPlanningKieServerExtensionMessages() {
     }
 
-    static final String PLANNER_EXTENSION_MESSAGE_PREFIX = TaskAssigningPlanningKieServerExtension.EXTENSION_NAME + ": %s";
+    static final String PLANNER_EXTENSION_MESSAGE_PREFIX = EXTENSION_NAME + ": %s";
 
-    static final String EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART = TaskAssigningPlanningKieServerExtension.EXTENSION_NAME + " won't operate properly";
+    static final String EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART = EXTENSION_NAME + " won't operate properly";
 
     static final String CREATE_CONTAINER_ERROR = "Container creation failed for containerId: %s, error: %s";
 
@@ -48,7 +50,7 @@ public class TaskAssigningPlanningKieServerExtensionErrors {
             " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART;
 
     static final String UNDESIRED_EXTENSIONS_RUNNING_ERROR = "It's was detected that the following extensions %s" +
-            " are running in current server, but it's not recommended to run them on the same server instance as the " + TaskAssigningPlanningKieServerExtension.EXTENSION_NAME + " sever.";
+            " are running in current server, but it's not recommended to run them on the same server instance as the " + EXTENSION_NAME + " sever.";
 
     static final String USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR = "No user system service name has been configured." +
             " " + EXTENSION_WONT_OPERATE_PROPERLY_ERROR_PART + ". Please use the property %s to configure it";
@@ -66,6 +68,8 @@ public class TaskAssigningPlanningKieServerExtensionErrors {
 
     static final String REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING = "Required parameters for container configuration are missing." +
             " containerId: %s, groupId: %s, artifactId: %s, version: %s";
+
+    static final String HEALTH_CHECK_IS_ALIVE_MESSAGE = EXTENSION_NAME + " is alive";
 
     static String addExtensionMessagePrefix(String msg) {
         return String.format(PLANNER_EXTENSION_MESSAGE_PREFIX, msg);

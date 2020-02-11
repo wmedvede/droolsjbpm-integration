@@ -61,22 +61,23 @@ import static org.kie.server.services.taskassigning.planning.TaskAssigningConsta
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_CONTAINER_ID;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_CONTAINER_VERSION;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.TASK_ASSIGNING_USER_SYSTEM_NAME;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.ACTIVATE_CONTAINER_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.CONTAINER_NOT_ACCESSIBLE_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.CREATE_CONTAINER_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.EXTENSION_CONTAINER_NOT_IN_EXPECTED_STATUS_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.PLANNER_SOLVER_NOT_CONFIGURED_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.SOLVER_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONFIGURATION_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_NOT_FOUND;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.USER_SYSTEM_SERVICE_START_ERROR;
-import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionErrors.addExtensionMessagePrefix;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.ACTIVATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.CONTAINER_NOT_ACCESSIBLE_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.CREATE_CONTAINER_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.EXTENSION_CONTAINER_NOT_IN_EXPECTED_STATUS_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.HEALTH_CHECK_IS_ALIVE_MESSAGE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.PLANNER_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.PLANNER_SOLVER_INSTANTIATION_CHECK_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.PLANNER_SOLVER_NOT_CONFIGURED_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.REQUIRED_PARAMETERS_FOR_CONTAINER_ARE_MISSING;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.SOLVER_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.UNDESIRED_EXTENSIONS_RUNNING_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_CONFIGURATION_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_CONTAINER_NOT_AVAILABLE;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_NAME_NOT_CONFIGURED_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_SERVICE_NOT_FOUND;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.USER_SYSTEM_SERVICE_START_ERROR;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningPlanningKieServerExtensionMessages.addExtensionMessagePrefix;
 import static org.kie.server.services.taskassigning.planning.util.PropertyUtil.readSystemProperty;
 
 public class TaskAssigningPlanningKieServerExtension implements KieServerExtension {
@@ -163,16 +164,6 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
 
     @Override
     public void createContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
-        // no-op are required for this extension.
-    }
-
-    @Override
-    public void activateContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
-        // no-op are required for this extension.
-    }
-
-    @Override
-    public void deactivateContainer(String id, KieContainerInstance kieContainerInstance, Map<String, Object> parameters) {
         // no-op are required for this extension.
     }
 
@@ -266,7 +257,7 @@ public class TaskAssigningPlanningKieServerExtension implements KieServerExtensi
         if (!permanentErrors.isEmpty()) {
             messages.addAll(permanentErrors);
         } else if (report) {
-            messages.add(new Message(Severity.INFO, getExtensionName() + " is alive"));
+            messages.add(new Message(Severity.INFO, HEALTH_CHECK_IS_ALIVE_MESSAGE));
         }
         return messages;
     }

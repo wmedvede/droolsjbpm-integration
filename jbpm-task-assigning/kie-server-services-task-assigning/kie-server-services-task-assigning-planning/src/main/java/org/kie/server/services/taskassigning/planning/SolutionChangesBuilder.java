@@ -187,7 +187,7 @@ public class SolutionChangesBuilder {
                 }
                 break;
             default:
-                // sonar required. Tasks in cases were typically crated and moved into a sink status completely
+                // sonar required. Tasks in this cases were typically crated and moved into a sink status completely
                 // out of the refresh interval, so there's nothing to do with them.
                 break;
         }

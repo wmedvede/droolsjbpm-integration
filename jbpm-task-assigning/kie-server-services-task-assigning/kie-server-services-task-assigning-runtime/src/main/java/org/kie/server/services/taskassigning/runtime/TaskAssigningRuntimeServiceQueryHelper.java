@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.jbpm.services.api.UserTaskService;
 import org.jbpm.services.api.query.QueryMapperRegistry;
+import org.jbpm.services.api.query.QueryResultMapper;
 import org.jbpm.services.api.query.QueryService;
 import org.jbpm.services.api.query.model.QueryParam;
 import org.kie.api.runtime.query.QueryContext;
@@ -114,15 +115,14 @@ public class TaskAssigningRuntimeServiceQueryHelper {
         }
 
         if (status != null && !status.isEmpty()) {
-            queryParams.add(QueryParam.equalsTo(STATUS, status.toArray(new String[0])));
+            queryParams.add(QueryParam.equalsTo(AbstractTaskAssigningQueryMapper.TASK_QUERY_COLUMN.STATUS.columnName(), status.toArray(new String[0])));
         }
 
         AbstractTaskAssigningQueryMapper<TaskData> resultMapper = (AbstractTaskAssigningQueryMapper<TaskData>) QueryMapperRegistry.get()
                 .mapperFor(TaskAssigningTaskDataQueryMapper.NAME, null);
 
-        String queryName = TASK_ASSIGNING_TASKS_WITH_POTENTIAL_OWNERS_AND_PLANNING_TASK;
-
-        List<TaskData> result = queryService.query(queryName, resultMapper, queryContext, queryParams.toArray(new QueryParam[0]));
+        List<TaskData> result = executeQuery(queryService, TASK_ASSIGNING_TASKS_WITH_POTENTIAL_OWNERS_AND_PLANNING_TASK,
+                                             resultMapper, queryContext, queryParams.toArray(new QueryParam[0]));
 
         Optional<Predicate<TaskData>> loadInputVariables = Optional.empty();
         if (TaskInputVariablesReadMode.READ_FOR_ALL.name().equals(loadVariablesMode)) {
@@ -176,7 +176,7 @@ public class TaskAssigningRuntimeServiceQueryHelper {
         AbstractTaskAssigningQueryMapper<TaskData> resultMapper = (AbstractTaskAssigningQueryMapper<TaskData>) QueryMapperRegistry.get()
                 .mapperFor(TaskAssigningTaskDataSummaryQueryMapper.NAME, null);
 
-        return queryService.query(TASK_ASSIGNING_TASKS_WITH_PLANNING_TASK_OPTIMIZED, resultMapper, queryContext, queryParams.toArray(new QueryParam[0]));
+        return executeQuery(queryService, TASK_ASSIGNING_TASKS_WITH_PLANNING_TASK_OPTIMIZED, resultMapper, queryContext, queryParams.toArray(new QueryParam[0]));
     }
 
     private Map<String, Object> readTaskVariables(TaskData taskData) {
@@ -193,5 +193,11 @@ public class TaskAssigningRuntimeServiceQueryHelper {
 
     private static boolean isSimpleTypeValue(Object value) {
         return isPrimitiveWrapper(value.getClass()) || value instanceof Date || value instanceof String;
+    }
+
+    // helper method for facilitating testing and avoiding ellipsis parameters capturing.
+    <T> T executeQuery(QueryService queryService,
+                       String queryName, QueryResultMapper<T> resultMapper, QueryContext queryContext, QueryParam[] params) {
+        return queryService.query(queryName, resultMapper, queryContext, params);
     }
 }

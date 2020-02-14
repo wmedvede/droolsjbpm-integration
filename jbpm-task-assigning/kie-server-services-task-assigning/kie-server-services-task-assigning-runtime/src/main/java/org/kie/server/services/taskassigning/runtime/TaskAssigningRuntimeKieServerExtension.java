@@ -95,7 +95,7 @@ public class TaskAssigningRuntimeKieServerExtension implements KieServerExtensio
             throw new KieServicesException(MISSING_REQUIRED_JBPM_EXTENSION_ERROR);
         }
 
-        configureServices(registry);
+        configureServices(kieServer, registry);
         services.add(taskAssigningRuntimeServiceBase);
 
         try {
@@ -106,7 +106,7 @@ public class TaskAssigningRuntimeKieServerExtension implements KieServerExtensio
         initialized = true;
     }
 
-    private void configureServices(KieServerRegistry registry) {
+    private void configureServices(KieServerImpl kieServer, KieServerRegistry registry) {
         KieServerExtension jbpmExtension = registry.getServerExtension(JbpmKieServerExtension.EXTENSION_NAME);
         List<Object> jbpmServices = jbpmExtension.getServices();
         UserTaskService userTaskService = null;
@@ -121,7 +121,7 @@ public class TaskAssigningRuntimeKieServerExtension implements KieServerExtensio
                 }
             }
         }
-        taskAssigningRuntimeServiceBase = new TaskAssigningRuntimeServiceBase(registry, userTaskService, queryService);
+        taskAssigningRuntimeServiceBase = new TaskAssigningRuntimeServiceBase(kieServer, registry, userTaskService, queryService);
     }
 
     @Override

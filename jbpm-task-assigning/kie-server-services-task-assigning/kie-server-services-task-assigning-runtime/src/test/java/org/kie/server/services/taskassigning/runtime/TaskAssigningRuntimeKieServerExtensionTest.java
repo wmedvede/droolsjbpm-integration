@@ -84,6 +84,7 @@ public class TaskAssigningRuntimeKieServerExtensionTest {
         List<Object> services = new ArrayList<>();
         services.add(queryService);
         services.add(userTaskService);
+        when(kieServer.isKieServerReady()).thenReturn(true);
         when(jbpmExtension.getServices()).thenReturn(services);
     }
 

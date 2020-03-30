@@ -52,9 +52,27 @@ public class TaskAssigningConstants {
     public static final String JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE = "org.kie.server.taskAssigning.publishWindowSize";
 
     /**
-     * Property for configuring the solution synchronization period in milliseconds.
+     * Property for configuring the solution synchronization period. This value is "normally" a short interval in
+     * milliseconds.
+     * The formats accepted are based on the ISO-8601 duration format {@code PnDTnHnMn.nS} with days considered to
+     * be exactly 24 hours.
+     * <p>
+     * e.g.
+     * "PT1.500S"  configures 1500 milliseconds.
+     * "PT0.500S"  configures 500 milliseconds.
+     * "PT3S"      configures 3000 milliseconds.
      */
     public static final String JBPM_TASK_ASSIGNING_SYNC_INTERVAL = "org.kie.server.taskAssigning.solutionSyncInterval";
+
+    /**
+     * Property for configuring the users information synchronization period.
+     * The formats accepted are based on the ISO-8601 duration format {@code PnDTnHnMn.nS} with days considered to
+     * be exactly 24 hours.
+     * <p>
+     * e.g.
+     * "PT1H30M"   configures 1 hour 30 minutes.
+     */
+    public static final String JBPM_TASK_ASSIGNING_USERS_SYNC_INTERVAL = "org.kie.server.taskAssigning.usersSyncInterval";
 
     /**
      * Property for configuring the resource with the solver configuration.

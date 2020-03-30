@@ -16,13 +16,16 @@
 
 package org.kie.server.services.taskassigning.planning;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.api.model.taskassigning.TaskInputVariablesReadMode;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
@@ -38,7 +41,6 @@ import static org.kie.api.task.model.Status.Reserved;
 import static org.kie.api.task.model.Status.Suspended;
 import static org.kie.server.services.taskassigning.planning.RunnableBase.Status.STARTED;
 import static org.kie.server.services.taskassigning.planning.RunnableBase.Status.STOPPED;
-import static org.kie.soup.commons.validation.PortablePreconditions.checkCondition;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
 /**
@@ -60,7 +62,9 @@ public class SolutionSynchronizer extends RunnableBase {
     private final SolverExecutor solverExecutor;
     private final TaskAssigningRuntimeDelegate delegate;
     private final UserSystemService userSystemService;
-    private final long syncInterval;
+    private final Duration syncInterval;
+    private final Duration usersSyncInterval;
+    private long nextUsersSyncTime;
     private final SolverHandlerContext context;
     private final Consumer<Result> resultConsumer;
     private int solverExecutorStarts = 0;
@@ -85,13 +89,15 @@ public class SolutionSynchronizer extends RunnableBase {
     public SolutionSynchronizer(final SolverExecutor solverExecutor,
                                 final TaskAssigningRuntimeDelegate delegate,
                                 final UserSystemService userSystem,
-                                final long syncInterval,
+                                final Duration syncInterval,
+                                final Duration usersSyncInterval,
                                 final SolverHandlerContext context,
                                 final Consumer<Result> resultConsumer) {
         checkNotNull("solverExecutor", solverExecutor);
         checkNotNull("delegate", delegate);
         checkNotNull("userSystem", userSystem);
-        checkCondition("syncInterval", syncInterval > 0);
+        checkNotNull("syncInterval", syncInterval);
+        checkNotNull("usersSyncInterval", usersSyncInterval);
         checkNotNull("context", context);
         checkNotNull("resultConsumer", resultConsumer);
 
@@ -99,8 +105,10 @@ public class SolutionSynchronizer extends RunnableBase {
         this.delegate = delegate;
         this.userSystemService = userSystem;
         this.syncInterval = syncInterval;
+        this.usersSyncInterval = usersSyncInterval;
         this.context = context;
         this.resultConsumer = resultConsumer;
+        this.nextUsersSyncTime = System.currentTimeMillis() + usersSyncInterval.toMillis();
     }
 
     public void initSolverExecutor() {
@@ -148,7 +156,7 @@ public class SolutionSynchronizer extends RunnableBase {
                         action.set(nextAction);
                     }
                     if (action.get() != null) {
-                        Thread.sleep(syncInterval);
+                        Thread.sleep(syncInterval.toMillis());
                         startPermit.release();
                     } else if (isAlive()) {
                         status.set(STOPPED);
@@ -170,7 +178,7 @@ public class SolutionSynchronizer extends RunnableBase {
             LOGGER.debug("Solution Synchronizer will recover the solution from the jBPM runtime for starting the solver.");
             if (!solverExecutor.isStopped()) {
                 LOGGER.debug("Previous solver instance has not yet finished, let's wait for it to stop." +
-                                     " Next attempt will be in {} milliseconds.", syncInterval);
+                                     " Next attempt will be in {} milliseconds.", syncInterval.toMillis());
                 nextAction = Action.INIT_SOLVER_EXECUTOR;
             } else {
                 final TaskAssigningSolution recoveredSolution = recoverSolution();
@@ -185,7 +193,7 @@ public class SolutionSynchronizer extends RunnableBase {
                     } else {
                         nextAction = Action.INIT_SOLVER_EXECUTOR;
                         LOGGER.debug("It looks like there are no tasks for recovering the solution at this moment." +
-                                             " Next attempt will be in {} milliseconds", syncInterval);
+                                             " Next attempt will be in {} milliseconds", syncInterval.toMillis());
                     }
                 }
             }
@@ -203,9 +211,13 @@ public class SolutionSynchronizer extends RunnableBase {
             if (solverExecutor.isStarted()) {
                 LOGGER.debug("Synchronizing solution status from the jBPM runtime.");
                 final List<TaskData> updatedTaskDataList = loadTasksForUpdate(fromLastModificationDate);
+                Pair<Boolean, List<User>> includeUsersUpdate = Pair.of(false, Collections.emptyList());
+                if (isAlive() && System.currentTimeMillis() > nextUsersSyncTime) {
+                    includeUsersUpdate = loadUsersForUpdate();
+                }
                 LOGGER.debug("Status was read successful.");
                 if (isAlive()) {
-                    final List<ProblemFactChange<TaskAssigningSolution>> changes = buildChanges(solution, updatedTaskDataList);
+                    final List<ProblemFactChange<TaskAssigningSolution>> changes = buildChanges(solution, updatedTaskDataList, includeUsersUpdate);
                     if (!changes.isEmpty()) {
                         LOGGER.debug("Current solution will be updated with {} changes from last synchronization", changes.size());
                         resultConsumer.accept(new Result(changes));
@@ -224,13 +236,32 @@ public class SolutionSynchronizer extends RunnableBase {
         return nextAction;
     }
 
-    protected List<ProblemFactChange<TaskAssigningSolution>> buildChanges(TaskAssigningSolution solution, List<TaskData> updatedTaskDataList) {
-        return SolutionChangesBuilder.create()
+    private Pair<Boolean, List<User>> loadUsersForUpdate() {
+        try {
+            LOGGER.debug("Loading users information from the external UserSystemService");
+            final List<User> userList = userSystemService.findAllUsers();
+            LOGGER.debug("Users information was loaded successful, next synchronization will be in {}", usersSyncInterval.toString());
+            nextUsersSyncTime = System.currentTimeMillis() + usersSyncInterval.toMillis();
+            return Pair.of(true, userList);
+        } catch (Exception e) {
+            LOGGER.debug("An error was produced during users information loading from the external UserSystem repository." +
+                                 " Tasks status will still be updated and users synchronization next attempt will be in {} milliseconds.", syncInterval, e);
+            return Pair.of(false, Collections.emptyList());
+        }
+    }
+
+    protected List<ProblemFactChange<TaskAssigningSolution>> buildChanges(TaskAssigningSolution solution,
+                                                                          List<TaskData> updatedTaskDataList,
+                                                                          Pair<Boolean, List<User>> includeUsersUpdate) {
+        SolutionChangesBuilder builder = SolutionChangesBuilder.create()
                 .withSolution(solution)
                 .withTasks(updatedTaskDataList)
                 .withUserSystem(userSystemService)
-                .withContext(context)
-                .build();
+                .withContext(context);
+        if (includeUsersUpdate.getKey()) {
+            builder.withUsersUpdate(includeUsersUpdate.getValue());
+        }
+        return builder.build();
     }
 
     private TaskAssigningSolution recoverSolution() {
@@ -262,7 +293,7 @@ public class SolutionSynchronizer extends RunnableBase {
                                                                                        fromLastModificationDateRounded,
                                                                                        TaskInputVariablesReadMode.READ_FOR_ACTIVE_TASKS_WITH_NO_PLANNING_ENTITY);
         context.setLastModificationDate(result.getQueryTime());
-        LOGGER.debug("Total modifications found: {} since fromLastModificationDate: {}, with result.queryTime: {}",
+        LOGGER.debug("Total tasks modifications found: {} since fromLastModificationDate: {}, with result.queryTime: {}",
                      result.getTasks().size(), fromLastModificationDateRounded, result.getQueryTime());
         return result.getTasks();
     }

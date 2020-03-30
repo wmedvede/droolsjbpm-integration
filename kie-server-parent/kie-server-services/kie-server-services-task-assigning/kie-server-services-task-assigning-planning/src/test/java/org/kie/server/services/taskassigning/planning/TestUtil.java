@@ -57,13 +57,8 @@ public class TestUtil {
     }
 
     public static org.kie.server.services.taskassigning.user.system.api.User mockExternalUser(String userId,
-                                                                                              boolean isActive,
                                                                                               Set<Group> groups) {
         return new org.kie.server.services.taskassigning.user.system.api.User() {
-            @Override
-            public boolean isActive() {
-                return isActive;
-            }
 
             @Override
             public String getId() {
@@ -82,8 +77,8 @@ public class TestUtil {
         };
     }
 
-    public static org.kie.server.services.taskassigning.user.system.api.User mockExternalUser(String userId, boolean isActive) {
-        return mockExternalUser(userId, isActive, Collections.emptySet());
+    public static org.kie.server.services.taskassigning.user.system.api.User mockExternalUser(String userId) {
+        return mockExternalUser(userId, Collections.emptySet());
     }
 
     public static <T extends AbstractPersistable & OrganizationalEntity> void assertContains(String entityId, Collection<T> entities) {

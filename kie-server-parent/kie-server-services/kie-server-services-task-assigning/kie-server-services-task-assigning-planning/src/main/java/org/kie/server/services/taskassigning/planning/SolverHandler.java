@@ -16,6 +16,7 @@
 
 package org.kie.server.services.taskassigning.planning;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_TARGET_USER;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE;
 import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.JBPM_TASK_ASSIGNING_SYNC_INTERVAL;
+import static org.kie.server.services.taskassigning.planning.TaskAssigningConstants.JBPM_TASK_ASSIGNING_USERS_SYNC_INTERVAL;
 import static org.kie.server.services.taskassigning.planning.util.PropertyUtil.readSystemProperty;
 import static org.kie.soup.commons.validation.PortablePreconditions.checkNotNull;
 
@@ -50,7 +52,9 @@ public class SolverHandler {
 
     private static final String TARGET_USER_ID = readSystemProperty(JBPM_TASK_ASSIGNING_PROCESS_RUNTIME_TARGET_USER, null, value -> value);
     private static final int PUBLISH_WINDOW_SIZE = readSystemProperty(JBPM_TASK_ASSIGNING_PUBLISH_WINDOW_SIZE, 2, Integer::parseInt);
-    private static final long SYNC_INTERVAL = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_INTERVAL, 5000L, Long::parseLong);
+    private static final Duration SYNC_INTERVAL = readSystemProperty(JBPM_TASK_ASSIGNING_SYNC_INTERVAL, Duration.parse("PT5S"), Duration::parse);
+    private static final Duration USERS_SYNC_INTERVAL = readSystemProperty(JBPM_TASK_ASSIGNING_USERS_SYNC_INTERVAL, Duration.parse("PT1H"), Duration::parse);
+
     private static final long EXECUTOR_TERMINATION_TIMEOUT = 5;
 
     private final SolverDef solverDef;
@@ -91,7 +95,7 @@ public class SolverHandler {
     public void start() {
         solverExecutor = createSolverExecutor(solverDef, registry, this::onBestSolutionChange);
         solutionSynchronizer = createSolutionSynchronizer(solverExecutor, delegate, userSystemService,
-                                                          SYNC_INTERVAL, context, this::onUpdateSolution);
+                                                          SYNC_INTERVAL, USERS_SYNC_INTERVAL, context, this::onUpdateSolution);
         solutionProcessor = createSolutionProcessor(delegate, this::onSolutionProcessed, TARGET_USER_ID,
                                                     PUBLISH_WINDOW_SIZE);
         executorService.execute(solverExecutor); //is started/stopped on demand by the SolutionSynchronizer.
@@ -125,10 +129,11 @@ public class SolverHandler {
     SolutionSynchronizer createSolutionSynchronizer(SolverExecutor solverExecutor,
                                                     TaskAssigningRuntimeDelegate delegate,
                                                     UserSystemService userSystemService,
-                                                    long synchInterval,
+                                                    Duration syncInterval,
+                                                    Duration usersSyncInterval,
                                                     SolverHandlerContext context,
                                                     Consumer<SolutionSynchronizer.Result> resultConsumer) {
-        return new SolutionSynchronizer(solverExecutor, delegate, userSystemService, synchInterval, context, resultConsumer);
+        return new SolutionSynchronizer(solverExecutor, delegate, userSystemService, syncInterval, usersSyncInterval, context, resultConsumer);
     }
 
     SolutionProcessor createSolutionProcessor(TaskAssigningRuntimeDelegate delegate,

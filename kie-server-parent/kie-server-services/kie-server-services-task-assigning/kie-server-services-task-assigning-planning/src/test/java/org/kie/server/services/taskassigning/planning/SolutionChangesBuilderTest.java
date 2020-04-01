@@ -355,7 +355,7 @@ public class SolutionChangesBuilderTest {
 
     private void addNewReservedOrInProgressOrSuspendedTaskChangeWithActualOwnerInExternalSystem(Status status) {
         TaskData taskData = mockTaskData(TASK_ID, NAME, status, USER_ENTITY_ID);
-        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(USER_ENTITY_ID, true);
+        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(USER_ENTITY_ID);
         when(userSystemService.findUser(USER_ENTITY_ID)).thenReturn(externalUser);
         TaskAssigningSolution solution = mockSolution(Collections.emptyList(), Collections.emptyList());
         addNewReservedOrInProgressOrSuspendedTaskChangeWithActualOwner(solution, taskData);
@@ -431,7 +431,7 @@ public class SolutionChangesBuilderTest {
     }
 
     private void addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassignedWithActualOwnerInExternalSystem(Status status) {
-        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID, true);
+        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID);
         when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(externalUser);
         addReassignReservedOrInProgressOrSuspendedTaskWhenItWasManuallyReassigned(status, false);
         verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);
@@ -473,7 +473,7 @@ public class SolutionChangesBuilderTest {
     }
 
     private void addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinnedWithActualOwnerInExternalSystem(Status status) {
-        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID, true);
+        org.kie.server.services.taskassigning.user.system.api.User externalUser = mockExternalUser(ACTUAL_OWNER_ENTITY_ID);
         when(userSystemService.findUser(ACTUAL_OWNER_ENTITY_ID)).thenReturn(externalUser);
         addPinReservedOrInProgressOrSuspendedTaskWhenPublishedAndNotYetPinned(status, false);
         verify(userSystemService).findUser(ACTUAL_OWNER_ENTITY_ID);

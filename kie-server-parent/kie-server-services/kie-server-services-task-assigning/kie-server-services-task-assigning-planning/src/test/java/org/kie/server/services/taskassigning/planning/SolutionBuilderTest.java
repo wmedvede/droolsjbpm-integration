@@ -39,10 +39,10 @@ import static org.kie.api.task.model.Status.Suspended;
 import static org.kie.server.api.model.taskassigning.util.StatusConverter.convertToString;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.DUMMY_TASK;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER_ID;
+import static org.kie.server.services.taskassigning.core.model.solver.TaskHelper.extractTasks;
 import static org.kie.server.services.taskassigning.planning.TestUtil.assertContains;
 import static org.kie.server.services.taskassigning.planning.TestUtil.assertNotContains;
 import static org.kie.server.services.taskassigning.planning.TestUtil.mockExternalUser;
-import static org.kie.server.services.taskassigning.planning.util.UserUtil.extractTasks;
 
 public class SolutionBuilderTest {
 
@@ -366,11 +366,11 @@ public class SolutionBuilderTest {
 
     private List<org.kie.server.services.taskassigning.user.system.api.User> buildExternalUsers() {
         org.kie.server.services.taskassigning.user.system.api.User externalUser1 =
-                mockExternalUser(USER1, true, Collections.emptySet());
+                mockExternalUser(USER1, Collections.emptySet());
         org.kie.server.services.taskassigning.user.system.api.User externalUser2 =
-                mockExternalUser(USER2, false, Collections.emptySet());
+                mockExternalUser(USER2, Collections.emptySet());
         org.kie.server.services.taskassigning.user.system.api.User externalUser3 =
-                mockExternalUser(USER3, true, Collections.emptySet());
+                mockExternalUser(USER3, Collections.emptySet());
         return Arrays.asList(externalUser1, externalUser2, externalUser3);
     }
 

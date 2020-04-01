@@ -33,6 +33,10 @@ public class RemoveUserProblemFactChange implements ProblemFactChange<TaskAssign
         this.user = user;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public void doChange(ScoreDirector<TaskAssigningSolution> scoreDirector) {
         final TaskAssigningSolution workingSolution = scoreDirector.getWorkingSolution();

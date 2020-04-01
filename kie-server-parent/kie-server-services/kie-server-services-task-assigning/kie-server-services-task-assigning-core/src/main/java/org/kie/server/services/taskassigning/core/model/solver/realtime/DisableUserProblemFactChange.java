@@ -31,6 +31,10 @@ public class DisableUserProblemFactChange implements ProblemFactChange<TaskAssig
         this.user = user;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public void doChange(ScoreDirector<TaskAssigningSolution> scoreDirector) {
         final User workingUser = scoreDirector.lookUpWorkingObjectOrReturnNull(user);

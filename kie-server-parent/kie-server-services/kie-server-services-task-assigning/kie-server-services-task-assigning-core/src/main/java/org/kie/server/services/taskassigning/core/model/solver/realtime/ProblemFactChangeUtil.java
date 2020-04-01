@@ -58,6 +58,11 @@ public class ProblemFactChangeUtil {
         Task task;
         for (int index = tasks.size() - 1; index >= 0; index--) {
             task = tasks.get(index);
+            scoreDirector.beforeProblemPropertyChanged(task);
+            //TODO todavia no he probado esta casuistica. En principio por la casuistica que tengo
+            //las tareas que libero siempre estan con pinned false, pero probar el caso por si peta algo.
+            task.setPinned(false);
+            scoreDirector.afterProblemPropertyChanged(task);
             scoreDirector.beforeVariableChanged(task, PREVIOUS_TASK_OR_USER);
             task.setPreviousTaskOrUser(null);
             scoreDirector.afterVariableChanged(task, PREVIOUS_TASK_OR_USER);

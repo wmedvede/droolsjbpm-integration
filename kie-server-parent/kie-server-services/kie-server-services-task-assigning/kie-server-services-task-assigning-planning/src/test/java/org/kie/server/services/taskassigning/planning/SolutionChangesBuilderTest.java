@@ -85,7 +85,8 @@ public class SolutionChangesBuilderTest {
 
     @Before
     public void setUp() {
-        context = new SolverHandlerContext();
+        //TODO revisar acá los parametros en caso de que afecten al test.
+        context = new SolverHandlerContext(2, 2000);
     }
 
     @Test

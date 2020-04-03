@@ -87,8 +87,9 @@ public class SolutionSynchronizerTest extends RunnableBaseTest<SolutionSynchroni
 
     @Override
     protected SolutionSynchronizer createRunnableBase() {
+        //TODO revisar aca los putos parametros del minim distance....
         return new SolutionSynchronizerMock(solverExecutor, delegate, userSystemService,
-                                            SYNCH_INTERVAL, new SolverHandlerContext(), resultConsumer);
+                                            SYNCH_INTERVAL, new SolverHandlerContext(2, 2000), resultConsumer);
     }
 
     @Test(timeout = TEST_TIMEOUT)

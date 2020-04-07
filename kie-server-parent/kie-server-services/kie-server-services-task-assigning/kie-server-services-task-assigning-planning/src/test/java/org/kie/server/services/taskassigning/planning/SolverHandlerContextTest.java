@@ -163,6 +163,18 @@ public class SolverHandlerContextTest {
     }
 
     @Test
+    public void peekLastQueryTime() {
+        LocalDateTime value1 = LocalDateTime.now();
+        LocalDateTime value2 = LocalDateTime.now();
+        context.addNextQueryTime(value1);
+        context.addNextQueryTime(value2);
+        assertThat(context.peekLastQueryTime()).isEqualTo(value2);
+        assertThat(context.pollLastQueryTime()).isEqualTo(value2);
+        assertThat(context.peekLastQueryTime()).isEqualTo(value1);
+        assertThat(context.pollLastQueryTime()).isEqualTo(value1);
+    }
+
+    @Test
     public void hasMinimalDistanceTrue() {
         LocalDateTime previousQueryTime = LocalDateTime.now();
         LocalDateTime nextQueryTime = previousQueryTime.plus(QUERY_MINIM_DISTANCE + 1, ChronoUnit.MILLIS);

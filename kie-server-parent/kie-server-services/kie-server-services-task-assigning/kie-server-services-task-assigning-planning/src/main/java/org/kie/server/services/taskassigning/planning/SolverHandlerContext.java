@@ -161,6 +161,12 @@ public class SolverHandlerContext {
         queryTimes.add(nextQueryTime);
     }
 
+    /**
+     * Indicates if two query times has the minimum configured separation.
+     * @param lastQueryTime the previous query time for the calculation.
+     * @param nextQueryTime the next query time for the calculation.
+     * @return true if the distance between the query times is at least the expected one, false in any other case.
+     */
     public boolean hasMinimalDistance(LocalDateTime lastQueryTime, LocalDateTime nextQueryTime) {
         if (lastQueryTime == null) {
             return true;

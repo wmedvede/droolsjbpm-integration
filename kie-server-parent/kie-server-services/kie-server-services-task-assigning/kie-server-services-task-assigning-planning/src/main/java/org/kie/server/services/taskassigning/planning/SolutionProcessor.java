@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 import org.kie.server.api.model.taskassigning.PlanningExecutionResult;
 import org.kie.server.api.model.taskassigning.PlanningItem;
+import org.kie.server.api.model.taskassigning.util.BenchmarkRegistry;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,11 +166,16 @@ public class SolutionProcessor extends RunnableBase {
 
         Result result;
         try {
+            // register the start time the planning execution
+            BenchmarkRegistry.registerStartTime(PlanningTimeId.EXECUTE_PLANNING.name());
             PlanningExecutionResult executeResult = delegate.executePlanning(publishedTasks, targetUserId);
             result = new Result(executeResult);
         } catch (Exception e) {
             LOGGER.error("An error was produced during solution processing, planning execution failed.", e);
             result = new Result(e);
+        } finally {
+            // register the end time for the planning execution.
+            BenchmarkRegistry.registerEndTime(PlanningTimeId.EXECUTE_PLANNING.name());
         }
 
         LOGGER.debug("Solution processing finished: {}", solution);

@@ -38,6 +38,7 @@ import org.kie.server.api.model.taskassigning.PlanningItem;
 import org.kie.server.api.model.taskassigning.PlanningItemList;
 import org.kie.server.api.model.taskassigning.PlanningTask;
 import org.kie.server.api.model.taskassigning.TaskData;
+import org.kie.server.api.model.taskassigning.util.BenchmarkRegistry;
 import org.kie.server.services.api.KieServerRegistry;
 import org.kie.server.services.impl.KieContainerInstanceImpl;
 import org.kie.server.services.impl.KieServerImpl;
@@ -100,6 +101,7 @@ public class TaskAssigningRuntimeServiceBase {
         checkServerStatus();
         Map<String, List<PlanningCommand>> commandsByContainer;
         try {
+            BenchmarkRegistry.registerStartTime(RuntimeTimeId.EXECUTE_PLANNING_PLAN_CALCULATION.name());
             commandsByContainer = calculatePlanningCommands(planningItemList, userId);
         } catch (PlanningException e) {
             LOGGER.debug("An error was produced during plan calculation, containerId: {}, error code: {}, message: {}",
@@ -116,12 +118,15 @@ public class TaskAssigningRuntimeServiceBase {
                     .error(PlanningExecutionResult.ErrorCode.UNEXPECTED_ERROR)
                     .errorMessage(msg)
                     .build();
+        } finally {
+            BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_PLAN_CALCULATION.name());
         }
         stopWatch.stop();
         LOGGER.debug("Time to calculate the planning commands: {}", stopWatch);
 
         stopWatch.reset();
         stopWatch.start();
+        BenchmarkRegistry.registerStartTime(RuntimeTimeId.EXECUTE_PLANNING_PLAN_EXECUTION.name());
         for (Map.Entry<String, List<PlanningCommand>> entry : commandsByContainer.entrySet()) {
             try {
                 executeContainerCommands(entry.getKey(), entry.getValue());
@@ -136,6 +141,7 @@ public class TaskAssigningRuntimeServiceBase {
             } catch (Exception e) {
                 final String msg = String.format(UNEXPECTED_ERROR_DURING_PLAN_EXECUTION, entry.getKey(), e.getMessage());
                 LOGGER.error(msg, e);
+                BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_PLAN_EXECUTION.name());
                 return PlanningExecutionResult.builder()
                         .error(PlanningExecutionResult.ErrorCode.UNEXPECTED_ERROR)
                         .errorMessage(msg)
@@ -143,6 +149,7 @@ public class TaskAssigningRuntimeServiceBase {
                         .build();
             }
         }
+        BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_PLAN_EXECUTION.name());
         stopWatch.stop();
         LOGGER.debug("Time for executing the planning with planning items: {}  ->  {}", planningItemList.getItems().size(), stopWatch);
         return PlanningExecutionResult.builder().build();

@@ -39,9 +39,11 @@ import org.kie.server.api.model.taskassigning.PlanningExecutionResult;
 import org.kie.server.api.model.taskassigning.PlanningItemList;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.api.model.taskassigning.TaskDataList;
+import org.kie.server.api.model.taskassigning.util.BenchmarkRegistry;
 import org.kie.server.remote.rest.common.Header;
 import org.kie.server.services.api.KieServerRegistry;
 import org.kie.server.services.impl.marshal.MarshallerHelper;
+import org.kie.server.services.taskassigning.runtime.RuntimeTimeId;
 import org.kie.server.services.taskassigning.runtime.TaskAssigningRuntimeServiceBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,15 +91,28 @@ public class TaskAssigningRuntimeResource {
         // no container id available so only used to transfer conversation id if given by client
         final Header conversationIdHeader = buildConversationIdHeader("", context, headers);
         try {
+            BenchmarkRegistry.registerStartTime(RuntimeTimeId.EXECUTE_PLANNING_TOTAL_TIME.name());
             final String contentType = getContentType(headers);
+            BenchmarkRegistry.registerStartTime(RuntimeTimeId.EXECUTE_PLANNING_UN_MARSHALLING_TIME.name());
             final PlanningItemList planningItemList = marshallerHelper.unmarshal(payload,
                                                                                  contentType,
                                                                                  PlanningItemList.class);
+            BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_UN_MARSHALLING_TIME.name());
+
             final PlanningExecutionResult result = runtimeServiceBase.executePlanning(planningItemList, userId);
-            return createCorrectVariant(result, headers, Response.Status.OK, conversationIdHeader);
+
+            BenchmarkRegistry.registerStartTime(RuntimeTimeId.EXECUTE_PLANNING_MARSHALLING_TIME.name());
+
+            Response response = createCorrectVariant(result, headers, Response.Status.OK, conversationIdHeader);
+            BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_MARSHALLING_TIME.name());
+            return response;
         } catch (Exception e) {
             LOGGER.error("Unexpected error executing planning {}", e.getMessage(), e);
+            BenchmarkRegistry.registerSafeEndTime(RuntimeTimeId.EXECUTE_PLANNING_MARSHALLING_TIME.name());
+            BenchmarkRegistry.registerSafeEndTime(RuntimeTimeId.EXECUTE_PLANNING_UN_MARSHALLING_TIME.name());
             return internalServerError(errorMessage(e), v);
+        } finally {
+            BenchmarkRegistry.registerEndTime(RuntimeTimeId.EXECUTE_PLANNING_TOTAL_TIME.name());
         }
     }
 

@@ -28,6 +28,7 @@ import java.util.function.Consumer;
 import org.apache.commons.lang3.tuple.Pair;
 import org.kie.server.api.model.taskassigning.TaskData;
 import org.kie.server.api.model.taskassigning.TaskInputVariablesReadMode;
+import org.kie.server.api.model.taskassigning.util.BenchmarkRegistry;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.kie.server.services.taskassigning.user.system.api.User;
 import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
@@ -184,6 +185,8 @@ public class SolutionSynchronizer extends RunnableBase {
                 final TaskAssigningSolution recoveredSolution = recoverSolution();
                 if (isAlive() && !solverExecutor.isDestroyed()) {
                     if (!recoveredSolution.getTaskList().isEmpty()) {
+                        // register the time Solver starts with a brand new solution.
+                        BenchmarkRegistry.registerStartTime(PlanningTimeId.CREATE_INITIAL_SOLUTION.name());
                         solverExecutor.start(recoveredSolution);
                         LOGGER.debug("Solution was successfully recovered. Solver was started for #{} time.", ++solverExecutorStarts);
                         if (solverExecutorStarts > 1) {
@@ -202,6 +205,11 @@ public class SolutionSynchronizer extends RunnableBase {
                                                      " Next attempt will be in a period of %s, error: %s", syncInterval, e.getMessage());
             LOGGER.warn(msg);
             LOGGER.debug(msg, e);
+            //register the end time for the all tasks query in case it was running.
+            BenchmarkRegistry.registerSafeEndTime(PlanningTimeId.QUERY_TASKS_FOR_INITIAL_SOLUTION.name());
+            // register the end time for the users query in case it was running.
+            BenchmarkRegistry.registerSafeEndTime(PlanningTimeId.QUERY_ALL_USERS.name());
+
             nextAction = Action.INIT_SOLVER_EXECUTOR;
         }
         return nextAction;
@@ -212,7 +220,11 @@ public class SolutionSynchronizer extends RunnableBase {
         try {
             if (solverExecutor.isStarted()) {
                 LOGGER.debug("Synchronizing solution status from the jBPM runtime.");
+                // register the start time for the incremental query execution.
+                BenchmarkRegistry.registerStartTime(PlanningTimeId.QUERY_TASKS_FOR_SOLUTION_UPDATE.name());
                 final Pair<List<TaskData>, LocalDateTime> tasksUpdateResult = loadTasksForUpdate(fromLastModificationDate);
+                // register the end time for the incremental query execution.
+                BenchmarkRegistry.registerEndTime(PlanningTimeId.QUERY_TASKS_FOR_SOLUTION_UPDATE.name());
                 Pair<Boolean, List<User>> usersUpdateResult = null;
                 if (isAlive() && isUsersSyncTime()) {
                     usersUpdateResult = loadUsersForUpdate();
@@ -238,6 +250,8 @@ public class SolutionSynchronizer extends RunnableBase {
                                                      " Next attempt will be in a period of %s, error: %s", syncInterval, e.getMessage());
             LOGGER.warn(msg);
             LOGGER.debug(msg, e);
+            // register the start time for the incremental query execution in case it was running.
+            BenchmarkRegistry.registerSafeEndTime(PlanningTimeId.QUERY_TASKS_FOR_SOLUTION_UPDATE.name());
             nextAction = Action.SYNCHRONIZE_SOLUTION;
         }
         return nextAction;
@@ -246,6 +260,8 @@ public class SolutionSynchronizer extends RunnableBase {
     private Pair<Boolean, List<User>> loadUsersForUpdate() {
         try {
             LOGGER.debug("Loading users information from the external UserSystemService");
+            // register the start time for the users query
+            BenchmarkRegistry.registerStartTime(PlanningTimeId.QUERY_ALL_USERS.name());
             final List<User> userList = userSystemService.findAllUsers();
             final int userListSize = userList != null ? userList.size() : 0;
             LOGGER.debug("Users information was loaded successful: {} users were returned from external system, next synchronization will be in a period of {}",
@@ -259,6 +275,9 @@ public class SolutionSynchronizer extends RunnableBase {
             LOGGER.warn(msg);
             LOGGER.debug(msg, e);
             return Pair.of(false, Collections.emptyList());
+        } finally {
+            //register the end time for the users query.
+            BenchmarkRegistry.registerEndTime(PlanningTimeId.QUERY_ALL_USERS.name());
         }
     }
 
@@ -300,12 +319,18 @@ public class SolutionSynchronizer extends RunnableBase {
     }
 
     private TaskAssigningSolution recoverSolution() {
+        // register the time all tasks are queried for recovering the solution.
+        BenchmarkRegistry.registerStartTime(PlanningTimeId.QUERY_TASKS_FOR_INITIAL_SOLUTION.name());
+
         final TaskAssigningRuntimeDelegate.FindTasksResult result = delegate.findTasks(Arrays.asList(Ready,
                                                                                                      Reserved,
                                                                                                      InProgress,
                                                                                                      Suspended),
                                                                                        null,
                                                                                        TaskInputVariablesReadMode.READ_FOR_ALL);
+
+        // register the end time for the all tasks query.
+        BenchmarkRegistry.registerEndTime(PlanningTimeId.QUERY_TASKS_FOR_INITIAL_SOLUTION.name());
 
         final LocalDateTime nextQueryTime = context.shiftQueryTime(trimMillis(result.getQueryTime()));
         final LocalDateTime adjustedFirstQueryTime = context.shiftQueryTime(nextQueryTime);
@@ -314,6 +339,8 @@ public class SolutionSynchronizer extends RunnableBase {
         context.clearTaskChangeTimes();
         final List<TaskData> taskDataList = result.getTasks();
         LOGGER.debug("{} tasks where loaded for solution recovery, with result.queryTime: {}", taskDataList.size(), result.getQueryTime());
+        // register the start time for the users query
+        BenchmarkRegistry.registerStartTime(PlanningTimeId.QUERY_ALL_USERS.name());
         final List<User> externalUsers = userSystemService.findAllUsers();
         return buildSolution(taskDataList, externalUsers);
     }

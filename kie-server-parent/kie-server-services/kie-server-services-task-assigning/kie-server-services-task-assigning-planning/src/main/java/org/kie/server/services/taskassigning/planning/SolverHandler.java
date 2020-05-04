@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.kie.server.api.model.taskassigning.util.BenchmarkRegistry;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
 import org.kie.server.services.taskassigning.user.system.api.UserSystemService;
 import org.kie.server.api.model.taskassigning.PlanningExecutionResult;
@@ -153,6 +154,8 @@ public class SolverHandler {
             return;
         }
         if (!changes.isEmpty()) {
+            // register that a new set of changes is be programed for execution.
+            BenchmarkRegistry.registerStartTime(PlanningTimeId.CREATE_NEW_SOLUTION.name());
             solverExecutor.addProblemFactChanges(changes);
         } else {
             LOGGER.info("It looks like an empty change list was provided. Nothing will be done since it has no effect on the solution.");
@@ -170,6 +173,13 @@ public class SolverHandler {
         if (event.isEveryProblemFactChangeProcessed() &&
                 event.getNewBestSolution().getScore().isSolutionInitialized() &&
                 !context.isProcessedChangeSet(context.getCurrentChangeSetId())) {
+            if (context.getLastProcessedChangeSetId() == -1) {
+                // register the time an initial solution is produced and accepted.
+                BenchmarkRegistry.registerEndTime(PlanningTimeId.CREATE_INITIAL_SOLUTION.name());
+            } else {
+                // register the time an new solution solution is produced and accepted after executing the last programmed changes.
+                BenchmarkRegistry.registerEndTime(PlanningTimeId.CREATE_NEW_SOLUTION.name());
+            }
             lock.lock();
             try {
                 LOGGER.debug("A new solution has been produced for changeSetId: {}", context.getCurrentChangeSetId());

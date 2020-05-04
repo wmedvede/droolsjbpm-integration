@@ -61,6 +61,10 @@ public class SolverHandlerContext {
         lastProcessedChangeSetId = -1;
     }
 
+    public long getLastProcessedChangeSetId() {
+        return lastProcessedChangeSetId;
+    }
+
     /**
      * Registers the time of the last change processed for a task.
      * @param taskId identifier of the task to register.

@@ -19,6 +19,7 @@
 
   <modules>
     <module>kie-server-services-task-assigning-core</module>
+    <module>kie-server-services-task-assigning-benchmark</module>
     <module>kie-server-services-task-assigning-user-system</module>
     <module>kie-server-services-task-assigning-runtime</module>
     <module>kie-server-services-task-assigning-planning</module>

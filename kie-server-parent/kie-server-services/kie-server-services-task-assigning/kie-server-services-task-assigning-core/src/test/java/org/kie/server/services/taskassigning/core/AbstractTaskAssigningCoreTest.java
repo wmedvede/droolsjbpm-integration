@@ -33,6 +33,8 @@ import org.optaplanner.core.api.solver.Solver;
 import org.optaplanner.core.api.solver.SolverFactory;
 import org.optaplanner.core.config.constructionheuristic.ConstructionHeuristicPhaseConfig;
 import org.optaplanner.core.config.constructionheuristic.ConstructionHeuristicType;
+import org.optaplanner.core.config.constructionheuristic.decider.forager.ConstructionHeuristicForagerConfig;
+import org.optaplanner.core.config.constructionheuristic.decider.forager.ConstructionHeuristicPickEarlyType;
 import org.optaplanner.core.config.localsearch.LocalSearchPhaseConfig;
 import org.optaplanner.core.config.score.director.ScoreDirectorFactoryConfig;
 import org.optaplanner.core.config.solver.SolverConfig;
@@ -64,9 +66,26 @@ public abstract class AbstractTaskAssigningCoreTest extends AbstractTaskAssignin
         SolverConfig config = createBaseConfig();
         ConstructionHeuristicPhaseConfig constructionHeuristicPhaseConfig = new ConstructionHeuristicPhaseConfig();
         constructionHeuristicPhaseConfig.setConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT);
-        LocalSearchPhaseConfig phaseConfig = new LocalSearchPhaseConfig();
-        phaseConfig.setTerminationConfig(new TerminationConfig().withStepCountLimit(stepCountLimit));
-        config.setPhaseConfigList(Arrays.asList(constructionHeuristicPhaseConfig, phaseConfig));
+//        LocalSearchPhaseConfig phaseConfig = new LocalSearchPhaseConfig();
+//        phaseConfig.setTerminationConfig(new TerminationConfig().withStepCountLimit(stepCountLimit));
+
+        config.setPhaseConfigList(Arrays.asList(constructionHeuristicPhaseConfig));
+        SolverFactory<TaskAssigningSolution> solverFactory = SolverFactory.create(config);
+        return solverFactory.buildSolver();
+    }
+
+
+    protected Solver<TaskAssigningSolution> createNonDaemonSolverPickEarly(int stepCountLimit) {
+        SolverConfig config = createBaseConfig();
+        ConstructionHeuristicPhaseConfig constructionHeuristicPhaseConfig = new ConstructionHeuristicPhaseConfig();
+        constructionHeuristicPhaseConfig.setConstructionHeuristicType(ConstructionHeuristicType.FIRST_FIT);
+        ConstructionHeuristicForagerConfig foragerConfig = new ConstructionHeuristicForagerConfig();
+        foragerConfig.setPickEarlyType(ConstructionHeuristicPickEarlyType.FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD);
+        constructionHeuristicPhaseConfig.setForagerConfig(foragerConfig);
+
+//        LocalSearchPhaseConfig phaseConfig = new LocalSearchPhaseConfig();
+//        phaseConfig.setTerminationConfig(new TerminationConfig().withStepCountLimit(stepCountLimit));
+        config.setPhaseConfigList(Arrays.asList(constructionHeuristicPhaseConfig));
         SolverFactory<TaskAssigningSolution> solverFactory = SolverFactory.create(config);
         return solverFactory.buildSolver();
     }

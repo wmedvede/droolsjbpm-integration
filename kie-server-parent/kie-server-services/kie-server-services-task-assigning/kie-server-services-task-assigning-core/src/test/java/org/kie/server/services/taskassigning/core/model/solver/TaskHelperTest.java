@@ -101,6 +101,31 @@ public class TaskHelperTest {
         }
     }
 
+
+    @Test
+    public void isPotentialOwerOfTaskWithNoGroupsAndUserNoGroups() {
+        Task task = new Task();
+        User user = availableUsers.get(0);
+        assertThat(isPotentialOwner(task, user)).isFalse();
+    }
+
+    @Test
+    public void isPotentialOwnerOfTaskWithGroupsAndUserNoGroups() {
+        Task task = new Task();
+        task.getPotentialOwners().add(availableGroups.get(0));
+        User user = availableUsers.get(0);
+        assertThat(isPotentialOwner(task, user)).isFalse();
+    }
+
+    @Test
+    public void isPotentialOwnerOfTaskWithNoGroupsAndUserWithGroups() {
+        Task task = new Task();
+        User user = availableUsers.get(0);
+        user.getGroups().add(availableGroups.get(0));
+        assertThat(isPotentialOwner(task, user)).isFalse();
+    }
+
+
     @Test
     public void isPotentialOwnerDirectAssignmentFalse() {
         for (User user : availableUsers) {

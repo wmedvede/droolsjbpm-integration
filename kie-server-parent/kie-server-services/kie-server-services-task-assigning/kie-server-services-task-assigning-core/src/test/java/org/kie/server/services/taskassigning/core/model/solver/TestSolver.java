@@ -16,6 +16,7 @@
 
 package org.kie.server.services.taskassigning.core.model.solver;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.kie.server.services.taskassigning.core.AbstractTaskAssigningCoreTest;
@@ -25,6 +26,9 @@ import org.kie.server.services.taskassigning.core.model.User;
 import org.junit.Test;
 import org.optaplanner.core.api.solver.Solver;
 
+import static org.kie.server.services.taskassigning.core.TestDataSet.NEW_SET_OF_15TASKS_3USERS_SOLUTION;
+import static org.kie.server.services.taskassigning.core.TestDataSet.NEW_SET_OF_300TASKS_300USERS_SOLUTION;
+import static org.kie.server.services.taskassigning.core.TestDataSet.SET_OF_1500TASKS_300USERS_SOLUTION;
 import static org.kie.server.services.taskassigning.core.TestDataSet.SET_OF_24TASKS_8USERS_SOLUTION;
 import static org.kie.server.services.taskassigning.core.model.ModelConstants.PLANNING_USER;
 import static org.kie.server.services.taskassigning.core.model.solver.TaskHelper.extractTasks;
@@ -37,11 +41,16 @@ import static org.junit.Assert.fail;
 
 public class TestSolver extends AbstractTaskAssigningCoreTest {
 
-    private static final long TEST_TIMEOUT = 20000;
+    private static final long TEST_TIMEOUT = 200000000;
 
     @Test(timeout = TEST_TIMEOUT)
     public void startSolverAndSolution24Tasks8Users() throws Exception {
-        testSolverStartAndSolution(1, SET_OF_24TASKS_8USERS_SOLUTION.resource());
+        testSolverStartAndSolution(1, SET_OF_1500TASKS_300USERS_SOLUTION.resource());
+    }
+
+    @Test
+    public void startSolverAndSolutionExample() throws Exception {
+        testSolverStartAndSolution(1, NEW_SET_OF_300TASKS_300USERS_SOLUTION.resource());
     }
 
     /**
@@ -57,7 +66,34 @@ public class TestSolver extends AbstractTaskAssigningCoreTest {
             fail(String.format("With current problem definition and stepCountLimit of %s it's expected " +
                                        "that a feasible solution has been produced.", stepCountLimit));
         }
+
+        int expectedTasks = 10;
+        List<UserBucket> withLessThan10 = new ArrayList<>();
+        List<UserBucket> with10 = new ArrayList<>();
+        List<UserBucket> withMoreThan10 = new ArrayList<>();
+
+        result.getUserList().forEach(user -> {
+            int count = TaskHelper.extractTasks(user).size();
+            if (count < expectedTasks) {
+                withLessThan10.add(new UserBucket(user, count));
+            } else if (count == 10) {
+                with10.add(new UserBucket(user, count));
+            } else {
+                withMoreThan10.add(new UserBucket(user, count));
+            }
+        });
         assertConstraints(result);
+
+    }
+
+    class UserBucket {
+        User user;
+        int tasksSize;
+
+        public UserBucket(User user, int tasksSize) {
+            this.user = user;
+            this.tasksSize = tasksSize;
+        }
     }
 
     /**

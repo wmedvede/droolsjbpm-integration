@@ -25,6 +25,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.kie.server.services.taskassigning.core.model.Group;
+import org.kie.server.services.taskassigning.core.model.ModelConstants;
 import org.kie.server.services.taskassigning.core.model.OrganizationalEntity;
 import org.kie.server.services.taskassigning.core.model.Task;
 import org.kie.server.services.taskassigning.core.model.TaskAssigningSolution;
@@ -62,10 +63,13 @@ public class TaskAssigningGenerator extends LoggingMain {
 
     public static void main(String[] args) {
         TaskAssigningGenerator generator = new TaskAssigningGenerator();
-        generator.writeTaskAssigningSolution(24, 8);
-        generator.writeTaskAssigningSolution(50, 5);
-        generator.writeTaskAssigningSolution(100, 5);
-        generator.writeTaskAssigningSolution(500, 20);
+//        generator.writeTaskAssigningSolution(24, 8);
+//        generator.writeTaskAssigningSolution(50, 5);
+//        generator.writeTaskAssigningSolution(100, 5);
+//        generator.writeTaskAssigningSolution(500, 20);
+        generator.writeTaskAssigningSolution(1500, 300);
+        generator.writeTaskAssigningSolution(3000, 300);
+        generator.writeTaskAssigningSolution(6000, 900);
     }
 
     private static final StringDataGenerator groupNameGenerator = new StringDataGenerator()
@@ -111,11 +115,13 @@ public class TaskAssigningGenerator extends LoggingMain {
         solution.setId(0L);
 
         List<Group> groupList = createGroupList(groupListSize);
-        createUserList(solution, userListSize, groupList);
-        createTaskList(solution, taskListSize, groupList);
 
-        BigInteger totalFacts = AbstractSolutionImporter.factorial(taskListSize + userListSize - 1);
-        BigInteger fixedFacts = AbstractSolutionImporter.factorial(userListSize - 1);
+        createUserList(solution, userListSize-1, groupList);
+        createTaskList(solution, taskListSize, groupList);
+        solution.getUserList().add(userListSize / 2, ModelConstants.PLANNING_USER);
+
+        BigInteger totalFacts = AbstractSolutionImporter.factorial(taskListSize + userListSize - 2);
+        BigInteger fixedFacts = AbstractSolutionImporter.factorial(userListSize - 2);
         BigInteger possibleSolutionSize = (totalFacts == null || fixedFacts == null) ? null : totalFacts.divide(fixedFacts);
         logger.info("TaskAssigningSolution {} has {} tasks, {} groups, and {} users with a search space of {}.",
                     fileName,
@@ -147,6 +153,7 @@ public class TaskAssigningGenerator extends LoggingMain {
             User user = new User();
             user.setId((long) i);
             String userName = userNameGenerator.generateNextValue();
+            user.setEnabled(true);
             user.setEntityId(userName);
             int groupListSize = USER_GROUP_SET_SIZE_MINIMUM + random.nextInt(USER_GROUP_SET_MAXIMUM - USER_GROUP_SET_SIZE_MINIMUM);
             if (groupListSize > groupList.size()) {

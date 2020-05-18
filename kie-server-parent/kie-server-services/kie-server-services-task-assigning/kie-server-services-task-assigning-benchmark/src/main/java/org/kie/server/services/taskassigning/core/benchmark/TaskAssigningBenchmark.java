@@ -28,14 +28,34 @@ import static org.kie.server.services.taskassigning.core.benchmark.TaskAssigning
 
 public class TaskAssigningBenchmark {
 
+    /**
+     * --advanced and --aggregator are optional parameters.
+     * Third/or second parameter is the benchmark configuration file
+     *
+     * e.g.
+     *
+     * mvn exec:java -Dexec.mainClass="org.kie.server.services.taskassigning.core.benchmark.TaskAssigningBenchmark"
+     * -Dexec.args="--advanced org/kie/server/services/taskassigning/solver/taskAssigningBenchmarkConfig-First-Fit-Variants.xml"
+     *
+     * mvn exec:java -Dexec.mainClass="org.kie.server.services.taskassigning.core.benchmark.TaskAssigningBenchmark"
+     * -Dexec.args="--advanced org/kie/server/services/taskassigning/solver/taskAssigningBenchmarkConfig-CH-quick-LS-with-time.xml"
+     *
+     */
     public static void main(String[] args) {
         List<String> argList = Arrays.asList(args);
+        String configFile = "org/kie/server/services/taskassigning/solver/taskAssigningBenchmarkConfig.xml";
+
         boolean advanced = argList.contains("--advanced");
         if (!advanced) {
             runBasicBenchmark();
         } else {
             boolean aggregator = argList.contains("--aggregator");
-            runAdvancedBenchmark(aggregator);
+            if (aggregator && argList.size() == 3) {
+                configFile = argList.get(2);
+            } else if (!aggregator && argList.size() == 2) {
+                configFile = argList.get(1);
+            }
+            runAdvancedBenchmark(aggregator, configFile);
         }
     }
 
@@ -63,10 +83,9 @@ public class TaskAssigningBenchmark {
     /**
      * Advanced (benchmark XML): benchmark multiple solver configurations
      */
-    public static void runAdvancedBenchmark(boolean aggregator) {
+    public static void runAdvancedBenchmark(boolean aggregator, String configFile) {
         // Build the PlannerBenchmark
-        PlannerBenchmarkFactory benchmarkFactory = PlannerBenchmarkFactory.createFromXmlResource(
-                "org/kie/server/services/taskassigning/solver/taskAssigningBenchmarkConfig.xml");
+        PlannerBenchmarkFactory benchmarkFactory = PlannerBenchmarkFactory.createFromXmlResource(configFile);
 
         PlannerBenchmark benchmark = benchmarkFactory.buildPlannerBenchmark();
         // Benchmark the problem and show it
@@ -74,8 +93,7 @@ public class TaskAssigningBenchmark {
 
         // Show aggregator to aggregate multiple reports
         if (aggregator) {
-            BenchmarkAggregatorFrame.createAndDisplayFromXmlResource(
-                    "org/kie/server/services/taskassigning/solver/taskAssigningBenchmarkConfig.xml");
+            BenchmarkAggregatorFrame.createAndDisplayFromXmlResource(configFile);
         }
     }
 }

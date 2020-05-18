@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>2020-05-18_101923 Planner benchmark report</title>
+    <link href="twitterbootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="twitterbootstrap/css/bootstrap-responsive.css" rel="stylesheet"/>
+    <link href="twitterbootstrap/css/prettify.css" rel="stylesheet"/>
+    <link href="website/css/benchmarkReport.css" rel="stylesheet"/>
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body onload="prettyPrint()">
+
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="span2">
+            <div class="benchmark-report-nav">
+                <div style="margin-top: 10px;">
+                    <a href="https://www.optaplanner.org">
+                        <img src="website/img/optaPlannerLogo.png" alt="OptaPlanner"/>
+                    </a>
+                </div>
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                    <ul class="nav nav-list">
+                        <li><a href="#summary">Summary</a></li>
+                        <li>
+                            <ul class="nav nav-list">
+                                <li><a href="#summary_result">Result</a></li>
+                                <li><a href="#summary_performance">Performance</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="#problemBenchmarkResult">Problem benchmarks</a></li>
+                        <li>
+                            <ul class="nav nav-list">
+                                <li><a href="#problemBenchmark_1500tasks-002D300users">1500tasks-300users&nbsp;</a></li>
+                                <li><a href="#problemBenchmark_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users">task-assigning-batch-1500-tasks-300users&nbsp;</a></li>
+                                <li><a href="#problemBenchmark_3000tasks-002D300users">3000tasks-300users&nbsp;</a></li>
+                                <li><a href="#problemBenchmark_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users">task-assigning-batch-3000-tasks-300users&nbsp;</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="#solverBenchmarkResult">Solver benchmarks</a></li>
+                        <li>
+                            <ul class="nav nav-list">
+                                <li><a href="#solverBenchmark_Original-002D0020configuration">Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</a></li>
+                                <li><a href="#solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE-0029">First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</a></li>
+                                <li><a href="#solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029">First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</a></li>
+                                <li><a href="#solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE-0029">First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</a></li>
+                                <li><a href="#solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029">First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</a></li>
+                            </ul>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="#benchmarkInformation">Benchmark information</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="span10">
+            <header class="main-page-header">
+                <h1>Benchmark report (First Fit Variants)</h1>
+            </header>
+            <section id="summary">
+                <div class="page-header">
+                    <h1>Summary</h1>
+                </div>
+
+                <section id="summary_result">
+                    <h2>Result summary</h2>
+                    <div class="tabbable">
+                        <ul class="nav nav-pills">
+                            <li class="active">
+                                <a href="#summary_bestScore" data-toggle="tab">Best score</a>
+                            </li>
+                            <li>
+                                <a href="#summary_bestScoreScalability" data-toggle="tab">Best score scalability</a>
+                            </li>
+                            <li>
+                                <a href="#summary_bestScoreDistribution" data-toggle="tab">Best score distribution</a>
+                            </li>
+                            <li>
+                                <a href="#summary_winningScoreDifference" data-toggle="tab">Winning score difference</a>
+                            </li>
+                            <li>
+                                <a href="#summary_worstScoreDifferencePercentage" data-toggle="tab">Worst score difference percentage (ROI)</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="summary_bestScore">
+                                <h3>Best score summary</h3>
+                                <p>Useful for visualizing the best solver configuration.</p>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_bestScore_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_bestScore_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScore_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_bestScore_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_bestScore_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScore_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreSummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Total</th>
+                                        <th rowspan="2">Average</th>
+                                        <th rowspan="2">Standard Deviation</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                        <td>[0/0]hard/[-752/-353596/0/-383156/-398933/-236718]soft</td>
+                                        <td>[0/0]hard/[-188/-88399/0/-95789/-99734/-59180]soft</td>
+                                        <td>0.0E0/0.0E0/208.96/58972.17/0.0E0/107696.31/134750.66/78271.48</td>
+                                                        <td>[0/0]hard/[-247/-27675/0/-66996/-71318/-45913]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-49500/0/-7500/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                        <td>[0/0]hard/[-505/-94921/0/-278660/-327615/-190805]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-181500/0/-30000/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>[0/0]hard/[-1124/-22806128/0/-5292758/-1851069/-693693]soft</td>
+                                        <td>[0/0]hard/[-281/-5701532/0/-1323190/-462768/-173424]soft</td>
+                                        <td>0.0E0/0.0E0/313.63/6383464.3/0.0E0/1014303.51/587774.48/216989.83</td>
+                                                        <td>[0/0]hard/[-365/-437555/0/-343584/-413040/-162407]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-4133250/0/-750000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[-759/-1718823/0/-1199174/-1438029/-531286]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-16516500/0/-3000000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>[0/0]hard/[-1124/-22806128/0/-5292758/-1851069/-693693]soft</td>
+                                        <td>[0/0]hard/[-281/-5701532/0/-1323190/-462768/-173424]soft</td>
+                                        <td>0.0E0/0.0E0/313.63/6383464.3/0.0E0/1014303.51/587774.48/216989.83</td>
+                                                        <td>[0/0]hard/[-365/-437555/0/-343584/-413040/-162407]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-4133250/0/-750000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[-759/-1718823/0/-1199174/-1438029/-531286]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-16516500/0/-3000000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>[0/0]hard/[-1124/-24269600/0/-5292758/-2146477/-302205]soft</td>
+                                        <td>[0/0]hard/[-281/-6067400/0/-1323190/-536620/-75552]soft</td>
+                                        <td>0.0E0/0.0E0/313.63/6149302.82/0.0E0/1014303.51/680349.86/94118.99</td>
+                                                        <td>[0/0]hard/[-365/-790394/0/-343584/-481773/-71725]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-4133250/0/-750000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[-759/-2829456/0/-1199174/-1664704/-230480]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-16516500/0/-3000000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>[0/0]hard/[-1124/-24269600/0/-5292758/-2146477/-302205]soft</td>
+                                        <td>[0/0]hard/[-281/-6067400/0/-1323190/-536620/-75552]soft</td>
+                                        <td>0.0E0/0.0E0/313.63/6149302.82/0.0E0/1014303.51/680349.86/94118.99</td>
+                                                        <td>[0/0]hard/[-365/-790394/0/-343584/-481773/-71725]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-4133250/0/-750000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                        <td>[0/0]hard/[-759/-2829456/0/-1199174/-1664704/-230480]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                        <td>[0/0]hard/[0/-16516500/0/-3000000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="summary_bestScoreScalability">
+                                <h3>Best score scalability summary</h3>
+                                <p>Useful for visualizing the scalability of each solver configuration.</p>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_bestScoreScalability_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_bestScoreScalability_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreScalability_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_bestScoreScalability_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreScalability_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreScalabilitySummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                            </div>
+                            <div class="tab-pane" id="summary_bestScoreDistribution">
+                                <h3>Best score distribution summary</h3>
+                                <p>Useful for visualizing the reliability of each solver configuration.</p>
+                                <p>Maximum subSingle count: 1<br/></p>
+                                    <div class="alert alert-error">
+                                        <p>The benchmarker did not run multiple subSingles, so there is no distribution and therefore no reliability indication.</p>
+                                    </div>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_bestScoreDistribution_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScoreDistribution_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_bestScoreDistribution_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScoreDistribution_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScoreDistributionSummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                            </div>
+                            <div class="tab-pane" id="summary_winningScoreDifference">
+                                <h3>Winning score difference summary</h3>
+                                <p>Useful for zooming in on the results of the best score summary.</p>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_winningScoreDifference_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_winningScoreDifference_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_winningScoreDifference_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_winningScoreDifference_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_winningScoreDifference_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/winningScoreDifferenceSummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Total</th>
+                                        <th rowspan="2">Average</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                        <td>[0/0]hard/[0/0/0/0/0/0]soft</td>
+                                        <td>[0/0]hard/[0/0/0/0/0/0]soft</td>
+                                                    <td>[0/0]hard/[0/0/0/0/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/0/0/0/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/0/0/0/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/0/0/0/0/0]soft&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>[0/0]hard/[-372/-22452532/0/-4909602/-1452136/-456975]soft</td>
+                                        <td>[0/0]hard/[-93/-5613133/0/-1227401/-363034/-114244]soft</td>
+                                                    <td>[0/0]hard/[-118/-409880/0/-276588/-341722/-116494]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-4083750/0/-742500/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[-254/-1623902/0/-920514/-1110414/-340481]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-16335000/0/-2970000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>[0/0]hard/[-372/-22452532/0/-4909602/-1452136/-456975]soft</td>
+                                        <td>[0/0]hard/[-93/-5613133/0/-1227401/-363034/-114244]soft</td>
+                                                    <td>[0/0]hard/[-118/-409880/0/-276588/-341722/-116494]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-4083750/0/-742500/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[-254/-1623902/0/-920514/-1110414/-340481]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-16335000/0/-2970000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>[0/0]hard/[-372/-23916004/0/-4909602/-1747544/-65487]soft</td>
+                                        <td>[0/0]hard/[-93/-5979001/0/-1227401/-436886/-16372]soft</td>
+                                                    <td>[0/0]hard/[-118/-762719/0/-276588/-410455/-25812]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-4083750/0/-742500/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[-254/-2734535/0/-920514/-1337089/-39675]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-16335000/0/-2970000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>[0/0]hard/[-372/-23916004/0/-4909602/-1747544/-65487]soft</td>
+                                        <td>[0/0]hard/[-93/-5979001/0/-1227401/-436886/-16372]soft</td>
+                                                    <td>[0/0]hard/[-118/-762719/0/-276588/-410455/-25812]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-4083750/0/-742500/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>[0/0]hard/[-254/-2734535/0/-920514/-1337089/-39675]soft&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>[0/0]hard/[0/-16335000/0/-2970000/0/0]soft&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="summary_worstScoreDifferencePercentage">
+                                <h3>Worst score difference percentage summary (ROI)</h3>
+                                <p>Useful for visualizing the return on investment (ROI) to decision makers.</p>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_worstScoreDifferencePercentage_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_worstScoreDifferencePercentage_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_worstScoreDifferencePercentage_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_worstScoreDifferencePercentage_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/worstScoreDifferencePercentageSummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Average</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                            <td>0.00%/0.00%/16.45%/97.71%/0.00%/88.82%/41.38%/13.30%</td>
+                                                    <td>0.00%/0.00%/32.33%/96.50%/0.00%/80.50%/85.20%/35.99%&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/98.80%/0.00%/99.00%/0.00%/0.00%&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>0.00%/0.00%/33.47%/96.65%/0.00%/76.76%/80.32%/17.21%&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/98.90%/0.00%/99.00%/0.00%/0.00%&nbsp;        <span class="badge badge-success">0</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                            <td>0.00%/0.00%/0.00%/20.97%/0.00%/0.00%/6.97%/-64.24%</td>
+                                                    <td>0.00%/0.00%/0.00%/44.64%/0.00%/0.00%/14.27%/-126.43%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/39.25%/0.00%/0.00%/13.62%/-130.51%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                            <td>0.00%/0.00%/0.00%/20.97%/0.00%/0.00%/6.97%/-64.24%</td>
+                                                    <td>0.00%/0.00%/0.00%/44.64%/0.00%/0.00%/14.27%/-126.43%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/39.25%/0.00%/0.00%/13.62%/-130.51%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                            <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                            <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">3</span>
+
+</td>
+                                                    <td>0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%/0.00%&nbsp;        <span class="badge">1</span>
+
+</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="summary_performance">
+                    <h2>Performance summary</h2>
+                    <div class="tabbable">
+                        <ul class="nav nav-pills">
+                            <li class="active">
+                                <a href="#summary_scoreCalculationSpeed" data-toggle="tab">Score calculation speed</a>
+                            </li>
+                            <li>
+                                <a href="#summary_worstScoreCalculationSpeedDifferencePercentage" data-toggle="tab">Worst score calculation speed difference percentage</a>
+                            </li>
+                            <li>
+                                <a href="#summary_timeSpent" data-toggle="tab">Time spent</a>
+                            </li>
+                            <li>
+                                <a href="#summary_timeSpentScalability" data-toggle="tab">Time spent scalability</a>
+                            </li>
+                            <li>
+                                <a href="#summary_bestScorePerTimeSpent" data-toggle="tab">Best score per time spent</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="summary_scoreCalculationSpeed">
+                                <h3>Score calculation speed summary</h3>
+                                <p>
+                                    Useful for comparing different score calculators and/or constraint implementations
+                                    (presuming that the solver configurations do not differ otherwise).
+                                    Also useful to measure the scalability cost of an extra constraint.
+                                </p>
+                                <div class="benchmark-chart">
+                                    <img src="summary/scoreCalculationSpeedSummary.png"/>
+                                </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Average</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="problemScale">Problem scale</th>
+                                        <td class="problemScale">6,300,000</td>
+                                        <td class="problemScale">2,700,000</td>
+                                        <td class="problemScale">2,700,000</td>
+                                        <td class="problemScale">9,900,000</td>
+                                        <td class="problemScale">9,900,000</td>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                        <td>17,307/s</td>
+                                                        <td>12,021/s</td>
+                                                        <td>25,316/s</td>
+                                                        <td>8,148/s</td>
+                                                        <td>23,743/s</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>8,215/s</td>
+                                                        <td>9,965/s</td>
+                                                        <td>10,608/s</td>
+                                                        <td>6,460/s</td>
+                                                        <td>5,827/s</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>9,077/s</td>
+                                                        <td>9,781/s</td>
+                                                        <td>14,147/s</td>
+                                                        <td>6,031/s</td>
+                                                        <td>6,350/s</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>8,754/s</td>
+                                                        <td>5,982/s</td>
+                                                        <td>15,394/s</td>
+                                                        <td>3,605/s</td>
+                                                        <td>10,038/s</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>10,778/s</td>
+                                                        <td>9,970/s</td>
+                                                        <td>16,474/s</td>
+                                                        <td>6,463/s</td>
+                                                        <td>10,207/s</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="summary_worstScoreCalculationSpeedDifferencePercentage">
+                                <h3>Worst score calculation speed difference percentage</h3>
+                                <p>
+                                    Useful for comparing different score calculators and/or constraint implementations
+                                    (presuming that the solver configurations do not differ otherwise).
+                                    Also useful to measure the scalability cost of an extra constraint.
+                                </p>
+                                <div class="benchmark-chart">
+                                    <img src="summary/worstScoreCalculationSpeedDifferencePercentageSummary.png"/>
+                                </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Average</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                            <td>168.27%</td>
+                                                    <td>100.95%</td>
+                                                    <td>138.65%</td>
+                                                    <td>126.02%</td>
+                                                    <td>307.47%</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                            <td>36.44%</td>
+                                                    <td>66.58%</td>
+                                                    <td>0.00%</td>
+                                                    <td>79.20%</td>
+                                                    <td>0.00%</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                            <td>43.28%</td>
+                                                    <td>63.51%</td>
+                                                    <td>33.36%</td>
+                                                    <td>67.30%</td>
+                                                    <td>8.98%</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                            <td>29.35%</td>
+                                                    <td>0.00%</td>
+                                                    <td>45.12%</td>
+                                                    <td>0.00%</td>
+                                                    <td>72.27%</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                            <td>69.10%</td>
+                                                    <td>66.67%</td>
+                                                    <td>55.30%</td>
+                                                    <td>79.28%</td>
+                                                    <td>75.17%</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="summary_timeSpent">
+                                <h3>Time spent summary</h3>
+                                <p>Useful for visualizing the performance of construction heuristics (presuming that no other solver phases are configured).</p>
+                                <div class="benchmark-chart">
+                                    <img src="summary/timeSpentSummary.png"/>
+                                </div>
+                                <table class="benchmark-table table table-striped table-bordered">
+                                    <tr>
+                                        <th rowspan="2">Solver</th>
+                                        <th rowspan="2">Average</th>
+                                        <th colspan="4">Problem</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1500tasks-300users</th>
+                                        <th>task-assigning-batch-1500-tasks-300users</th>
+                                        <th>3000tasks-300users</th>
+                                        <th>task-assigning-batch-3000-tasks-300users</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="problemScale">Problem scale</th>
+                                        <td class="problemScale">6,300,000</td>
+                                        <td class="problemScale">2,700,000</td>
+                                        <td class="problemScale">2,700,000</td>
+                                        <td class="problemScale">9,900,000</td>
+                                        <td class="problemScale">9,900,000</td>
+                                    </tr>
+                                    <tr class="favoriteSolverBenchmark">
+                                        <th>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</th>
+                                        <td>270,761</td>
+                                                        <td>130,956</td>
+                                                        <td>62,184</td>
+                                                        <td>662,533</td>
+                                                        <td>227,371</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>24,003</td>
+                                                        <td>7,413</td>
+                                                        <td>14,281</td>
+                                                        <td>22,328</td>
+                                                        <td>51,993</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</th>
+                                        <td>22,472</td>
+                                                        <td>7,552</td>
+                                                        <td>10,709</td>
+                                                        <td>23,918</td>
+                                                        <td>47,712</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>23,095</td>
+                                                        <td>12,348</td>
+                                                        <td>9,841</td>
+                                                        <td>40,008</td>
+                                                        <td>30,185</td>
+                                    </tr>
+                                    <tr>
+                                        <th>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</th>
+                                        <td>17,152</td>
+                                                        <td>7,409</td>
+                                                        <td>9,196</td>
+                                                        <td>22,320</td>
+                                                        <td>29,683</td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="tab-pane" id="summary_timeSpentScalability">
+                                <h3>Time spent scalability summary</h3>
+                                <p>Useful for extrapolating the scalability of construction heuristics (presuming that no other solver phases are configured).</p>
+                                <div class="benchmark-chart">
+                                    <img src="summary/timeSpentScalabilitySummary.png"/>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="summary_bestScorePerTimeSpent">
+                                <h3>Best score per time spent summary</h3>
+                                <p>Useful for visualizing trade-off between the best score versus the time spent for construction heuristics (presuming that no other solver phases are configured).</p>
+    <div class="tabbable tabs-right">
+        <ul class="nav nav-tabs">
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_0" data-toggle="tab">Hard 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_1" data-toggle="tab">Hard 1 score</a>
+            </li>
+            <li class="active">
+                <a href="#summary_bestScorePerTimeSpent_chart_2" data-toggle="tab">Soft 0 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_3" data-toggle="tab">Soft 1 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_4" data-toggle="tab">Soft 2 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_5" data-toggle="tab">Soft 3 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_6" data-toggle="tab">Soft 4 score</a>
+            </li>
+            <li>
+                <a href="#summary_bestScorePerTimeSpent_chart_7" data-toggle="tab">Soft 5 score</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_0">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel0.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_1">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel1.png"/>
+                </div>
+            </div>
+            <div class="tab-pane active" id="summary_bestScorePerTimeSpent_chart_2">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel2.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_3">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel3.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_4">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel4.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_5">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel5.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_6">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel6.png"/>
+                </div>
+            </div>
+            <div class="tab-pane" id="summary_bestScorePerTimeSpent_chart_7">
+                <div class="benchmark-chart">
+                    <img src="summary/bestScorePerTimeSpentSummaryLevel7.png"/>
+                </div>
+            </div>
+        </div>
+    </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="problemBenchmarkResult">
+                <div class="page-header">
+                    <h1>Problem benchmarks</h1>
+                </div>
+                <section id="problemBenchmark_1500tasks-002D300users">
+                    <h2>1500tasks-300users</h2>
+                    <p>
+                        Entity count: 1,500<br/>
+                        Variable count: 1,500<br/>
+                        Maximum value count: 1,800<br/>
+                        Problem scale: 2,700,000
+                            <br/>Time spent to load the inputSolution:&nbsp;
+                                98 ms
+                    </p>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE" data-toggle="tab">Best score</a>
+                                    </li>
+                            </ul>
+                            <div class="tab-content">
+                                    <div class="tab-pane active" id="problemStatistic_1500tasks-002D300users_BEST_SCORE">
+                                                <div class="tabbable tabs-right">
+                                                    <ul class="nav nav-tabs">
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_0" data-toggle="tab">Hard 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_1" data-toggle="tab">Hard 1 score</a>
+                                                            </li>
+                                                            <li class="active">
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_2" data-toggle="tab">Soft 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_3" data-toggle="tab">Soft 1 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_4" data-toggle="tab">Soft 2 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_5" data-toggle="tab">Soft 3 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_6" data-toggle="tab">Soft 4 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_1500tasks-002D300users_BEST_SCORE_7" data-toggle="tab">Soft 5 score</a>
+                                                            </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_0">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel0.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_1">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel1.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane active" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_2">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel2.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_3">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel3.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_4">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel4.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_5">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel5.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_6">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel6.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_1500tasks-002D300users_BEST_SCORE_7">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="1500tasks-300users/1500tasks-300usersBestScoreStatisticLevel7.png"/>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            <span>CSV files per solver:</span>
+                                            <div class="btn-group download-btn-group">
+                                                <button class="btn" onclick="window.location.href='1500tasks-300users/Original configuration/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='1500tasks-300users/First Fit (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='1500tasks-300users/First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='1500tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='1500tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                            </div>
+                                    </div>
+                            </div>
+                        </div>
+                </section>
+                <section id="problemBenchmark_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users">
+                    <h2>task-assigning-batch-1500-tasks-300users</h2>
+                    <p>
+                        Entity count: 1,500<br/>
+                        Variable count: 1,500<br/>
+                        Maximum value count: 1,800<br/>
+                        Problem scale: 2,700,000
+                            <br/>Time spent to load the inputSolution:&nbsp;
+                                57 ms
+                    </p>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE" data-toggle="tab">Best score</a>
+                                    </li>
+                            </ul>
+                            <div class="tab-content">
+                                    <div class="tab-pane active" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE">
+                                                <div class="tabbable tabs-right">
+                                                    <ul class="nav nav-tabs">
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_0" data-toggle="tab">Hard 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_1" data-toggle="tab">Hard 1 score</a>
+                                                            </li>
+                                                            <li class="active">
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_2" data-toggle="tab">Soft 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_3" data-toggle="tab">Soft 1 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_4" data-toggle="tab">Soft 2 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_5" data-toggle="tab">Soft 3 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_6" data-toggle="tab">Soft 4 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_7" data-toggle="tab">Soft 5 score</a>
+                                                            </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_0">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel0.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_1">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel1.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane active" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_2">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel2.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_3">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel3.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_4">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel4.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_5">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel5.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_6">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel6.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D1500-002Dtasks-002D300users_BEST_SCORE_7">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-1500-tasks-300users/task-assigning-batch-1500-tasks-300usersBestScoreStatisticLevel7.png"/>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            <span>CSV files per solver:</span>
+                                            <div class="btn-group download-btn-group">
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-1500-tasks-300users/Original configuration/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-1500-tasks-300users/First Fit (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-1500-tasks-300users/First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-1500-tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-1500-tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                            </div>
+                                    </div>
+                            </div>
+                        </div>
+                </section>
+                <section id="problemBenchmark_3000tasks-002D300users">
+                    <h2>3000tasks-300users</h2>
+                    <p>
+                        Entity count: 3,000<br/>
+                        Variable count: 3,000<br/>
+                        Maximum value count: 3,300<br/>
+                        Problem scale: 9,900,000
+                            <br/>Time spent to load the inputSolution:&nbsp;
+                                58 ms
+                    </p>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE" data-toggle="tab">Best score</a>
+                                    </li>
+                            </ul>
+                            <div class="tab-content">
+                                    <div class="tab-pane active" id="problemStatistic_3000tasks-002D300users_BEST_SCORE">
+                                                <div class="tabbable tabs-right">
+                                                    <ul class="nav nav-tabs">
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_0" data-toggle="tab">Hard 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_1" data-toggle="tab">Hard 1 score</a>
+                                                            </li>
+                                                            <li class="active">
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_2" data-toggle="tab">Soft 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_3" data-toggle="tab">Soft 1 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_4" data-toggle="tab">Soft 2 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_5" data-toggle="tab">Soft 3 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_6" data-toggle="tab">Soft 4 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_3000tasks-002D300users_BEST_SCORE_7" data-toggle="tab">Soft 5 score</a>
+                                                            </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_0">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel0.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_1">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel1.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane active" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_2">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel2.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_3">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel3.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_4">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel4.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_5">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel5.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_6">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel6.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_3000tasks-002D300users_BEST_SCORE_7">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="3000tasks-300users/3000tasks-300usersBestScoreStatisticLevel7.png"/>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            <span>CSV files per solver:</span>
+                                            <div class="btn-group download-btn-group">
+                                                <button class="btn" onclick="window.location.href='3000tasks-300users/Original configuration/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='3000tasks-300users/First Fit (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='3000tasks-300users/First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='3000tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='3000tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                            </div>
+                                    </div>
+                            </div>
+                        </div>
+                </section>
+                <section id="problemBenchmark_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users">
+                    <h2>task-assigning-batch-3000-tasks-300users</h2>
+                    <p>
+                        Entity count: 3,000<br/>
+                        Variable count: 3,000<br/>
+                        Maximum value count: 3,300<br/>
+                        Problem scale: 9,900,000
+                            <br/>Time spent to load the inputSolution:&nbsp;
+                                95 ms
+                    </p>
+                        <div class="tabbable">
+                            <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE" data-toggle="tab">Best score</a>
+                                    </li>
+                            </ul>
+                            <div class="tab-content">
+                                    <div class="tab-pane active" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE">
+                                                <div class="tabbable tabs-right">
+                                                    <ul class="nav nav-tabs">
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_0" data-toggle="tab">Hard 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_1" data-toggle="tab">Hard 1 score</a>
+                                                            </li>
+                                                            <li class="active">
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_2" data-toggle="tab">Soft 0 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_3" data-toggle="tab">Soft 1 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_4" data-toggle="tab">Soft 2 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_5" data-toggle="tab">Soft 3 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_6" data-toggle="tab">Soft 4 score</a>
+                                                            </li>
+                                                            <li>
+                                                                <a href="#problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_7" data-toggle="tab">Soft 5 score</a>
+                                                            </li>
+                                                    </ul>
+                                                    <div class="tab-content">
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_0">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel0.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_1">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel1.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane active" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_2">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel2.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_3">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel3.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_4">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel4.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_5">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel5.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_6">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel6.png"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="tab-pane" id="problemStatistic_task-002Dassigning-002Dbatch-002D3000-002Dtasks-002D300users_BEST_SCORE_7">
+                                                                <div class="benchmark-chart">
+                                                                    <img src="task-assigning-batch-3000-tasks-300users/task-assigning-batch-3000-tasks-300usersBestScoreStatisticLevel7.png"/>
+                                                                </div>
+                                                            </div>
+                                                    </div>
+                                                </div>
+                                            <span>CSV files per solver:</span>
+                                            <div class="btn-group download-btn-group">
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-3000-tasks-300users/Original configuration/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-3000-tasks-300users/First Fit (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-3000-tasks-300users/First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-3000-tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                                <button class="btn" onclick="window.location.href='task-assigning-batch-3000-tasks-300users/First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)/sub0/BEST_SCORE.csv'"><i class="icon-download"></i></button>
+                                            </div>
+                                    </div>
+                            </div>
+                        </div>
+                </section>
+            </section>
+
+            <section id="solverBenchmarkResult">
+                <div class="page-header">
+                    <h1>Solver benchmarks</h1>
+                </div>
+                <section id="solverBenchmark_Original-002D0020configuration">
+                    <h2>Original configuration&nbsp;        <span class="badge badge-success">0</span>
+
+</h2>
+                    <button class="btn showSolverConfiguration" data-toggle="collapse" data-target="#solverBenchmark_Original-002D0020configuration_config">
+                        Show/hide Solver configuration
+                    </button>
+                    <div id="solverBenchmark_Original-002D0020configuration_config" class="collapse in">
+                        <pre class="prettyprint lang-xml">&lt;solver&gt;
+  &lt;solutionClass&gt;org.kie.server.services.taskassigning.core.model.TaskAssigningSolution&lt;/solutionClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.TaskOrUser&lt;/entityClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.Task&lt;/entityClass&gt;
+  &lt;scoreDirectorFactory&gt;
+    &lt;scoreDrl&gt;org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl&lt;/scoreDrl&gt;
+  &lt;/scoreDirectorFactory&gt;
+  &lt;constructionHeuristic/&gt;
+&lt;/solver&gt;</pre>
+                    </div>
+                </section>
+                <section id="solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE-0029">
+                    <h2>First Fit (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">1</span>
+
+</h2>
+                    <button class="btn showSolverConfiguration" data-toggle="collapse" data-target="#solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE-0029_config">
+                        Show/hide Solver configuration
+                    </button>
+                    <div id="solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE-0029_config" class="collapse in">
+                        <pre class="prettyprint lang-xml">&lt;solver&gt;
+  &lt;solutionClass&gt;org.kie.server.services.taskassigning.core.model.TaskAssigningSolution&lt;/solutionClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.TaskOrUser&lt;/entityClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.Task&lt;/entityClass&gt;
+  &lt;scoreDirectorFactory&gt;
+    &lt;scoreDrl&gt;org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl&lt;/scoreDrl&gt;
+  &lt;/scoreDirectorFactory&gt;
+  &lt;constructionHeuristic&gt;
+    &lt;constructionHeuristicType&gt;FIRST_FIT&lt;/constructionHeuristicType&gt;
+    &lt;forager&gt;
+      &lt;pickEarlyType&gt;FIRST_FEASIBLE_SCORE&lt;/pickEarlyType&gt;
+    &lt;/forager&gt;
+  &lt;/constructionHeuristic&gt;
+&lt;/solver&gt;</pre>
+                    </div>
+                </section>
+                <section id="solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029">
+                    <h2>First Fit (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">1</span>
+
+</h2>
+                    <button class="btn showSolverConfiguration" data-toggle="collapse" data-target="#solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029_config">
+                        Show/hide Solver configuration
+                    </button>
+                    <div id="solverBenchmark_First-002D0020Fit-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029_config" class="collapse in">
+                        <pre class="prettyprint lang-xml">&lt;solver&gt;
+  &lt;solutionClass&gt;org.kie.server.services.taskassigning.core.model.TaskAssigningSolution&lt;/solutionClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.TaskOrUser&lt;/entityClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.Task&lt;/entityClass&gt;
+  &lt;scoreDirectorFactory&gt;
+    &lt;scoreDrl&gt;org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl&lt;/scoreDrl&gt;
+  &lt;/scoreDirectorFactory&gt;
+  &lt;constructionHeuristic&gt;
+    &lt;constructionHeuristicType&gt;FIRST_FIT&lt;/constructionHeuristicType&gt;
+    &lt;forager&gt;
+      &lt;pickEarlyType&gt;FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD&lt;/pickEarlyType&gt;
+    &lt;/forager&gt;
+  &lt;/constructionHeuristic&gt;
+&lt;/solver&gt;</pre>
+                    </div>
+                </section>
+                <section id="solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE-0029">
+                    <h2>First Fit Dec (FIRST_FEASIBLE_SCORE)&nbsp;        <span class="badge">3</span>
+
+</h2>
+                    <button class="btn showSolverConfiguration" data-toggle="collapse" data-target="#solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE-0029_config">
+                        Show/hide Solver configuration
+                    </button>
+                    <div id="solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE-0029_config" class="collapse in">
+                        <pre class="prettyprint lang-xml">&lt;solver&gt;
+  &lt;solutionClass&gt;org.kie.server.services.taskassigning.core.model.TaskAssigningSolution&lt;/solutionClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.TaskOrUser&lt;/entityClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.Task&lt;/entityClass&gt;
+  &lt;scoreDirectorFactory&gt;
+    &lt;scoreDrl&gt;org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl&lt;/scoreDrl&gt;
+  &lt;/scoreDirectorFactory&gt;
+  &lt;constructionHeuristic&gt;
+    &lt;constructionHeuristicType&gt;FIRST_FIT_DECREASING&lt;/constructionHeuristicType&gt;
+    &lt;forager&gt;
+      &lt;pickEarlyType&gt;FIRST_FEASIBLE_SCORE&lt;/pickEarlyType&gt;
+    &lt;/forager&gt;
+  &lt;/constructionHeuristic&gt;
+&lt;/solver&gt;</pre>
+                    </div>
+                </section>
+                <section id="solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029">
+                    <h2>First Fit Dec (FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD)&nbsp;        <span class="badge">3</span>
+
+</h2>
+                    <button class="btn showSolverConfiguration" data-toggle="collapse" data-target="#solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029_config">
+                        Show/hide Solver configuration
+                    </button>
+                    <div id="solverBenchmark_First-002D0020Fit-002D0020Dec-002D0020-0028FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD-0029_config" class="collapse in">
+                        <pre class="prettyprint lang-xml">&lt;solver&gt;
+  &lt;solutionClass&gt;org.kie.server.services.taskassigning.core.model.TaskAssigningSolution&lt;/solutionClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.TaskOrUser&lt;/entityClass&gt;
+  &lt;entityClass&gt;org.kie.server.services.taskassigning.core.model.Task&lt;/entityClass&gt;
+  &lt;scoreDirectorFactory&gt;
+    &lt;scoreDrl&gt;org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl&lt;/scoreDrl&gt;
+  &lt;/scoreDirectorFactory&gt;
+  &lt;constructionHeuristic&gt;
+    &lt;constructionHeuristicType&gt;FIRST_FIT_DECREASING&lt;/constructionHeuristicType&gt;
+    &lt;forager&gt;
+      &lt;pickEarlyType&gt;FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD&lt;/pickEarlyType&gt;
+    &lt;/forager&gt;
+  &lt;/constructionHeuristic&gt;
+&lt;/solver&gt;</pre>
+                    </div>
+                </section>
+            </section>
+
+            <section id="benchmarkInformation">
+                <div class="page-header">
+                    <h1>Benchmark information</h1>
+                </div>
+                <table class="benchmark-table table table-striped">
+                    <tr>
+                        <th>Name</th>
+                        <td>2020-05-18_101923</td>
+                    </tr>
+                    <tr>
+                        <th>Aggregation</th>
+                        <td>false</td>
+                    </tr>
+                    <tr>
+                        <th>Failure count</th>
+                        <td>0</td>
+                    </tr>
+                    <tr>
+                        <th>Starting timestamp</th>
+                        <td>May 18, 2020 10:19:23 AM</td>
+                    </tr>
+                    <tr>
+                        <th>Warm up time spent</th>
+                            <td>30 ms</td>
+                    </tr>
+                    <tr>
+                        <th>Parallel benchmark count / available processors</th>
+                            <td>5 / 8</td>
+                    </tr>
+                    <tr>
+                        <th>Benchmark time spent</th>
+                            <td>686,462 ms</td>
+                    </tr>
+                    <tr>
+                        <th>Environment mode</th>
+                        <td>REPRODUCIBLE</td>
+                    </tr>
+                    <tr>
+                        <th>Logging level org.optaplanner.core</th>
+                        <td>debug</td>
+                    </tr>
+                    <tr>
+                        <th>Logging level org.drools.core</th>
+                        <td>warn</td>
+                    </tr>
+                    <tr>
+                        <th>Solver ranking class</th>
+                        <td>
+                            <span data-toggle="tooltip" title="org.optaplanner.benchmark.impl.ranking.TotalScoreSolverRankingComparator">
+                                TotalScoreSolverRankingComparator
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>VM max memory (as in -Xmx but lower)</th>
+                            <td>7,635,730,432 bytes</td>
+                    </tr>
+                    <tr>
+                        <th>OptaPlanner version</th>
+                        <td>7.38.0-SNAPSHOT</td>
+                    </tr>
+                    <tr>
+                        <th>Java version</th>
+                        <td>Java 1.8.0_201 (Oracle Corporation)</td>
+                    </tr>
+                    <tr>
+                        <th>Java VM</th>
+                        <td>Java Java HotSpot(TM) 64-Bit Server VM 25.201-b09 (Oracle Corporation)</td>
+                    </tr>
+                    <tr>
+                        <th>Operating system</th>
+                        <td>Linux amd64 4.15.0-99-generic</td>
+                    </tr>
+                    <tr>
+                        <th>Report locale</th>
+                        <td>en_US</td>
+                    </tr>
+                    <tr>
+                        <th>Report timezone</th>
+                        <td>Europe/Madrid</td>
+                    </tr>
+                </table>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script src="twitterbootstrap/js/jquery.js"></script>
+<script src="twitterbootstrap/js/bootstrap.js"></script>
+<script src="twitterbootstrap/js/prettify.js"></script>
+<script>
+$(function () {
+    $('[data-toggle="tooltip"]').tooltip()
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<plannerBenchmarkResult xStreamId="1">
+  <name>2020-05-15_182426</name>
+  <aggregation>false</aggregation>
+  <availableProcessors>8</availableProcessors>
+  <loggingLevelOptaPlannerCore>debug</loggingLevelOptaPlannerCore>
+  <loggingLevelDroolsCore>warn</loggingLevelDroolsCore>
+  <maxMemory>7635730432</maxMemory>
+  <optaPlannerVersion>7.38.0-SNAPSHOT</optaPlannerVersion>
+  <javaVersion>Java 1.8.0_201 (Oracle Corporation)</javaVersion>
+  <javaVM>Java Java HotSpot(TM) 64-Bit Server VM 25.201-b09 (Oracle Corporation)</javaVM>
+  <operatingSystem>Linux amd64 4.15.0-99-generic</operatingSystem>
+  <parallelBenchmarkCount>5</parallelBenchmarkCount>
+  <warmUpTimeMillisSpentLimit>30</warmUpTimeMillisSpentLimit>
+  <solverBenchmarkResult xStreamId="2">
+    <name>Original configuration</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="3">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="4">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="5"/>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="6">
+      <subSingleBenchmarkResult xStreamId="7">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="8">[0/0]hard/[-247/-27675/0/-66996/-71318/-45913]soft</score>
+        <timeMillisSpent>219361</timeMillisSpent>
+        <scoreCalculationCount>1574252</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="9">
+      <subSingleBenchmarkResult xStreamId="10">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="11">[0/0]hard/[0/-49500/0/-7500/0/0]soft</score>
+        <timeMillisSpent>116452</timeMillisSpent>
+        <scoreCalculationCount>1574252</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="12">
+      <subSingleBenchmarkResult xStreamId="13">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="14">[0/0]hard/[-505/-94921/0/-278660/-327615/-190805]soft</score>
+        <timeMillisSpent>1239346</timeMillisSpent>
+        <scoreCalculationCount>5398502</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="15">
+      <subSingleBenchmarkResult xStreamId="16">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="17">[0/0]hard/[0/-181500/0/-30000/0/0]soft</score>
+        <timeMillisSpent>475704</timeMillisSpent>
+        <scoreCalculationCount>5398502</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <solverBenchmarkResult xStreamId="18">
+    <name>First Fit Decreasing (LS 10 S) (NON_DETERIORATING_HARD)</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="19">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="20">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="21">
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <forager xStreamId="22">
+          <pickEarlyType>FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD</pickEarlyType>
+        </forager>
+      </constructionHeuristic>
+      <localSearch xStreamId="23">
+        <termination xStreamId="24">
+          <spentLimit>PT10S</spentLimit>
+        </termination>
+      </localSearch>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="25">
+      <subSingleBenchmarkResult xStreamId="26">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="27">[0/0]hard/[-365/-754595/0/-340854/-467480/-81325]soft</score>
+        <timeMillisSpent>21659</timeMillisSpent>
+        <scoreCalculationCount>74528</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="28">
+      <subSingleBenchmarkResult xStreamId="29">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="30">[0/0]hard/[0/-4094882/0/-743024/0/0]soft</score>
+        <timeMillisSpent>50092</timeMillisSpent>
+        <scoreCalculationCount>151747</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="31">
+      <subSingleBenchmarkResult xStreamId="32">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="33">[0/0]hard/[-759/-2758194/0/-1195586/-1663333/-241925]soft</score>
+        <timeMillisSpent>160200</timeMillisSpent>
+        <scoreCalculationCount>144752</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="34">
+      <subSingleBenchmarkResult xStreamId="35">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="36">[0/0]hard/[0/-16516500/0/-3000000/0/0]soft</score>
+        <timeMillisSpent>101630</timeMillisSpent>
+        <scoreCalculationCount>303082</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <solverBenchmarkResult xStreamId="37">
+    <name>First Fit Decreasing (LS 30 S) (NON_DETERIORATING_HARD)</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="38">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="39">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="40">
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <forager xStreamId="41">
+          <pickEarlyType>FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD</pickEarlyType>
+        </forager>
+      </constructionHeuristic>
+      <localSearch xStreamId="42">
+        <termination xStreamId="43">
+          <spentLimit>PT30S</spentLimit>
+        </termination>
+      </localSearch>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="44">
+      <subSingleBenchmarkResult xStreamId="45">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="46">[0/0]hard/[-365/-653731/0/-331006/-449790/-95350]soft</score>
+        <timeMillisSpent>39412</timeMillisSpent>
+        <scoreCalculationCount>76216</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="47">
+      <subSingleBenchmarkResult xStreamId="48">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="49">[0/0]hard/[0/-4040432/0/-733124/0/0]soft</score>
+        <timeMillisSpent>59878</timeMillisSpent>
+        <scoreCalculationCount>152222</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="50">
+      <subSingleBenchmarkResult xStreamId="51">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="52">[0/0]hard/[-759/-2689725/0/-1188670/-1623822/-260994]soft</score>
+        <timeMillisSpent>105135</timeMillisSpent>
+        <scoreCalculationCount>145673</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="53">
+      <subSingleBenchmarkResult xStreamId="54">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="55">[0/0]hard/[0/-16472555/0/-2992010/0/0]soft</score>
+        <timeMillisSpent>106373</timeMillisSpent>
+        <scoreCalculationCount>303252</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <solverBenchmarkResult xStreamId="56">
+    <name>First Fit Decreasing (LS 1M) (NON_DETERIORATING_HARD)</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="57">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="58">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="59">
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <forager xStreamId="60">
+          <pickEarlyType>FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD</pickEarlyType>
+        </forager>
+      </constructionHeuristic>
+      <localSearch xStreamId="61">
+        <termination xStreamId="62">
+          <spentLimit>PT1M</spentLimit>
+        </termination>
+      </localSearch>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="63">
+      <subSingleBenchmarkResult xStreamId="64">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="65">[0/0]hard/[-365/-519945/0/-310756/-410428/-113171]soft</score>
+        <timeMillisSpent>68762</timeMillisSpent>
+        <scoreCalculationCount>79329</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="66">
+      <subSingleBenchmarkResult xStreamId="67">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="68">[0/0]hard/[0/-3975510/0/-721320/0/0]soft</score>
+        <timeMillisSpent>89931</timeMillisSpent>
+        <scoreCalculationCount>152814</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="69">
+      <subSingleBenchmarkResult xStreamId="70">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="71">[0/0]hard/[-759/-2579089/0/-1183230/-1597796/-288648]soft</score>
+        <timeMillisSpent>129312</timeMillisSpent>
+        <scoreCalculationCount>146973</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="72">
+      <subSingleBenchmarkResult xStreamId="73">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="74">[0/0]hard/[0/-16439632/0/-2986024/0/0]soft</score>
+        <timeMillisSpent>146104</timeMillisSpent>
+        <scoreCalculationCount>303500</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <solverBenchmarkResult xStreamId="75">
+    <name>First Fit Decreasing (LS 2M) (NON_DETERIORATING_HARD)</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="76">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="77">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="78">
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <forager xStreamId="79">
+          <pickEarlyType>FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD</pickEarlyType>
+        </forager>
+      </constructionHeuristic>
+      <localSearch xStreamId="80">
+        <termination xStreamId="81">
+          <spentLimit>PT2M</spentLimit>
+        </termination>
+      </localSearch>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="82">
+      <subSingleBenchmarkResult xStreamId="83">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="84">[0/0]hard/[-364/-444967/0/-298792/-396334/-117473]soft</score>
+        <timeMillisSpent>134053</timeMillisSpent>
+        <scoreCalculationCount>85602</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="85">
+      <subSingleBenchmarkResult xStreamId="86">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="87">[0/0]hard/[0/-3805208/0/-690356/0/0]soft</score>
+        <timeMillisSpent>169546</timeMillisSpent>
+        <scoreCalculationCount>153940</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="88">
+      <subSingleBenchmarkResult xStreamId="89">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="90">[0/0]hard/[-759/-2323839/0/-1166116/-1527792/-345410]soft</score>
+        <timeMillisSpent>198084</timeMillisSpent>
+        <scoreCalculationCount>149916</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="91">
+      <subSingleBenchmarkResult xStreamId="92">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="93">[0/0]hard/[0/-16373907/0/-2974074/0/0]soft</score>
+        <timeMillisSpent>217665</timeMillisSpent>
+        <scoreCalculationCount>303931</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <solverBenchmarkResult xStreamId="94">
+    <name>First Fit Decreasing (LS 5M) (NON_DETERIORATING_HARD)</name>
+    <subSingleCount>1</subSingleCount>
+    <solverConfig xStreamId="95">
+      <solutionClass>org.kie.server.services.taskassigning.core.model.TaskAssigningSolution</solutionClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.TaskOrUser</entityClass>
+      <entityClass>org.kie.server.services.taskassigning.core.model.Task</entityClass>
+      <scoreDirectorFactory xStreamId="96">
+        <scoreDrl>org/kie/server/services/taskassigning/solver/taskAssigningScoreRules.drl</scoreDrl>
+      </scoreDirectorFactory>
+      <constructionHeuristic xStreamId="97">
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <forager xStreamId="98">
+          <pickEarlyType>FIRST_FEASIBLE_SCORE_OR_NON_DETERIORATING_HARD</pickEarlyType>
+        </forager>
+      </constructionHeuristic>
+      <localSearch xStreamId="99">
+        <termination xStreamId="100">
+          <spentLimit>PT5M</spentLimit>
+        </termination>
+      </localSearch>
+    </solverConfig>
+    <singleBenchmarkResult xStreamId="101">
+      <subSingleBenchmarkResult xStreamId="102">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="103">[0/0]hard/[-364/-342818/0/-260798/-320696/-118591]soft</score>
+        <timeMillisSpent>338748</timeMillisSpent>
+        <scoreCalculationCount>102473</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="104">
+      <subSingleBenchmarkResult xStreamId="105">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="106">[0/0]hard/[0/-3091473/0/-560586/0/0]soft</score>
+        <timeMillisSpent>349273</timeMillisSpent>
+        <scoreCalculationCount>159047</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="107">
+      <subSingleBenchmarkResult xStreamId="108">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="109">[0/0]hard/[-759/-1857314/0/-1110722/-1424996/-408667]soft</score>
+        <timeMillisSpent>400033</timeMillisSpent>
+        <scoreCalculationCount>159109</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+    <singleBenchmarkResult xStreamId="110">
+      <subSingleBenchmarkResult xStreamId="111">
+        <subSingleBenchmarkIndex>0</subSingleBenchmarkIndex>
+        <succeeded>true</succeeded>
+        <score class="org.optaplanner.core.api.score.buildin.bendable.BendableScore" xStreamId="112">[0/0]hard/[0/-15939110/0/-2895020/0/0]soft</score>
+        <timeMillisSpent>390148</timeMillisSpent>
+        <scoreCalculationCount>306387</scoreCalculationCount>
+      </subSingleBenchmarkResult>
+      <timeMillisSpent>-1</timeMillisSpent>
+      <scoreCalculationCount>-1</scoreCalculationCount>
+    </singleBenchmarkResult>
+  </solverBenchmarkResult>
+  <unifiedProblemBenchmarkResult xStreamId="113">
+    <name>1500tasks-300users</name>
+    <problemProvider class="fileProblemProvider" xStreamId="114">
+      <problemFile>data/unsolved/1500tasks-300users.xml</problemFile>
+    </problemProvider>
+    <writeOutputSolutionEnabled>false</writeOutputSolutionEnabled>
+    <problemStatistic class="bestScoreProblemStatistic" xStreamId="115">
+      <problemStatisticType>BEST_SCORE</problemStatisticType>
+    </problemStatistic>
+    <singleBenchmarkResult xStreamRef="6"/>
+    <singleBenchmarkResult xStreamRef="25"/>
+    <singleBenchmarkResult xStreamRef="44"/>
+    <singleBenchmarkResult xStreamRef="63"/>
+    <singleBenchmarkResult xStreamRef="82"/>
+    <singleBenchmarkResult xStreamRef="101"/>
+    <entityCount>1500</entityCount>
+    <variableCount>1500</variableCount>
+    <maximumValueCount>1800</maximumValueCount>
+    <problemScale>2700000</problemScale>
+    <inputSolutionLoadingTimeMillisSpent>31</inputSolutionLoadingTimeMillisSpent>
+  </unifiedProblemBenchmarkResult>
+  <unifiedProblemBenchmarkResult xStreamId="116">
+    <name>task-assigning-batch-1500-tasks-300users</name>
+    <problemProvider class="fileProblemProvider" xStreamId="117">
+      <problemFile>data/unsolved/task-assigning-batch-1500-tasks-300users.xml</problemFile>
+    </problemProvider>
+    <writeOutputSolutionEnabled>false</writeOutputSolutionEnabled>
+    <problemStatistic class="bestScoreProblemStatistic" xStreamId="118">
+      <problemStatisticType>BEST_SCORE</problemStatisticType>
+    </problemStatistic>
+    <singleBenchmarkResult xStreamRef="9"/>
+    <singleBenchmarkResult xStreamRef="28"/>
+    <singleBenchmarkResult xStreamRef="47"/>
+    <singleBenchmarkResult xStreamRef="66"/>
+    <singleBenchmarkResult xStreamRef="85"/>
+    <singleBenchmarkResult xStreamRef="104"/>
+    <entityCount>1500</entityCount>
+    <variableCount>1500</variableCount>
+    <maximumValueCount>1800</maximumValueCount>
+    <problemScale>2700000</problemScale>
+    <inputSolutionLoadingTimeMillisSpent>85</inputSolutionLoadingTimeMillisSpent>
+  </unifiedProblemBenchmarkResult>
+  <unifiedProblemBenchmarkResult xStreamId="119">
+    <name>3000tasks-300users</name>
+    <problemProvider class="fileProblemProvider" xStreamId="120">
+      <problemFile>data/unsolved/3000tasks-300users.xml</problemFile>
+    </problemProvider>
+    <writeOutputSolutionEnabled>false</writeOutputSolutionEnabled>
+    <problemStatistic class="bestScoreProblemStatistic" xStreamId="121">
+      <problemStatisticType>BEST_SCORE</problemStatisticType>
+    </problemStatistic>
+    <singleBenchmarkResult xStreamRef="12"/>
+    <singleBenchmarkResult xStreamRef="31"/>
+    <singleBenchmarkResult xStreamRef="50"/>
+    <singleBenchmarkResult xStreamRef="69"/>
+    <singleBenchmarkResult xStreamRef="88"/>
+    <singleBenchmarkResult xStreamRef="107"/>
+    <entityCount>3000</entityCount>
+    <variableCount>3000</variableCount>
+    <maximumValueCount>3300</maximumValueCount>
+    <problemScale>9900000</problemScale>
+    <inputSolutionLoadingTimeMillisSpent>59</inputSolutionLoadingTimeMillisSpent>
+  </unifiedProblemBenchmarkResult>
+  <unifiedProblemBenchmarkResult xStreamId="122">
+    <name>task-assigning-batch-3000-tasks-300users</name>
+    <problemProvider class="fileProblemProvider" xStreamId="123">
+      <problemFile>data/unsolved/task-assigning-batch-3000-tasks-300users.xml</problemFile>
+    </problemProvider>
+    <writeOutputSolutionEnabled>false</writeOutputSolutionEnabled>
+    <problemStatistic class="bestScoreProblemStatistic" xStreamId="124">
+      <problemStatisticType>BEST_SCORE</problemStatisticType>
+    </problemStatistic>
+    <singleBenchmarkResult xStreamRef="15"/>
+    <singleBenchmarkResult xStreamRef="34"/>
+    <singleBenchmarkResult xStreamRef="53"/>
+    <singleBenchmarkResult xStreamRef="72"/>
+    <singleBenchmarkResult xStreamRef="91"/>
+    <singleBenchmarkResult xStreamRef="110"/>
+    <entityCount>3000</entityCount>
+    <variableCount>3000</variableCount>
+    <maximumValueCount>3300</maximumValueCount>
+    <problemScale>9900000</problemScale>
+    <inputSolutionLoadingTimeMillisSpent>146</inputSolutionLoadingTimeMillisSpent>
+  </unifiedProblemBenchmarkResult>
+  <startingTimestamp>2020-05-15T18:24:26.102+02:00</startingTimestamp>
+  <benchmarkTimeMillisSpent>1461085</benchmarkTimeMillisSpent>
+</plannerBenchmarkResult>

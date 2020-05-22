@@ -80,6 +80,9 @@ public class TaskAssigningBatchGenerator extends LoggingMain {
     public static void main(String[] args) {
         TaskAssigningBatchGenerator generator = new TaskAssigningBatchGenerator();
 
+        //generator.generateAndWriteBatchScenario(30, 2, 0);
+
+
 //        generator.generateAndWriteBatchScenario(100, 100, 0);
 //        generator.generateAndWriteBatchScenario(500, 100, 0);
 //        generator.generateAndWriteBatchScenario(1000, 100, 0);

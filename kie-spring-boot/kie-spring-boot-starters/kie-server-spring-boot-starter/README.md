@@ -7,7 +7,7 @@ Persistence is configured out of the box and relies on data source setup via app
 IdentityProvider used by jBPM services api to collect information about user who performs the operation is based on Spring Security
 so keep in mind that proper configuration of Spring Security will be required for it to work as expected.
 
-Since this includes all capabilities it has full access to underlying services. When it comes to jBPM it does rely on jbpm services API and therefore makes all services available for injection/autowire:
+Since this iorg.kie.server.taskAssigning.processRuntime.key.pwdncludes all capabilities it has full access to underlying services. When it comes to jBPM it does rely on jbpm services API and therefore makes all services available for injection/autowire:
 
 - ProcessService
 - DeploymentService
@@ -87,6 +87,8 @@ kieserver.casemgmt.enabled=true
 kieserver.optaplanner.enabled=true
 kieserver.prometheus.enabled=true
 kieserver.scenariosimulation.enabled=true
+kieserver.taskAssigning.planning.enabled=true
+kieserver.taskAssigning.runtime.enabled=true
 ```
 
 Additional configuration properties that might be relevant (depending on application needs) can be found at https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#common-application-properties

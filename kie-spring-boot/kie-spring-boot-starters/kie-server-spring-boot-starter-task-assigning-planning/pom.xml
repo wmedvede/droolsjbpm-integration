@@ -9,7 +9,7 @@
 
   <name>KIE Server :: Spring :: Boot :: Starter :: TaskAssigningPlanning</name>
   <description>TaskAssigningPlanning - KIE Server SpringBoot Starter</description>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -29,6 +29,12 @@
     <dependency>
       <groupId>org.kie</groupId>
       <artifactId>kie-server-spring-boot-autoconfiguration</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.kie</groupId>
@@ -45,5 +51,5 @@
       </plugin>
     </plugins>
   </build>
-  
+
 </project>
